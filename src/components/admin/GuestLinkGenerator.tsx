@@ -65,7 +65,13 @@ export function GuestLinkGenerator() {
         if (typeof window !== "undefined") {
           localStorage.setItem("wevitation_admin_guests", JSON.stringify(json.data));
         }
-        return;
+      }
+
+      const cfgRes = await fetch("/api/db?type=config");
+      const cfgJson = await cfgRes.json();
+      if (cfgJson.success && cfgJson.data && cfgJson.data.customServerUrl) {
+        setCustomServerUrl(cfgJson.data.customServerUrl);
+        if (cfgJson.data.provider) setProvider(cfgJson.data.provider);
       }
     } catch {
       // Fallback
@@ -104,7 +110,7 @@ export function GuestLinkGenerator() {
     }
   }
 
-  function saveConfig(
+  async function saveConfig(
     token: string,
     phoneId: string,
     prov: "local" | "meta" | "fonnte" | "wablas",
@@ -119,6 +125,20 @@ export function GuestLinkGenerator() {
       localStorage.setItem("wevitation_meta_phone_id", phoneId);
       localStorage.setItem("wevitation_wa_provider", prov);
       localStorage.setItem("wevitation_custom_server_url", cUrl);
+    }
+
+    try {
+      await fetch("/api/db", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "set",
+          type: "config",
+          item: { waToken: token, phoneNumberId: phoneId, provider: prov, customServerUrl: cUrl },
+        }),
+      });
+    } catch {
+      // Fallback
     }
   }
 
@@ -329,12 +349,14 @@ Hormat kami,
       } else {
         const updated = guests.map((g) => (g.id === guest.id ? { ...g, status: "failed" as const } : g));
         saveGuests(updated);
-        alert(`Notice: ${data.error || "Pesan gagal terkirim. Pastikan server bot lokal berjalan."}`);
+        setShowTokenInput(true);
+        alert(`Notice: ${data.error || "Pesan gagal terkirim. Pengaturan URL bot otomatis dibuka di bawah."}`);
         return false;
       }
     } catch {
       const updated = guests.map((g) => (g.id === guest.id ? { ...g, status: "failed" as const } : g));
       saveGuests(updated);
+      setShowTokenInput(true);
       return false;
     } finally {
       setSendingId(null);
@@ -452,7 +474,19 @@ Hormat kami,
                 onChange={(e) => setCustomServerUrl(e.target.value)}
                 className="form-input text-xs py-2 px-3 font-mono rounded-lg w-full bg-[#1c0a08]"
               />
-              <p className="text-[10px] text-white/60">
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await saveConfig(waToken, phoneNumberId, provider, customServerUrl);
+                    alert("✅ URL Server Bot berhasil disimpan & disinkronkan ke Cloud!");
+                  }}
+                  className="btn-modern-primary text-xs py-1.5 px-4 font-bold bg-[#d4af37] text-black hover:bg-[#f3e5ab] cursor-pointer"
+                >
+                  💾 Simpan Pengaturan Bot
+                </button>
+              </div>
+              <p className="text-[10px] text-white/60 pt-1">
                 Tempel URL Tunnel di atas agar Admin Panel Netlify online dapat terhubung ke bot laptop Anda!
               </p>
             </div>

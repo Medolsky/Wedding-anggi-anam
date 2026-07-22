@@ -11,8 +11,10 @@ let cloudStore: {
   guests: any[];
   rsvps: any[];
   wishes: any[];
+  config: any;
 } = {
   guests: [],
+  config: {},
   rsvps: [
     {
       id: "1",
@@ -110,6 +112,7 @@ export async function GET(req: Request) {
   if (type === "guests") return NextResponse.json({ success: true, data: data.guests });
   if (type === "rsvps") return NextResponse.json({ success: true, data: data.rsvps });
   if (type === "wishes") return NextResponse.json({ success: true, data: data.wishes });
+  if (type === "config") return NextResponse.json({ success: true, data: data.config });
 
   return NextResponse.json({ success: true, data });
 }

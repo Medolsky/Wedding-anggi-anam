@@ -391,15 +391,15 @@ Hormat kami,
             ⚙️ Pengaturan Server WhatsApp Bot Gateway
           </h4>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div>
-              <label className="block text-[10px] uppercase text-[#d4af37] font-semibold mb-0.5">
+              <label className="block text-[10px] uppercase text-[#d4af37] font-semibold mb-1">
                 Provider Bot Pengirim
               </label>
               <select
                 value={provider}
                 onChange={(e) => setProvider(e.target.value as any)}
-                className="form-input text-xs py-1.5 px-2 bg-[#1c0a08]"
+                className="form-input text-xs py-2 px-3 bg-[#1c0a08] rounded-xl w-full"
               >
                 <option value="local">🤖 Bot Lokal Self-Hosted (100% Gratis &amp; Unlimited)</option>
                 <option value="meta">Meta Official Cloud API (Gratis 1.000 msgs/bulan)</option>
@@ -408,23 +408,22 @@ Hormat kami,
               </select>
             </div>
 
-            {provider === "local" && (
-              <div>
-                <label className="block text-[10px] uppercase text-[#d4af37] font-semibold mb-0.5">
-                  URL Server Bot Custom (Localtunnel / Tunnel) - Opsional
-                </label>
-                <input
-                  type="text"
-                  placeholder="Default: http://localhost:5001 atau https://xxxx.loca.lt"
-                  value={customServerUrl}
-                  onChange={(e) => setCustomServerUrl(e.target.value)}
-                  className="form-input text-xs py-1.5 px-3 font-mono"
-                />
-                <p className="text-[10px] text-white/50 mt-1">
-                  Jika dipakai di Netlify online, masukkan URL Localtunnel gratis di sini.
-                </p>
-              </div>
-            )}
+            {/* Custom Tunnel / Server URL Input - Always Visible */}
+            <div className="bg-[#120605] p-3 rounded-xl border border-[#d4af37]/30 space-y-1">
+              <label className="block text-[11px] uppercase text-[#f3e5ab] font-bold">
+                🔗 URL Server Bot Custom (Localtunnel / Tunnel)
+              </label>
+              <input
+                type="text"
+                placeholder="Paste URL Localtunnel (contoh: https://many-rice-enter.loca.lt)"
+                value={customServerUrl}
+                onChange={(e) => setCustomServerUrl(e.target.value)}
+                className="form-input text-xs py-2 px-3 font-mono rounded-lg w-full bg-[#1c0a08]"
+              />
+              <p className="text-[10px] text-white/60">
+                Tempel URL Localtunnel di atas (contoh: <code className="text-[#d4af37]">https://many-rice-enter.loca.lt</code>) agar Admin Panel Netlify online dapat terhubung ke bot laptop Anda!
+              </p>
+            </div>
 
             {provider === "meta" && (
               <div>

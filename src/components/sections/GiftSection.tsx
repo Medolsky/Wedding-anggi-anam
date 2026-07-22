@@ -1,0 +1,220 @@
+"use client";
+
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import { weddingData } from "@/data/weddingData";
+import { AnimatedText, StaggerContainer, StaggerItem } from "@/components/ui/AnimatedText";
+import { Modal } from "@/components/ui/Modal";
+import { copyToClipboard } from "@/lib/utils";
+
+export function GiftSection() {
+  const { giftAccounts, giftAddress, sectionBgs } = weddingData;
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [showQris, setShowQris] = useState(false);
+  const [showAddress, setShowAddress] = useState(false);
+
+  async function handleCopy(text: string, fieldId: string) {
+    const success = await copyToClipboard(text);
+    if (success) {
+      setCopiedField(fieldId);
+      setTimeout(() => setCopiedField(null), 2000);
+    }
+  }
+
+  return (
+    <section
+      id="gift"
+      data-section="gift"
+      className="section-gift relative py-18 md:py-24 overflow-hidden flex flex-col items-center justify-center text-center bg-[#1c0a08] text-white"
+    >
+      {/* Background Image from Unsplash — Clear & Vivid */}
+      <div className="absolute inset-0">
+        <motion.div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: `url('${sectionBgs.gift}')`,
+            filter: "brightness(0.6) contrast(1.05)",
+          }}
+          initial={{ scale: 1.15 }}
+          whileInView={{ scale: 1 }}
+          viewport={{ once: false, amount: 0.1 }}
+          transition={{ duration: 10, ease: "linear" }}
+        />
+        <div className="absolute inset-0 photo-overlay-cinematic" />
+        <div className="absolute inset-0 film-grain" />
+      </div>
+
+      <div className="relative z-20 max-w-md mx-auto px-6 w-full text-center flex flex-col items-center justify-center">
+        {/* Section header */}
+        <AnimatedText delay={0} variant="fadeUp" className="w-full text-center">
+          <p
+            className="text-[10px] uppercase tracking-[4px] text-[#d4af37] font-bold mb-1.5 text-center leading-none"
+            style={{ fontFamily: "var(--font-body)" }}
+          >
+            Wedding Gift
+          </p>
+        </AnimatedText>
+
+        <AnimatedText delay={0.1} variant="scaleUp" className="w-full text-center">
+          <h2
+            className="text-2xl md:text-3xl text-center mb-2 font-serif text-white drop-shadow-sm leading-snug"
+            style={{ fontFamily: "var(--font-heading)" }}
+          >
+            Hadiah Pernikahan
+          </h2>
+        </AnimatedText>
+
+        <AnimatedText delay={0.2} variant="fadeUp" className="w-full text-center">
+          <p className="text-center text-xs opacity-90 mb-6 leading-relaxed text-white/90">
+            Kehadiran dan doa Anda adalah hadiah terindah. Namun jika ingin
+            memberikan tanda kasih, kami menyediakan opsi berikut.
+          </p>
+        </AnimatedText>
+
+        {/* Bank account cards */}
+        <StaggerContainer delay={0.3} staggerDelay={0.15} className="space-y-4 mb-5 w-full max-w-xs">
+          {giftAccounts.map((account) => (
+            <StaggerItem key={account.id}>
+              <motion.div
+                className="gold-card-pro p-4 border border-[#d4af37]/40 shadow-2xl text-center flex flex-col items-center justify-center w-full rounded-2xl"
+                whileHover={{ y: -2 }}
+                transition={{ duration: 0.3 }}
+              >
+                <p className="text-[9px] uppercase tracking-[2px] font-bold text-[#d4af37] mb-1 text-center leading-none">
+                  {account.bankName}
+                </p>
+
+                {/* Account number */}
+                <p
+                  className="text-2xl md:text-3xl tracking-[2.5px] mb-0.5 font-serif text-gold-gradient font-extrabold text-center drop-shadow-xs leading-tight"
+                  style={{ fontFamily: "var(--font-heading)" }}
+                >
+                  {account.accountNumber}
+                </p>
+
+                {/* Account name */}
+                <p className="text-xs text-white/80 font-medium mb-3 text-center leading-none">
+                  a.n. {account.accountName}
+                </p>
+
+                {/* Copy buttons */}
+                <div className="flex gap-2 w-full">
+                  <button
+                    onClick={() =>
+                      handleCopy(account.accountNumber, `num-${account.id}`)
+                    }
+                    className="btn-modern-primary flex-1 py-1.5 px-2 text-[10px] font-bold rounded-full flex items-center justify-center gap-1 shadow-md"
+                  >
+                    <AnimatePresence mode="wait">
+                      {copiedField === `num-${account.id}` ? (
+                        <motion.span
+                          key="copied"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          exit={{ scale: 0 }}
+                        >
+                          ✓
+                        </motion.span>
+                      ) : (
+                        <motion.span key="copy" initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                          📋
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                    {copiedField === `num-${account.id}`
+                      ? "Tersalin!"
+                      : "Salin Rekening"}
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      handleCopy(account.accountName, `name-${account.id}`)
+                    }
+                    className="btn-modern-secondary flex-1 py-1.5 px-2 text-[10px] font-semibold rounded-full flex items-center justify-center"
+                  >
+                    {copiedField === `name-${account.id}`
+                      ? "✓ Tersalin!"
+                      : "Salin Nama"}
+                  </button>
+                </div>
+              </motion.div>
+            </StaggerItem>
+          ))}
+        </StaggerContainer>
+
+        {/* QRIS & Physical gift buttons */}
+        <AnimatedText delay={0.5} variant="fadeUp" className="w-full max-w-xs flex justify-center">
+          <div className="flex gap-2 w-full">
+            <button
+              onClick={() => setShowQris(true)}
+              className="btn-modern-primary flex-1 py-2 text-[10px] uppercase tracking-[1.5px] font-bold rounded-full shadow-md flex items-center justify-center"
+            >
+              Lihat QRIS
+            </button>
+            <button
+              onClick={() => setShowAddress(true)}
+              className="btn-modern-secondary flex-1 py-2 text-[10px] uppercase tracking-[1.5px] font-bold rounded-full shadow-md flex items-center justify-center"
+            >
+              Kado Fisik
+            </button>
+          </div>
+        </AnimatedText>
+      </div>
+
+      {/* QRIS Modal */}
+      <Modal isOpen={showQris} onClose={() => setShowQris(false)} title="QRIS Pembayaran">
+        <div className="flex flex-col items-center justify-center text-center py-2">
+          <div className="w-48 h-48 bg-white p-2 rounded-xl shadow-xl flex flex-col items-center justify-center mb-3 border border-[#d4af37]">
+            <img
+              src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=Wedding-Raka-Alya-QRIS"
+              alt="QRIS Wedding"
+              className="w-full h-full object-contain"
+            />
+          </div>
+          <p className="text-xs text-white/80 text-center max-w-xs leading-relaxed">
+            Scan QR code di atas menggunakan GoPay, OVO, Dana, ShopeePay, LinkAja, atau Mobile Banking Anda.
+          </p>
+        </div>
+      </Modal>
+
+      {/* Gift Address Modal */}
+      <Modal
+        isOpen={showAddress}
+        onClose={() => setShowAddress(false)}
+        title="Alamat Pengiriman Kado"
+      >
+        <div className="py-2 space-y-3 text-center flex flex-col items-center">
+          <div className="w-full text-center">
+            <p className="text-[9px] uppercase tracking-[1.5px] text-[#d4af37] mb-0.5 font-bold leading-none">
+              Penerima
+            </p>
+            <p className="font-bold text-sm text-white">{giftAddress.name}</p>
+          </div>
+          <div className="w-full text-center">
+            <p className="text-[9px] uppercase tracking-[1.5px] text-[#d4af37] mb-0.5 font-bold leading-none">
+              Alamat Lengkap
+            </p>
+            <p className="text-xs leading-relaxed text-white/80 max-w-xs mx-auto">{giftAddress.address}</p>
+          </div>
+          <div className="w-full text-center">
+            <p className="text-[9px] uppercase tracking-[1.5px] text-[#d4af37] mb-0.5 font-bold leading-none">
+              No. Telepon
+            </p>
+            <p className="text-xs font-mono text-white font-semibold">{giftAddress.phone}</p>
+          </div>
+          <button
+            onClick={() =>
+              handleCopy(
+                `${giftAddress.name}\n${giftAddress.address}\n${giftAddress.phone}`,
+                "address"
+              )
+            }
+            className="btn-modern-primary w-full py-2 text-[10px] uppercase tracking-[1.5px] font-bold rounded-full shadow-md mt-1"
+          >
+            {copiedField === "address" ? "✓ Alamat Tersalin!" : "Salin Alamat Lengkap"}
+          </button>
+        </div>
+      </Modal>
+    </section>
+  );
+}

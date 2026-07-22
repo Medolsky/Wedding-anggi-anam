@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 /**
  * Next.js API Route for Automated Background WhatsApp Message Delivery
- * Supports 100% Free Unlimited Local Bot Gateway (port 5001), Meta Cloud API, Fonnte, and Wablas
+ * Supports 100% Free Unlimited Local Bot Gateway (port 5001 or custom tunnel), Meta Cloud API, Fonnte, and Wablas
  */
 export async function POST(req: Request) {
   try {
@@ -13,6 +13,7 @@ export async function POST(req: Request) {
       apiKey,
       provider = "local",
       phoneNumberId,
+      customServerUrl,
     } = body;
 
     if (!phone || !message) {
@@ -28,12 +29,18 @@ export async function POST(req: Request) {
       targetPhone = "62" + targetPhone.slice(1);
     }
 
-    // 1. 100% FREE Unlimited Local Bot Gateway Server (localhost:5001)
+    // 1. 100% FREE Unlimited Local Bot Gateway Server (localhost:5001 or LocalTunnel / Ngrok URL)
     if (provider === "local") {
+      const serverUrl = customServerUrl || "http://localhost:5001";
+      const targetEndpoint = `${serverUrl.replace(/\/$/, "")}/send-message`;
+
       try {
-        const response = await fetch("http://localhost:5001/send-message", {
+        const response = await fetch(targetEndpoint, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Bypass-Tunnel-Remainder": "true",
+          },
           body: JSON.stringify({
             phone: targetPhone,
             message: message,
@@ -53,15 +60,14 @@ export async function POST(req: Request) {
             success: false,
             error:
               data.error ||
-              "Bot Lokal belum terhubung. Jalankan 'npm run wa-bot' di terminal dan scan QR code.",
+              "Bot Lokal belum terhubung. Jalankan 'npm run wa-bot' di terminal.",
           });
         }
       } catch {
         return NextResponse.json({
           success: false,
           needToken: true,
-          error:
-            "Server Bot Lokal (port 5001) belum berjalan. Jalankan perintah 'npm run wa-bot' di terminal untuk mengaktifkan Bot WA 100% Gratis Unlimited!",
+          error: `Server Bot Lokal (${serverUrl}) belum berjalan atau tidak terjangkau. Jalankan 'npm run wa-bot' dan 'npx localtunnel --port 5001' di terminal.`,
         });
       }
     }

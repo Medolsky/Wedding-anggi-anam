@@ -32,6 +32,7 @@ export function GuestLinkGenerator() {
   const [provider, setProvider] = useState<"local" | "meta" | "fonnte" | "wablas">("local");
   const [waToken, setWaToken] = useState("");
   const [phoneNumberId, setPhoneNumberId] = useState("");
+  const [customServerUrl, setCustomServerUrl] = useState("");
   const [showTokenInput, setShowTokenInput] = useState(false);
   const [sendingId, setSendingId] = useState<string | null>(null);
 
@@ -53,6 +54,9 @@ export function GuestLinkGenerator() {
       const savedPhoneId = localStorage.getItem("wevitation_meta_phone_id");
       if (savedPhoneId) setPhoneNumberId(savedPhoneId);
 
+      const savedCustomUrl = localStorage.getItem("wevitation_custom_server_url");
+      if (savedCustomUrl) setCustomServerUrl(savedCustomUrl);
+
       const savedProvider = localStorage.getItem("wevitation_wa_provider");
       if (savedProvider) setProvider(savedProvider as any);
     }
@@ -65,14 +69,21 @@ export function GuestLinkGenerator() {
     }
   }
 
-  function saveConfig(token: string, phoneId: string, prov: "local" | "meta" | "fonnte" | "wablas") {
+  function saveConfig(
+    token: string,
+    phoneId: string,
+    prov: "local" | "meta" | "fonnte" | "wablas",
+    cUrl: string
+  ) {
     setWaToken(token);
     setPhoneNumberId(phoneId);
     setProvider(prov);
+    setCustomServerUrl(cUrl);
     if (typeof window !== "undefined") {
       localStorage.setItem("wevitation_wa_token", token);
       localStorage.setItem("wevitation_meta_phone_id", phoneId);
       localStorage.setItem("wevitation_wa_provider", prov);
+      localStorage.setItem("wevitation_custom_server_url", cUrl);
     }
   }
 
@@ -270,6 +281,7 @@ Hormat kami,
           apiKey: waToken,
           phoneNumberId: phoneNumberId,
           provider: provider,
+          customServerUrl: customServerUrl,
         }),
       });
 
@@ -396,6 +408,24 @@ Hormat kami,
               </select>
             </div>
 
+            {provider === "local" && (
+              <div>
+                <label className="block text-[10px] uppercase text-[#d4af37] font-semibold mb-0.5">
+                  URL Server Bot Custom (Localtunnel / Tunnel) - Opsional
+                </label>
+                <input
+                  type="text"
+                  placeholder="Default: http://localhost:5001 atau https://xxxx.loca.lt"
+                  value={customServerUrl}
+                  onChange={(e) => setCustomServerUrl(e.target.value)}
+                  className="form-input text-xs py-1.5 px-3 font-mono"
+                />
+                <p className="text-[10px] text-white/50 mt-1">
+                  Jika dipakai di Netlify online, masukkan URL Localtunnel gratis di sini.
+                </p>
+              </div>
+            )}
+
             {provider === "meta" && (
               <div>
                 <label className="block text-[10px] uppercase text-[#d4af37] font-semibold mb-0.5">
@@ -428,7 +458,7 @@ Hormat kami,
 
             <button
               onClick={() => {
-                saveConfig(waToken, phoneNumberId, provider);
+                saveConfig(waToken, phoneNumberId, provider, customServerUrl);
                 setShowTokenInput(false);
                 alert("✓ Pengaturan Provider WA Bot berhasil disimpan!");
               }}

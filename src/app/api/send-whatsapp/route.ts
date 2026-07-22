@@ -42,7 +42,7 @@ export async function POST(req: Request) {
             "Bypass-Tunnel-Remainder": "true",
             "bypass-tunnel-reminder": "true",
             "ngrok-skip-browser-warning": "true",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
           },
           body: JSON.stringify({
             phone: targetPhone,
@@ -50,7 +50,13 @@ export async function POST(req: Request) {
           }),
         });
 
-        const data = await response.json();
+        const rawText = await response.text();
+        let data: any = {};
+        try {
+          data = JSON.parse(rawText);
+        } catch {
+          data = { success: false, error: "Tunnel mengembalikan halaman HTML. Gunakan Pinggy (ssh -R 80:localhost:5001 free.pinggy.online) atau buka URL tunnel di browser sekali untuk klik Continue." };
+        }
 
         if (response.ok && data.success) {
           return NextResponse.json({

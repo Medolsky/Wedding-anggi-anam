@@ -42,26 +42,52 @@ export function RSVPSection() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const maxGuest = guest.maxGuest || 3;
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!formData.attendance || !formData.name) return;
 
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      const existingRsvps = JSON.parse(
-        localStorage.getItem("wedding_rsvps") || "[]"
-      );
-      existingRsvps.push({
-        ...formData,
-        guestId: guest.guestId,
-        submittedAt: new Date().toISOString(),
-      });
-      localStorage.setItem("wedding_rsvps", JSON.stringify(existingRsvps));
+    const rsvpItem = {
+      id: Date.now().toString(),
+      name: formData.name,
+      phone: formData.phone,
+      pax: formData.guestCount,
+      status: formData.attendance === "hadir" ? "Hadir" : "Tidak Hadir",
+      notes: formData.message || (formData.attendance === "hadir" ? `Hadir Sesi: ${formData.session}` : "Halangan Hadir"),
+      createdAt: new Date().toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
 
-      setIsSubmitting(false);
-      setRsvpSubmitted(true);
-    }, 1000);
+    // Save to Cloud DB
+    try {
+      await fetch("/api/db", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "add",
+          type: "rsvps",
+          item: rsvpItem,
+        }),
+      });
+    } catch {
+      // Fallback
+    }
+
+    // Save to LocalStorage fallback
+    const existingRsvps = JSON.parse(
+      localStorage.getItem("wedding_rsvps") || "[]"
+    );
+    existingRsvps.unshift(rsvpItem);
+    localStorage.setItem("wedding_rsvps", JSON.stringify(existingRsvps));
+
+    setIsSubmitting(false);
+    setRsvpSubmitted(true);
   }
 
   return (
@@ -282,7 +308,7 @@ export function RSVPSection() {
                             }
                             className="form-input text-center py-1.5 text-xs bg-[#1c0a08]"
                           >
-                            <option value="keduanya">Akad & Resepsi</option>
+                            <option value="keduanya">Akad &amp; Resepsi</option>
                             <option value="akad">Akad Nikah</option>
                             <option value="resepsi">Resepsi</option>
                           </select>

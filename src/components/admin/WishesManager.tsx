@@ -6,7 +6,7 @@ export interface WishItem {
   id: string;
   name: string;
   message: string;
-  attendance: "Hadir" | "Ragu-ragu" | "Tidak Hadir";
+  attendance?: "Hadir" | "Ragu-ragu" | "Tidak Hadir";
   createdAt: string;
 }
 
@@ -17,7 +17,21 @@ export function WishesManager() {
     loadWishes();
   }, []);
 
-  function loadWishes() {
+  async function loadWishes() {
+    try {
+      const res = await fetch("/api/db?type=wishes");
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        setWishes(json.data);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("wevitation_wishes", JSON.stringify(json.data));
+        }
+        return;
+      }
+    } catch {
+      // Fallback
+    }
+
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("wevitation_wishes");
       if (saved) {
@@ -30,20 +44,49 @@ export function WishesManager() {
     }
   }
 
-  function saveWishes(updated: WishItem[]) {
+  async function saveWishes(updated: WishItem[]) {
     setWishes(updated);
     if (typeof window !== "undefined") {
       localStorage.setItem("wevitation_wishes", JSON.stringify(updated));
     }
   }
 
-  function handleDelete(id: string) {
+  async function handleDelete(id: string) {
+    const itemToDelete = wishes.find((w) => w.id === id);
+    try {
+      await fetch("/api/db", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "delete",
+          type: "wishes",
+          item: itemToDelete,
+        }),
+      });
+    } catch {
+      // Fallback
+    }
+
     const updated = wishes.filter((w) => w.id !== id);
     saveWishes(updated);
   }
 
-  function handleClearAll() {
+  async function handleClearAll() {
     if (confirm("Apakah Anda yakin ingin menghapus semua ucapan tamu?")) {
+      try {
+        await fetch("/api/db", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "set",
+            type: "wishes",
+            item: [],
+          }),
+        });
+      } catch {
+        // Fallback
+      }
+
       saveWishes([]);
     }
   }
@@ -59,18 +102,27 @@ export function WishesManager() {
             💌 Moderasi Ucapan Tamu Undangan ({wishes.length})
           </h3>
           <p className="text-[11px] text-white/60">
-            Lihat dan kelola ucapan serta doa yang dikirimkan oleh para tamu undangan.
+            Lihat dan kelola ucapan serta doa yang dikirimkan oleh para tamu undangan secara real-time dari semua device.
           </p>
         </div>
 
-        {wishes.length > 0 && (
+        <div className="flex gap-2">
           <button
-            onClick={handleClearAll}
-            className="btn-modern-secondary text-[10px] py-1.5 px-3 text-rose-300 border-rose-500/40"
+            onClick={loadWishes}
+            className="btn-modern-secondary text-[10px] py-1.5 px-3"
           >
-            Hapus Semua
+            🔄 Sync Cloud
           </button>
-        )}
+
+          {wishes.length > 0 && (
+            <button
+              onClick={handleClearAll}
+              className="btn-modern-secondary text-[10px] py-1.5 px-3 text-rose-300 border-rose-500/40"
+            >
+              Hapus Semua
+            </button>
+          )}
+        </div>
       </div>
 
       {wishes.length === 0 ? (
@@ -87,17 +139,19 @@ export function WishesManager() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-white font-serif text-sm">{w.name}</span>
-                  <span
-                    className={`text-[9px] px-2 py-0.5 rounded-full font-bold ${
-                      w.attendance === "Hadir"
-                        ? "bg-emerald-950 text-emerald-300 border border-emerald-500/40"
-                        : w.attendance === "Ragu-ragu"
-                        ? "bg-amber-950 text-amber-300 border border-amber-500/40"
-                        : "bg-rose-950 text-rose-300 border border-rose-500/40"
-                    }`}
-                  >
-                    {w.attendance}
-                  </span>
+                  {w.attendance && (
+                    <span
+                      className={`text-[9px] px-2 py-0.5 rounded-full font-bold ${
+                        w.attendance === "Hadir"
+                          ? "bg-emerald-950 text-emerald-300 border border-emerald-500/40"
+                          : w.attendance === "Ragu-ragu"
+                          ? "bg-amber-950 text-amber-300 border border-amber-500/40"
+                          : "bg-rose-950 text-rose-300 border border-rose-500/40"
+                      }`}
+                    >
+                      {w.attendance}
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-2">

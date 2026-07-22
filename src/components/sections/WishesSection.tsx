@@ -21,34 +21,63 @@ export function WishesSection() {
   const [showAll, setShowAll] = useState(false);
   const { sectionBgs } = weddingData;
 
-  // Load wishes from localStorage
+  // Load wishes from Cloud DB & LocalStorage fallback
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("wedding_wishes") || "[]");
-    setWishes(stored);
+    async function loadWishes() {
+      try {
+        const res = await fetch("/api/db?type=wishes");
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          setWishes(json.data);
+          localStorage.setItem("wedding_wishes", JSON.stringify(json.data));
+          return;
+        }
+      } catch {
+        // Fallback
+      }
+
+      const stored = JSON.parse(localStorage.getItem("wedding_wishes") || "[]");
+      setWishes(stored);
+    }
+
+    loadWishes();
   }, []);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim() || !message.trim()) return;
 
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      const newWish: WishItem = {
-        id: Date.now().toString(),
-        name: name.trim(),
-        message: message.trim(),
-        createdAt: new Date().toISOString(),
-      };
+    const newWish: WishItem = {
+      id: Date.now().toString(),
+      name: name.trim(),
+      message: message.trim(),
+      createdAt: new Date().toISOString(),
+    };
 
-      const updated = [newWish, ...wishes];
-      setWishes(updated);
-      localStorage.setItem("wedding_wishes", JSON.stringify(updated));
+    // Save to Cloud DB
+    try {
+      await fetch("/api/db", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "add",
+          type: "wishes",
+          item: newWish,
+        }),
+      });
+    } catch {
+      // Fallback
+    }
 
-      setName("");
-      setMessage("");
-      setIsSubmitting(false);
-    }, 800);
+    const updated = [newWish, ...wishes];
+    setWishes(updated);
+    localStorage.setItem("wedding_wishes", JSON.stringify(updated));
+
+    setName("");
+    setMessage("");
+    setIsSubmitting(false);
   }
 
   const displayedWishes = showAll ? wishes : wishes.slice(0, 5);
@@ -83,7 +112,7 @@ export function WishesSection() {
             className="text-[10px] uppercase tracking-[4px] text-[#d4af37] font-bold mb-1.5 text-center leading-none"
             style={{ fontFamily: "var(--font-body)" }}
           >
-            Wishes & Prayers
+            Wishes &amp; Prayers
           </p>
         </AnimatedText>
 
@@ -92,7 +121,7 @@ export function WishesSection() {
             className="text-2xl md:text-3xl text-center mb-2 font-serif text-white drop-shadow-sm leading-snug"
             style={{ fontFamily: "var(--font-heading)" }}
           >
-            Ucapan & Doa
+            Ucapan &amp; Doa
           </h2>
         </AnimatedText>
 

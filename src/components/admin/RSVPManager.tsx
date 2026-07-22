@@ -28,7 +28,29 @@ export function RSVPManager() {
     loadRSVPs();
   }, []);
 
-  function loadRSVPs() {
+  async function loadRSVPs() {
+    try {
+      const res = await fetch("/api/db?type=rsvps");
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        const formatted = json.data.map((item: any) => ({
+          id: item.id || Date.now().toString(),
+          name: item.name,
+          attendance: item.status === "Hadir" ? "Hadir" : "Tidak Hadir",
+          guestCount: item.pax || 1,
+          session: item.notes || "Akad & Resepsi",
+          createdAt: item.createdAt || "Baru saja",
+        }));
+        setRsvps(formatted);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("wevitation_rsvps", JSON.stringify(formatted));
+        }
+        return;
+      }
+    } catch {
+      // Fallback
+    }
+
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("wevitation_rsvps");
       if (saved) {
@@ -41,14 +63,14 @@ export function RSVPManager() {
     }
   }
 
-  function saveRSVPs(updated: RSVPItem[]) {
+  async function saveRSVPs(updated: RSVPItem[]) {
     setRsvps(updated);
     if (typeof window !== "undefined") {
       localStorage.setItem("wevitation_rsvps", JSON.stringify(updated));
     }
   }
 
-  function handleAddManual(e: React.FormEvent) {
+  async function handleAddManual(e: React.FormEvent) {
     e.preventDefault();
     if (!manualName.trim()) return;
 
@@ -66,13 +88,49 @@ export function RSVPManager() {
       }),
     };
 
+    try {
+      await fetch("/api/db", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "add",
+          type: "rsvps",
+          item: {
+            id: newItem.id,
+            name: newItem.name,
+            pax: newItem.guestCount,
+            status: newItem.attendance,
+            notes: newItem.session,
+            createdAt: newItem.createdAt,
+          },
+        }),
+      });
+    } catch {
+      // Fallback
+    }
+
     const updated = [newItem, ...rsvps];
     saveRSVPs(updated);
     setShowAddModal(false);
     setManualName("");
   }
 
-  function handleDelete(id: string) {
+  async function handleDelete(id: string) {
+    const itemToDelete = rsvps.find((r) => r.id === id);
+    try {
+      await fetch("/api/db", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "delete",
+          type: "rsvps",
+          item: itemToDelete,
+        }),
+      });
+    } catch {
+      // Fallback
+    }
+
     const updated = rsvps.filter((r) => r.id !== id);
     saveRSVPs(updated);
   }
@@ -187,9 +245,17 @@ export function RSVPManager() {
 
       {/* RSVP Table / List */}
       <div className="gold-card-pro p-4 border border-[#d4af37]/30 rounded-xl">
-        <h4 className="text-xs uppercase tracking-[2px] font-bold text-[#d4af37] mb-3">
-          Daftar Konfirmasi Kehadiran ({filteredRSVPs.length})
-        </h4>
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-xs uppercase tracking-[2px] font-bold text-[#d4af37]">
+            Daftar Konfirmasi Kehadiran ({filteredRSVPs.length})
+          </h4>
+          <button
+            onClick={loadRSVPs}
+            className="text-[10px] text-[#f3e5ab] hover:underline cursor-pointer"
+          >
+            🔄 Sync Cloud
+          </button>
+        </div>
 
         {filteredRSVPs.length === 0 ? (
           <div className="text-center py-6 text-xs text-white/50">

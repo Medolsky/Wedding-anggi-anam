@@ -652,8 +652,13 @@ Budi Santoso, 081987654321`}
           </h4>
           <div className="flex gap-2">
             <button
-              onClick={loadCloudGuests}
-              className="text-[10px] text-[#f3e5ab] hover:underline cursor-pointer"
+              onClick={async () => {
+                if (guests.length > 0) {
+                  await saveGuests(guests);
+                }
+                await loadCloudGuests();
+              }}
+              className="text-[10px] text-[#f3e5ab] bg-[#3a1512] hover:bg-[#521c17] px-2 py-1 rounded border border-[#d4af37]/40 cursor-pointer font-bold transition-all"
             >
               🔄 Sync Cloud
             </button>

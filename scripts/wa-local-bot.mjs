@@ -14,8 +14,17 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const SESSION_DIR = path.join(__dirname, "../.wa_session");
 
-if (!fs.existsSync(SESSION_DIR)) {
-  fs.mkdirSync(SESSION_DIR, { recursive: true });
+function ensureSessionDir() {
+  if (!fs.existsSync(SESSION_DIR)) {
+    fs.mkdirSync(SESSION_DIR, { recursive: true });
+  }
+}
+
+function clearSessionDir() {
+  if (fs.existsSync(SESSION_DIR)) {
+    fs.rmSync(SESSION_DIR, { recursive: true, force: true });
+  }
+  ensureSessionDir();
 }
 
 let sock = null;
@@ -23,6 +32,7 @@ let qrCodeData = null;
 let isConnected = false;
 
 async function connectToWhatsApp() {
+  ensureSessionDir();
   const { state, saveCreds } = await useMultiFileAuthState(SESSION_DIR);
   const { version } = await fetchLatestBaileysVersion();
 
@@ -58,18 +68,16 @@ async function connectToWhatsApp() {
 
     if (connection === "close") {
       isConnected = false;
-      const shouldReconnect =
-        lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
+      const statusCode = lastDisconnect?.error?.output?.statusCode;
+      const isLoggedOut = statusCode === DisconnectReason.loggedOut;
 
-      console.log(
-        "⚠️ Koneksi WhatsApp terputus. Mencoba menghubungkan kembali...",
-        shouldReconnect
-      );
-
-      if (shouldReconnect) {
-        setTimeout(connectToWhatsApp, 3000);
+      if (isLoggedOut) {
+        console.log("🔄 Sesi WA terputus. Membersihkan sesi lama dan membuat QR Code baru...");
+        clearSessionDir();
+        setTimeout(connectToWhatsApp, 2000);
       } else {
-        console.log("❌ Sesi WA Keluar. Silakan hapus folder .wa_session dan scan QR lagi.");
+        console.log("⚠️ Koneksi WhatsApp terputus. Hubungkan kembali...");
+        setTimeout(connectToWhatsApp, 3000);
       }
     }
   });

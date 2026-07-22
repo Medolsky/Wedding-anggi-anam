@@ -29,8 +29,40 @@ export async function POST(req: Request) {
       targetPhone = "62" + targetPhone.slice(1);
     }
 
-    // 1. 100% FREE Unlimited Local Bot Gateway Server (localhost:5001 or Localtunnel / Pinggy URL)
-    if (provider === "local") {
+    const activeProvider = provider || process.env.WA_PROVIDER || "fonnte";
+    const fonnteToken = apiKey || process.env.FONNTE_TOKEN || process.env.WA_API_KEY || "4Sf3SH6toe8ztYykjmMV";
+
+    // 1. Fonnte Gateway Provider
+    if (activeProvider === "fonnte" && fonnteToken) {
+      const response = await fetch("https://api.fonnte.com/send", {
+        method: "POST",
+        headers: {
+          Authorization: fonnteToken,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          target: targetPhone,
+          message: message,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.status) {
+        return NextResponse.json({
+          success: true,
+          message: "Pesan WhatsApp berhasil terkirim via Fonnte Gateway!",
+          data,
+        });
+      } else {
+        return NextResponse.json({
+          success: false,
+          error: data.reason || "Gagal mengirim via WA Gateway Fonnte. Periksa token Anda.",
+        });
+      }
+    }
+
+    // 2. 100% FREE Unlimited Local Bot Gateway Server (localhost:5001 or Localtunnel / Pinggy URL)
+    if (activeProvider === "local") {
       const serverUrl = customServerUrl || "https://wedding-anam-bot.loca.lt";
       const base = serverUrl.replace(/\/$/, "");
       const targetEndpoint = base.includes("?") 
@@ -84,8 +116,8 @@ export async function POST(req: Request) {
       }
     }
 
-    // 2. Meta Official WhatsApp Cloud API
-    if (provider === "meta") {
+    // 3. Meta Official WhatsApp Cloud API
+    if (activeProvider === "meta") {
       const token = apiKey;
       const phoneId = phoneNumberId || process.env.META_WA_PHONE_NUMBER_ID;
 
@@ -135,37 +167,8 @@ export async function POST(req: Request) {
       }
     }
 
-    // 3. Fonnte Gateway Provider
-    if (provider === "fonnte" && apiKey) {
-      const response = await fetch("https://api.fonnte.com/send", {
-        method: "POST",
-        headers: {
-          Authorization: apiKey,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          target: targetPhone,
-          message: message,
-        }),
-      });
-
-      const data = await response.json();
-      if (data.status) {
-        return NextResponse.json({
-          success: true,
-          message: "Pesan WhatsApp berhasil terkirim via Fonnte Gateway!",
-          data,
-        });
-      } else {
-        return NextResponse.json({
-          success: false,
-          error: data.reason || "Gagal mengirim via WA Gateway Fonnte",
-        });
-      }
-    }
-
     // 4. Wablas Gateway Provider
-    if (provider === "wablas" && apiKey) {
+    if (activeProvider === "wablas" && apiKey) {
       const response = await fetch("https://wablas.com/api/send-message", {
         method: "POST",
         headers: {

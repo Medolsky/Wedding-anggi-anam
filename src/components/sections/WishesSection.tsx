@@ -21,26 +21,26 @@ export function WishesSection() {
   const [showAll, setShowAll] = useState(false);
   const { sectionBgs } = weddingData;
 
-  // Load wishes from Cloud DB & LocalStorage fallback
+  // Load wishes from Cloud DB — API is the single source of truth
   useEffect(() => {
     async function loadWishes() {
       try {
         const res = await fetch("/api/db?type=wishes");
         const json = await res.json();
-        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        if (json.success && Array.isArray(json.data)) {
           setWishes(json.data);
-          localStorage.setItem("wedding_wishes", JSON.stringify(json.data));
           return;
         }
       } catch {
-        // Fallback
+        // API failed — no fallback, just show empty
       }
-
-      const stored = JSON.parse(localStorage.getItem("wedding_wishes") || "[]");
-      setWishes(stored);
     }
 
     loadWishes();
+
+    // Re-sync every 15 seconds so admin deletions appear quickly
+    const interval = setInterval(loadWishes, 15000);
+    return () => clearInterval(interval);
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -73,7 +73,6 @@ export function WishesSection() {
 
     const updated = [newWish, ...wishes];
     setWishes(updated);
-    localStorage.setItem("wedding_wishes", JSON.stringify(updated));
 
     setName("");
     setMessage("");

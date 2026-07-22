@@ -16,46 +16,11 @@ let cloudStore: {
   guests: [],
   config: {
     customServerUrl: "https://wedding-anam-bot.loca.lt",
-    provider: "local"
+    provider: "fonnte",
+    waToken: "4Sf3SH6toe8ztYykjmMV"
   },
-  rsvps: [
-    {
-      id: "1",
-      name: "Bapak H. Ahmad & Keluarga",
-      phone: "6281234567890",
-      pax: 2,
-      status: "Hadir",
-      notes: "Insya Allah hadir berdua dari Depok",
-      createdAt: "10 Okt 2026, 09:30",
-    },
-    {
-      id: "2",
-      name: "Siti Rahma",
-      phone: "6285712345678",
-      pax: 1,
-      status: "Hadir",
-      notes: "Selamat ya Angi & Anam!",
-      createdAt: "10 Okt 2026, 11:15",
-    },
-  ],
-  wishes: [
-    {
-      id: "1",
-      name: "Bapak H. Ahmad",
-      relationship: "Keluarga",
-      message:
-        "Barakallahu lakuma wa baraka 'alaikuma wa jama'a bainakuma fii khair. Selamat menempuh hidup baru untuk Angi & Anam!",
-      createdAt: "10 Okt 2026, 09:32",
-    },
-    {
-      id: "2",
-      name: "Siti Rahma",
-      relationship: "Teman Angi",
-      message:
-        "Happy wedding Angi & Anam! Semoga menjadi keluarga yang sakinah, mawaddah, warahmah. Aamiin!",
-      createdAt: "10 Okt 2026, 11:18",
-    },
-  ],
+  rsvps: [],
+  wishes: [],
 };
 
 // Optional external free Cloud Database Integration (JSONBin.io / Supabase / KV)

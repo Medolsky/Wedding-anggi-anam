@@ -79,12 +79,7 @@ export function RSVPSection() {
       // Fallback
     }
 
-    // Save to LocalStorage fallback
-    const existingRsvps = JSON.parse(
-      localStorage.getItem("wedding_rsvps") || "[]"
-    );
-    existingRsvps.unshift(rsvpItem);
-    localStorage.setItem("wedding_rsvps", JSON.stringify(existingRsvps));
+
 
     setIsSubmitting(false);
     setRsvpSubmitted(true);

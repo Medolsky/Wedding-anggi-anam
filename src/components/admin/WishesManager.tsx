@@ -21,34 +21,16 @@ export function WishesManager() {
     try {
       const res = await fetch("/api/db?type=wishes");
       const json = await res.json();
-      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+      if (json.success && Array.isArray(json.data)) {
         setWishes(json.data);
-        if (typeof window !== "undefined") {
-          localStorage.setItem("wevitation_wishes", JSON.stringify(json.data));
-        }
-        return;
       }
     } catch {
-      // Fallback
-    }
-
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("wevitation_wishes");
-      if (saved) {
-        try {
-          setWishes(JSON.parse(saved));
-        } catch {
-          setWishes([]);
-        }
-      }
+      // API failed
     }
   }
 
   async function saveWishes(updated: WishItem[]) {
     setWishes(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wevitation_wishes", JSON.stringify(updated));
-    }
   }
 
   async function handleDelete(id: string) {

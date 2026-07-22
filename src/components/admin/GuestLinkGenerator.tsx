@@ -29,8 +29,8 @@ export function GuestLinkGenerator() {
   const [blastProgress, setBlastProgress] = useState({ current: 0, total: 0 });
 
   // WA Gateway State (Local Bot / Meta Cloud API / Fonnte / Wablas)
-  const [provider, setProvider] = useState<"local" | "meta" | "fonnte" | "wablas">("local");
-  const [waToken, setWaToken] = useState("");
+  const [provider, setProvider] = useState<"local" | "meta" | "fonnte" | "wablas">("fonnte");
+  const [waToken, setWaToken] = useState("4Sf3SH6toe8ztYykjmMV");
   const [phoneNumberId, setPhoneNumberId] = useState("");
   const [customServerUrl, setCustomServerUrl] = useState("https://wedding-anam-bot.loca.lt");
   const [showTokenInput, setShowTokenInput] = useState(false);
@@ -39,20 +39,7 @@ export function GuestLinkGenerator() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       setOrigin(window.location.origin);
-
-      const savedToken = localStorage.getItem("wevitation_wa_token");
-      if (savedToken) setWaToken(savedToken);
-
-      const savedPhoneId = localStorage.getItem("wevitation_meta_phone_id");
-      if (savedPhoneId) setPhoneNumberId(savedPhoneId);
-
-      const savedCustomUrl = localStorage.getItem("wevitation_custom_server_url");
-      if (savedCustomUrl) setCustomServerUrl(savedCustomUrl);
-
-      const savedProvider = localStorage.getItem("wevitation_wa_provider");
-      if (savedProvider) setProvider(savedProvider as any);
     }
-
     loadCloudGuests();
   }, []);
 
@@ -60,40 +47,24 @@ export function GuestLinkGenerator() {
     try {
       const res = await fetch("/api/db?type=guests");
       const json = await res.json();
-      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+      if (json.success && Array.isArray(json.data)) {
         setGuests(json.data);
-        if (typeof window !== "undefined") {
-          localStorage.setItem("wevitation_admin_guests", JSON.stringify(json.data));
-        }
       }
 
       const cfgRes = await fetch("/api/db?type=config");
       const cfgJson = await cfgRes.json();
-      if (cfgJson.success && cfgJson.data && cfgJson.data.customServerUrl) {
-        setCustomServerUrl(cfgJson.data.customServerUrl);
+      if (cfgJson.success && cfgJson.data) {
+        if (cfgJson.data.customServerUrl) setCustomServerUrl(cfgJson.data.customServerUrl);
         if (cfgJson.data.provider) setProvider(cfgJson.data.provider);
+        if (cfgJson.data.waToken) setWaToken(cfgJson.data.waToken);
       }
     } catch {
-      // Fallback
-    }
-
-    if (typeof window !== "undefined") {
-      const savedGuests = localStorage.getItem("wevitation_admin_guests");
-      if (savedGuests) {
-        try {
-          setGuests(JSON.parse(savedGuests));
-        } catch {
-          setGuests([]);
-        }
-      }
+      // API failed
     }
   }
 
   async function saveGuests(updated: GeneratedGuest[]) {
     setGuests(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wevitation_admin_guests", JSON.stringify(updated));
-    }
 
     try {
       await fetch("/api/db", {
@@ -120,12 +91,6 @@ export function GuestLinkGenerator() {
     setPhoneNumberId(phoneId);
     setProvider(prov);
     setCustomServerUrl(cUrl);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wevitation_wa_token", token);
-      localStorage.setItem("wevitation_meta_phone_id", phoneId);
-      localStorage.setItem("wevitation_wa_provider", prov);
-      localStorage.setItem("wevitation_custom_server_url", cUrl);
-    }
 
     try {
       await fetch("/api/db", {
@@ -419,14 +384,21 @@ Hormat kami,
         <div>
           <div className="flex items-center gap-2">
             <span className="text-sm font-bold text-[#f3e5ab]">
-              🤖 Bot WA Lokal Self-Hosted (100% Gratis &amp; Unlimited)
+              {provider === "fonnte" ? "🌐 Fonnte WA Gateway" : provider === "local" ? "🤖 Pure Bot WA (Nomor Baru)" : `🤖 ${provider.toUpperCase()}`}
             </span>
-            <span className="text-[9px] bg-emerald-950 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded-full font-bold uppercase">
-              {provider === "local" ? "✓ Bot Lokal Aktif" : provider}
+            <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase ${
+              provider === "fonnte" 
+                ? "bg-blue-950 text-blue-300 border border-blue-500/40" 
+                : "bg-emerald-950 text-emerald-300 border border-emerald-500/40"
+            }`}>
+              {provider === "fonnte" ? "✓ Fonnte Aktif" : provider === "local" ? "✓ Pure Bot" : provider}
             </span>
           </div>
           <p className="text-[11px] text-white/70 mt-0.5">
-            Jalankan <code className="bg-black/50 px-1 py-0.5 rounded text-[#f3e5ab]">npm run wa-bot</code> di terminal untuk kirim ribuan undangan 100% gratis tanpa bayar sepeser pun.
+            {provider === "fonnte" 
+              ? <>Kirim undangan via Fonnte Gateway. Token sudah terpasang otomatis.</>
+              : <>Jalankan <code className="bg-black/50 px-1 py-0.5 rounded text-[#f3e5ab]">npm run wa-pure-bot</code> di terminal untuk konek WA nomor baru.</>
+            }
           </p>
         </div>
 
@@ -455,9 +427,9 @@ Hormat kami,
                 onChange={(e) => setProvider(e.target.value as any)}
                 className="form-input text-xs py-2 px-3 bg-[#1c0a08] rounded-xl w-full"
               >
-                <option value="local">🤖 Bot Lokal Self-Hosted (100% Gratis &amp; Unlimited)</option>
+                <option value="fonnte">🌐 Fonnte WA Gateway (Token Aktif)</option>
+                <option value="local">🤖 Pure Bot WA Nomor Baru (npm run wa-pure-bot)</option>
                 <option value="meta">Meta Official Cloud API (Gratis 1.000 msgs/bulan)</option>
-                <option value="fonnte">Fonnte WA Gateway</option>
                 <option value="wablas">Wablas WA Gateway</option>
               </select>
             </div>

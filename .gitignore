@@ -24,6 +24,8 @@
 .DS_Store
 *.pem
 .wa_session/
+.wa_session_new/
+.wa_bot_log.txt
 
 # debug
 npm-debug.log*

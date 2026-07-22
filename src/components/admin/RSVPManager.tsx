@@ -32,7 +32,7 @@ export function RSVPManager() {
     try {
       const res = await fetch("/api/db?type=rsvps");
       const json = await res.json();
-      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+      if (json.success && Array.isArray(json.data)) {
         const formatted = json.data.map((item: any) => ({
           id: item.id || Date.now().toString(),
           name: item.name,
@@ -42,32 +42,14 @@ export function RSVPManager() {
           createdAt: item.createdAt || "Baru saja",
         }));
         setRsvps(formatted);
-        if (typeof window !== "undefined") {
-          localStorage.setItem("wevitation_rsvps", JSON.stringify(formatted));
-        }
-        return;
       }
     } catch {
-      // Fallback
-    }
-
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("wevitation_rsvps");
-      if (saved) {
-        try {
-          setRsvps(JSON.parse(saved));
-        } catch {
-          setRsvps([]);
-        }
-      }
+      // API failed
     }
   }
 
   async function saveRSVPs(updated: RSVPItem[]) {
     setRsvps(updated);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wevitation_rsvps", JSON.stringify(updated));
-    }
   }
 
   async function handleAddManual(e: React.FormEvent) {

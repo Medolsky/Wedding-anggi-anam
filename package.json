@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "wa-bot": "node scripts/wa-local-bot.mjs"
+    "wa-bot": "node scripts/wa-local-bot.mjs",
+    "wa-pure-bot": "node scripts/wa-pure-bot.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

@@ -15,7 +15,7 @@ let cloudStore: {
 } = {
   guests: [],
   config: {
-    customServerUrl: "https://mag-lie-source-involvement.trycloudflare.com",
+    customServerUrl: "https://wedding-anam-bot.loca.lt",
     provider: "local"
   },
   rsvps: [

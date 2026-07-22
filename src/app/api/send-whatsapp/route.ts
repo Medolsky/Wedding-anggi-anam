@@ -31,7 +31,7 @@ export async function POST(req: Request) {
 
     // 1. 100% FREE Unlimited Local Bot Gateway Server (localhost:5001 or Localtunnel / Pinggy URL)
     if (provider === "local") {
-      const serverUrl = customServerUrl || "https://mag-lie-source-involvement.trycloudflare.com";
+      const serverUrl = customServerUrl || "https://wedding-anam-bot.loca.lt";
       const targetEndpoint = `${serverUrl.replace(/\/$/, "")}/send-message`;
 
       try {

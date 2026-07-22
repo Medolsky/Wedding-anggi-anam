@@ -32,7 +32,7 @@ export function GuestLinkGenerator() {
   const [provider, setProvider] = useState<"local" | "meta" | "fonnte" | "wablas">("local");
   const [waToken, setWaToken] = useState("");
   const [phoneNumberId, setPhoneNumberId] = useState("");
-  const [customServerUrl, setCustomServerUrl] = useState("https://mag-lie-source-involvement.trycloudflare.com");
+  const [customServerUrl, setCustomServerUrl] = useState("https://wedding-anam-bot.loca.lt");
   const [showTokenInput, setShowTokenInput] = useState(false);
   const [sendingId, setSendingId] = useState<string | null>(null);
 

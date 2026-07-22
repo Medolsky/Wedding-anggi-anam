@@ -32,7 +32,10 @@ export async function POST(req: Request) {
     // 1. 100% FREE Unlimited Local Bot Gateway Server (localhost:5001 or Localtunnel / Pinggy URL)
     if (provider === "local") {
       const serverUrl = customServerUrl || "https://wedding-anam-bot.loca.lt";
-      const targetEndpoint = `${serverUrl.replace(/\/$/, "")}/send-message`;
+      const base = serverUrl.replace(/\/$/, "");
+      const targetEndpoint = base.includes("?") 
+        ? `${base}/send-message` 
+        : `${base}/send-message?bypass-tunnel-reminder=true&bypass-tunnel-reminder=1`;
 
       try {
         const response = await fetch(targetEndpoint, {

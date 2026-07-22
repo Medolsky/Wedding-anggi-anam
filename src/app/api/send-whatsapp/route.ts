@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 /**
  * Next.js API Route for Automated Background WhatsApp Message Delivery
- * Supports 100% Free Unlimited Local Bot Gateway (port 5001 or custom tunnel), Meta Cloud API, Fonnte, and Wablas
+ * Supports 100% Free Unlimited Local Bot Gateway (port 5001 or Localtunnel/Pinggy URL), Meta Cloud API, Fonnte, and Wablas
  */
 export async function POST(req: Request) {
   try {
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
       targetPhone = "62" + targetPhone.slice(1);
     }
 
-    // 1. 100% FREE Unlimited Local Bot Gateway Server (localhost:5001 or LocalTunnel / Ngrok URL)
+    // 1. 100% FREE Unlimited Local Bot Gateway Server (localhost:5001 or Localtunnel / Pinggy URL)
     if (provider === "local") {
       const serverUrl = customServerUrl || "http://localhost:5001";
       const targetEndpoint = `${serverUrl.replace(/\/$/, "")}/send-message`;
@@ -40,6 +40,9 @@ export async function POST(req: Request) {
           headers: {
             "Content-Type": "application/json",
             "Bypass-Tunnel-Remainder": "true",
+            "bypass-tunnel-reminder": "true",
+            "ngrok-skip-browser-warning": "true",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
           },
           body: JSON.stringify({
             phone: targetPhone,
@@ -60,14 +63,14 @@ export async function POST(req: Request) {
             success: false,
             error:
               data.error ||
-              "Bot Lokal belum terhubung. Jalankan 'npm run wa-bot' di terminal.",
+              "Bot Lokal belum terhubung. Pastikan 'npm run wa-bot' berjalan.",
           });
         }
-      } catch {
+      } catch (err: any) {
         return NextResponse.json({
           success: false,
           needToken: true,
-          error: `Server Bot Lokal (${serverUrl}) belum berjalan atau tidak terjangkau. Jalankan 'npm run wa-bot' dan 'npx localtunnel --port 5001' di terminal.`,
+          error: `Server Bot Lokal (${serverUrl}) belum berjalan atau tidak terjangkau. (Error: ${err.message})`,
         });
       }
     }

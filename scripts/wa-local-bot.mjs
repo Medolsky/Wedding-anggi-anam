@@ -76,7 +76,7 @@ async function connectToWhatsApp() {
         clearSessionDir();
         setTimeout(connectToWhatsApp, 2000);
       } else {
-        console.log("⚠️ Koneksi WhatsApp terputus. Hubungkan kembali...");
+        console.log("⚠️ Koneksi WhatsApp terputus. Hubungkan kembali dalam 3 detik...");
         setTimeout(connectToWhatsApp, 3000);
       }
     }
@@ -144,8 +144,23 @@ const server = http.createServer(async (req, res) => {
           cleanPhone = "62" + cleanPhone.slice(1);
         }
 
-        const jid = `${cleanPhone}@s.whatsapp.net`;
-        await sock.sendMessage(jid, { text: message });
+        const defaultJid = `${cleanPhone}@s.whatsapp.net`;
+        let targetJid = defaultJid;
+
+        // Check if number exists on WA
+        try {
+          const [result] = await sock.onWhatsApp(cleanPhone);
+          if (result && result.exists) {
+            targetJid = result.jid;
+          }
+        } catch {
+          // Fallback to default JID
+        }
+
+        // Send message via Baileys
+        await sock.sendMessage(targetJid, { text: message });
+
+        console.log(`✅ [TERKIRIM] Undangan berhasil terkirim ke +${cleanPhone}`);
 
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(
@@ -155,6 +170,7 @@ const server = http.createServer(async (req, res) => {
           })
         );
       } catch (err) {
+        console.log(`❌ [GAGAL] Pesan gagal: ${err.message}`);
         res.writeHead(500, { "Content-Type": "application/json" });
         res.end(
           JSON.stringify({

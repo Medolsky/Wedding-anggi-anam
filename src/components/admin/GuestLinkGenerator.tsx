@@ -39,14 +39,6 @@ export function GuestLinkGenerator() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       setOrigin(window.location.origin);
-      const savedGuests = localStorage.getItem("wevitation_admin_guests");
-      if (savedGuests) {
-        try {
-          setGuests(JSON.parse(savedGuests));
-        } catch {
-          setGuests([]);
-        }
-      }
 
       const savedToken = localStorage.getItem("wevitation_wa_token");
       if (savedToken) setWaToken(savedToken);
@@ -60,12 +52,55 @@ export function GuestLinkGenerator() {
       const savedProvider = localStorage.getItem("wevitation_wa_provider");
       if (savedProvider) setProvider(savedProvider as any);
     }
+
+    loadCloudGuests();
   }, []);
 
-  function saveGuests(updated: GeneratedGuest[]) {
+  async function loadCloudGuests() {
+    try {
+      const res = await fetch("/api/db?type=guests");
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        setGuests(json.data);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("wevitation_admin_guests", JSON.stringify(json.data));
+        }
+        return;
+      }
+    } catch {
+      // Fallback
+    }
+
+    if (typeof window !== "undefined") {
+      const savedGuests = localStorage.getItem("wevitation_admin_guests");
+      if (savedGuests) {
+        try {
+          setGuests(JSON.parse(savedGuests));
+        } catch {
+          setGuests([]);
+        }
+      }
+    }
+  }
+
+  async function saveGuests(updated: GeneratedGuest[]) {
     setGuests(updated);
     if (typeof window !== "undefined") {
       localStorage.setItem("wevitation_admin_guests", JSON.stringify(updated));
+    }
+
+    try {
+      await fetch("/api/db", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "set",
+          type: "guests",
+          item: updated,
+        }),
+      });
+    } catch {
+      // Fallback
     }
   }
 
@@ -169,7 +204,7 @@ export function GuestLinkGenerator() {
       saveGuests(updated);
       setBulkText("");
       setShowBulkInput(false);
-      alert(`✓ Berhasil mengimpor ${newGuests.length} nama & nomor tamu!`);
+      alert(`✓ Berhasil mengimpor ${newGuests.length} nama & nomor tamu ke Cloud DB!`);
     }
   }
 
@@ -288,21 +323,18 @@ Hormat kami,
       const data = await res.json();
 
       if (data.success) {
-        setGuests((prev) =>
-          prev.map((g) => (g.id === guest.id ? { ...g, status: "sent" as const } : g))
-        );
+        const updated = guests.map((g) => (g.id === guest.id ? { ...g, status: "sent" as const } : g));
+        saveGuests(updated);
         return true;
       } else {
-        setGuests((prev) =>
-          prev.map((g) => (g.id === guest.id ? { ...g, status: "failed" as const } : g))
-        );
+        const updated = guests.map((g) => (g.id === guest.id ? { ...g, status: "failed" as const } : g));
+        saveGuests(updated);
         alert(`Notice: ${data.error || "Pesan gagal terkirim. Pastikan server bot lokal berjalan."}`);
         return false;
       }
     } catch {
-      setGuests((prev) =>
-        prev.map((g) => (g.id === guest.id ? { ...g, status: "failed" as const } : g))
-      );
+      const updated = guests.map((g) => (g.id === guest.id ? { ...g, status: "failed" as const } : g));
+      saveGuests(updated);
       return false;
     } finally {
       setSendingId(null);
@@ -411,17 +443,17 @@ Hormat kami,
             {/* Custom Tunnel / Server URL Input - Always Visible */}
             <div className="bg-[#120605] p-3 rounded-xl border border-[#d4af37]/30 space-y-1">
               <label className="block text-[11px] uppercase text-[#f3e5ab] font-bold">
-                🔗 URL Server Bot Custom (Localtunnel / Tunnel)
+                🔗 URL Server Bot Custom (Localtunnel / Cloudflare / Tunnel)
               </label>
               <input
                 type="text"
-                placeholder="Paste URL Localtunnel (contoh: https://many-rice-enter.loca.lt)"
+                placeholder="Paste URL Tunnel (contoh: https://mag-lie-source-involvement.trycloudflare.com)"
                 value={customServerUrl}
                 onChange={(e) => setCustomServerUrl(e.target.value)}
                 className="form-input text-xs py-2 px-3 font-mono rounded-lg w-full bg-[#1c0a08]"
               />
               <p className="text-[10px] text-white/60">
-                Tempel URL Localtunnel di atas (contoh: <code className="text-[#d4af37]">https://many-rice-enter.loca.lt</code>) agar Admin Panel Netlify online dapat terhubung ke bot laptop Anda!
+                Tempel URL Tunnel di atas agar Admin Panel Netlify online dapat terhubung ke bot laptop Anda!
               </p>
             </div>
 
@@ -618,14 +650,23 @@ Budi Santoso, 081987654321`}
           <h4 className="text-xs uppercase tracking-[2px] font-bold text-[#d4af37]">
             Daftar Kirim Undangan ({guests.length})
           </h4>
-          {guests.length > 0 && (
+          <div className="flex gap-2">
             <button
-              onClick={() => saveGuests([])}
-              className="text-[10px] text-red-400 hover:underline cursor-pointer"
+              onClick={loadCloudGuests}
+              className="text-[10px] text-[#f3e5ab] hover:underline cursor-pointer"
             >
-              Hapus Semua
+              🔄 Sync Cloud
             </button>
-          )}
+
+            {guests.length > 0 && (
+              <button
+                onClick={() => saveGuests([])}
+                className="text-[10px] text-red-400 hover:underline cursor-pointer"
+              >
+                Hapus Semua
+              </button>
+            )}
+          </div>
         </div>
 
         {guests.length === 0 ? (
@@ -668,7 +709,7 @@ Budi Santoso, 081987654321`}
                   </div>
                 )}
 
-                <div className="bg-[#120605] p-2 rounded-lg text-[10px] font-mono text-[#f3e5ab] truncate border border-white/10">
+                <div className="bg-[#120605] p-2 rounded-lg text-[10px] font-mono text-[#f3e5ab] truncate border border-[#d4af37]/20">
                   {getGuestUrl(g.name)}
                 </div>
 

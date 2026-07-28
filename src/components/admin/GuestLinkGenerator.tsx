@@ -44,6 +44,11 @@ export function GuestLinkGenerator() {
   // QR Preview
   const [qrPreviewId, setQrPreviewId] = useState<string | null>(null);
 
+  // Search & Filters
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       setOrigin(window.location.origin);
@@ -678,43 +683,113 @@ Budi Santoso, 081987654321`}
         </form>
       </div>
 
-      {/* Guest Links & WA Sender Feed */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between px-1">
-          <h4 className="text-xs uppercase tracking-[2px] font-bold text-[#b8860b]">
-            Daftar Kirim Undangan ({guests.length})
-          </h4>
-          <div className="flex gap-2">
-            <button
-              onClick={async () => {
-                if (guests.length > 0) {
-                  await saveGuests(guests);
-                }
-                await loadCloudGuests();
-              }}
-              className="text-[10px] text-[#8a662d] bg-[#f7ebbf]/40 hover:bg-[#f7ebbf] px-2 py-1 rounded border border-[#d4af37]/40 cursor-pointer font-bold transition-all"
-            >
-              🔄 Sync Cloud
-            </button>
+      {/* Filtered Guests Computation */}
+      {(() => {
+        const filteredGuests = guests.filter((g) => {
+          const matchSearch =
+            !searchQuery.trim() ||
+            g.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (g.phone && g.phone.includes(searchQuery)) ||
+            (g.code && g.code.toLowerCase().includes(searchQuery.toLowerCase()));
 
-            {guests.length > 0 && (
-              <button
-                onClick={() => saveGuests([])}
-                className="text-[10px] text-red-500 hover:underline cursor-pointer"
-              >
-                Hapus Semua
-              </button>
-            )}
-          </div>
-        </div>
+          const matchCat = filterCategory === "all" || g.category === filterCategory;
 
-        {guests.length === 0 ? (
-          <div className="bg-white border border-[#d4af37]/20 p-6 text-center text-xs text-[#66615c] rounded-xl">
-            Belum ada daftar tamu. Gunakan tombol &quot;Impor Banyak Tamu&quot; di atas untuk memasukkan seluruh daftar nama &amp; nomor HP sekaligus.
-          </div>
-        ) : (
+          const matchStatus =
+            filterStatus === "all"
+              ? true
+              : filterStatus === "checkedIn"
+              ? g.checkedIn
+              : filterStatus === "sent"
+              ? g.status === "sent"
+              : filterStatus === "pending"
+              ? g.status === "pending" || !g.status
+              : true;
+
+          return matchSearch && matchCat && matchStatus;
+        });
+
+        return (
           <div className="space-y-3">
-            {guests.map((g) => (
+            {/* Search & Filter Bar */}
+            <div className="bg-white p-3.5 border border-[#d4af37]/30 rounded-xl shadow-sm space-y-2.5">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5">
+                <input
+                  type="text"
+                  placeholder="🔍 Cari nama / No WA / Kode Barcode..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full sm:w-72 text-xs py-2 px-3 rounded-xl border border-[#d4af37]/40 bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+                />
+
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <select
+                    value={filterCategory}
+                    onChange={(e) => setFilterCategory(e.target.value)}
+                    className="text-xs py-2 px-3 rounded-xl border border-[#d4af37]/40 bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none flex-1 sm:w-36"
+                  >
+                    <option value="all">Semua Kategori</option>
+                    <option value="Tamu VIP">Tamu VIP</option>
+                    <option value="Keluarga">Keluarga</option>
+                    <option value="Teman Anam">Teman Anam</option>
+                    <option value="Teman Angi">Teman Angi</option>
+                    <option value="Rekan Kerja">Rekan Kerja</option>
+                  </select>
+
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    className="text-xs py-2 px-3 rounded-xl border border-[#d4af37]/40 bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none flex-1 sm:w-36"
+                  >
+                    <option value="all">Semua Status</option>
+                    <option value="pending">Belum Kirim</option>
+                    <option value="sent">Terkirim Bot</option>
+                    <option value="checkedIn">Checked-In (Hadir)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between px-1">
+              <h4 className="text-xs uppercase tracking-[2px] font-bold text-[#b8860b]">
+                Daftar Undangan ({filteredGuests.length} dari {guests.length})
+              </h4>
+              <div className="flex gap-2">
+                <button
+                  onClick={async () => {
+                    if (guests.length > 0) {
+                      await saveGuests(guests);
+                    }
+                    await loadCloudGuests();
+                  }}
+                  className="text-[10px] text-[#8a662d] bg-[#f7ebbf]/40 hover:bg-[#f7ebbf] px-2 py-1 rounded border border-[#d4af37]/40 cursor-pointer font-bold transition-all"
+                >
+                  🔄 Sync Cloud
+                </button>
+
+                {guests.length > 0 && (
+                  <button
+                    onClick={() => {
+                      if (confirm("Yakin ingin menghapus seluruh daftar tamu?")) {
+                        saveGuests([]);
+                      }
+                    }}
+                    className="text-[10px] text-red-500 hover:underline cursor-pointer"
+                  >
+                    Hapus Semua
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {filteredGuests.length === 0 ? (
+              <div className="bg-white border border-[#d4af37]/20 p-6 text-center text-xs text-[#66615c] rounded-xl">
+                {guests.length === 0
+                  ? "Belum ada daftar tamu. Gunakan tombol 'Impor Banyak Tamu' di atas."
+                  : "Tidak ada tamu yang cocok dengan pencarian / filter Anda."}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {filteredGuests.map((g) => (
               <div
                 key={g.id}
                 className={`bg-white p-4 border rounded-xl flex flex-col gap-2.5 shadow-sm ${
@@ -829,6 +904,8 @@ Budi Santoso, 081987654321`}
           </div>
         )}
       </div>
-    </div>
-  );
+    );
+  })()}
+</div>
+);
 }

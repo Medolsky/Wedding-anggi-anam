@@ -12,97 +12,104 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<"links" | "scanner" | "rsvp" | "wishes" | "info">("scanner");
 
   return (
-    <main className="min-h-screen bg-[#faf8f5] text-[#2a2723] flex justify-center selection:bg-[#d4af37] selection:text-white">
-      {/* Mobile Stage Container (480px Centered Wrapper) */}
-      <div className="w-full max-w-[480px] min-h-screen bg-[#faf8f5] relative shadow-2xl flex flex-col justify-between border-x border-[#d4af37]/30 pb-12">
+    <main className="min-h-screen bg-[#faf8f5] text-[#2a2723] selection:bg-[#d4af37] selection:text-white pb-16">
+      {/* Full Desktop Container */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* Header Bar */}
-        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-[#d4af37]/30 px-5 py-4 flex items-center justify-between">
+        <header className="bg-white border border-[#d4af37]/30 rounded-2xl shadow-sm p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <span className="text-[10px] uppercase tracking-[3px] text-[#b8860b] font-extrabold block">
-              Wevitation Admin Panel
-            </span>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[10px] uppercase tracking-[3px] text-[#b8860b] font-extrabold bg-[#f7ebbf]/40 px-2.5 py-0.5 rounded-full border border-[#d4af37]/30">
+                Wevitation Admin Dashboard
+              </span>
+            </div>
             <h1
-              className="text-lg md:text-xl font-bold font-serif text-[#2a2723] leading-tight"
+              className="text-xl sm:text-2xl font-bold font-serif text-[#2a2723]"
               style={{ fontFamily: "var(--font-heading)" }}
             >
               {weddingData.couple.bride.nickname} &amp; {weddingData.couple.groom.nickname}
             </h1>
+            <p className="text-xs text-[#66615c] mt-0.5">
+              Kelola daftar tamu, bot WA, rekap konfirmasi RSVP, ucapan, dan scanner check-in lokasi acara.
+            </p>
           </div>
 
-          <Link
-            href="/"
-            target="_blank"
-            className="btn-modern-secondary text-[10px] py-1.5 px-3 flex items-center gap-1 font-bold"
-          >
-            <span>Lihat Undangan</span>
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-              <polyline points="15 3 21 3 21 9" />
-              <line x1="10" y1="14" x2="21" y2="3" />
-            </svg>
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              target="_blank"
+              className="btn-modern-primary text-xs py-2 px-4 flex items-center gap-2 font-bold shadow-md whitespace-nowrap"
+            >
+              <span>👁️ Lihat Undangan Live</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </Link>
+          </div>
         </header>
 
-        {/* Tab Buttons Navigation */}
-        <div className="p-3 bg-white/80 border-b border-[#d4af37]/30 flex gap-1 overflow-x-auto no-scrollbar">
+        {/* Desktop Navigation Tabs */}
+        <div className="bg-white border border-[#d4af37]/30 rounded-2xl shadow-sm p-2 flex flex-wrap gap-2">
           <button
             onClick={() => setActiveTab("scanner")}
-            className={`py-2 px-3 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-1 whitespace-nowrap cursor-pointer ${
+            className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "scanner"
                 ? "bg-[#d4af37] text-white shadow-md"
-                : "bg-white/80 text-[#66615c] hover:bg-[#f7ebbf]/40 border border-[#d4af37]/20"
+                : "bg-transparent text-[#66615c] hover:bg-[#f7ebbf]/40 hover:text-[#2a2723]"
             }`}
           >
-            <span>📷 Scanner Check-In</span>
+            <span>📷 Scanner Check-In Barcode</span>
           </button>
 
           <button
             onClick={() => setActiveTab("links")}
-            className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 whitespace-nowrap cursor-pointer ${
+            className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "links"
                 ? "bg-[#d4af37] text-white shadow-md"
-                : "bg-white/80 text-[#66615c] hover:bg-[#f7ebbf]/40 border border-[#d4af37]/20"
+                : "bg-transparent text-[#66615c] hover:bg-[#f7ebbf]/40 hover:text-[#2a2723]"
             }`}
           >
-            <span>🔗 Tamu</span>
+            <span>🔗 Daftar Tamu &amp; WA Bot</span>
           </button>
 
           <button
             onClick={() => setActiveTab("rsvp")}
-            className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 whitespace-nowrap cursor-pointer ${
+            className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "rsvp"
                 ? "bg-[#d4af37] text-white shadow-md"
-                : "bg-white/80 text-[#66615c] hover:bg-[#f7ebbf]/40 border border-[#d4af37]/20"
+                : "bg-transparent text-[#66615c] hover:bg-[#f7ebbf]/40 hover:text-[#2a2723]"
             }`}
           >
-            <span>📅 RSVP</span>
+            <span>📅 Rekap Kehadiran (RSVP)</span>
           </button>
 
           <button
             onClick={() => setActiveTab("wishes")}
-            className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 whitespace-nowrap cursor-pointer ${
+            className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "wishes"
                 ? "bg-[#d4af37] text-white shadow-md"
-                : "bg-white/80 text-[#66615c] hover:bg-[#f7ebbf]/40 border border-[#d4af37]/20"
+                : "bg-transparent text-[#66615c] hover:bg-[#f7ebbf]/40 hover:text-[#2a2723]"
             }`}
           >
-            <span>💌 Ucapan</span>
+            <span>💌 Ucapan &amp; Doa</span>
           </button>
 
           <button
             onClick={() => setActiveTab("info")}
-            className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 whitespace-nowrap cursor-pointer ${
+            className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm font-extrabold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === "info"
                 ? "bg-[#d4af37] text-white shadow-md"
-                : "bg-white/80 text-[#66615c] hover:bg-[#f7ebbf]/40 border border-[#d4af37]/20"
+                : "bg-transparent text-[#66615c] hover:bg-[#f7ebbf]/40 hover:text-[#2a2723]"
             }`}
           >
-            <span>⚙️ Info</span>
+            <span>⚙️ Info Acara &amp; Kado</span>
           </button>
         </div>
 
         {/* Tab Content */}
-        <div className="p-5 flex-1 space-y-6">
+        <div className="space-y-6">
           {activeTab === "scanner" && <BarcodeScannerManager />}
 
           {activeTab === "links" && <GuestLinkGenerator />}
@@ -112,10 +119,10 @@ export default function AdminPage() {
           {activeTab === "wishes" && <WishesManager />}
 
           {activeTab === "info" && (
-            <div className="space-y-4">
-              <div className="gold-card-pro p-5 border border-[#d4af37]/40 rounded-xl space-y-3">
-                <h3 className="text-base font-bold font-serif text-[#f3e5ab]">ℹ️ Ringkasan Informasi Acara</h3>
-                <div className="text-xs space-y-2 text-white/80">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="gold-card-pro p-6 border border-[#d4af37]/40 rounded-2xl bg-white space-y-4 shadow-sm">
+                <h3 className="text-lg font-bold font-serif text-[#2a2723]">ℹ️ Ringkasan Informasi Acara</h3>
+                <div className="text-xs space-y-2 text-[#555555]">
                   <p><strong>Mempelai:</strong> {weddingData.couple.bride.fullName} &amp; {weddingData.couple.groom.fullName}</p>
                   <p><strong>Tanggal:</strong> Sabtu, 10 Oktober 2026</p>
                   <p><strong>Lokasi:</strong> BALAI IKABAMA, Depok</p>
@@ -123,13 +130,13 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              <div className="gold-card-pro p-5 border border-[#d4af37]/40 rounded-xl space-y-3">
-                <h3 className="text-base font-bold font-serif text-[#f3e5ab]">💳 Rekening &amp; Hadiah</h3>
-                <div className="text-xs space-y-2 text-white/80">
+              <div className="gold-card-pro p-6 border border-[#d4af37]/40 rounded-2xl bg-white space-y-4 shadow-sm">
+                <h3 className="text-lg font-bold font-serif text-[#2a2723]">💳 Rekening &amp; Hadiah</h3>
+                <div className="text-xs space-y-2 text-[#555555]">
                   {weddingData.giftAccounts.map((acc) => (
                     <p key={acc.id}>• <strong>{acc.bankName}:</strong> {acc.accountNumber} (a.n. {acc.accountName})</p>
                   ))}
-                  <p className="pt-1"><strong>Alamat Kado:</strong> {weddingData.giftAddress.address}</p>
+                  <p className="pt-2 border-t border-[#d4af37]/20"><strong>Alamat Kado:</strong> {weddingData.giftAddress.address}</p>
                 </div>
               </div>
             </div>
@@ -137,8 +144,8 @@ export default function AdminPage() {
         </div>
 
         {/* Footer info */}
-        <footer className="px-5 py-4 border-t border-[#d4af37]/20 text-center text-[10px] text-white/40">
-          Wevitation Wedding Digital Admin Panel • 2026
+        <footer className="pt-6 border-t border-[#d4af37]/20 text-center text-xs text-[#66615c]">
+          Wevitation Wedding Digital Admin Panel Dashboard • 2026
         </footer>
       </div>
     </main>

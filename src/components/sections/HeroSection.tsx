@@ -12,7 +12,7 @@ export function HeroSection() {
     <section
       id="home"
       data-section="hero"
-      className="relative min-h-screen h-screen flex flex-col justify-between items-center overflow-hidden bg-[#1c0a08] text-white transform-gpu py-8 px-6"
+      className="relative min-h-screen h-screen flex flex-col justify-between items-center overflow-hidden bg-[#faf8f5] text-[#2a2723] transform-gpu py-8 px-6"
     >
       {/* Background Image — Clear & Vivid Unsplash Photo */}
       <div className="absolute inset-0">
@@ -20,7 +20,7 @@ export function HeroSection() {
           className="absolute inset-0 bg-cover bg-center transform-gpu"
           style={{
             backgroundImage: `url('${sectionBgs.hero}')`,
-            filter: "brightness(0.65) contrast(1.05)",
+            filter: "brightness(0.85) contrast(1.05)",
           }}
         />
         <div className="absolute inset-0 photo-overlay-cinematic" />
@@ -40,7 +40,7 @@ export function HeroSection() {
         {/* The Wedding of — Enlarged & Prominent */}
         <AnimatedText delay={0.2} variant="fadeUp" className="w-full text-center mt-1">
           <p
-            className="text-xs md:text-sm uppercase tracking-[7px] text-[#f3e5ab] font-extrabold text-center leading-none drop-shadow-sm"
+            className="text-xs md:text-sm uppercase tracking-[7px] text-[#8a662d] font-extrabold text-center leading-none drop-shadow-sm"
             style={{ fontFamily: "var(--font-body)" }}
           >
             The Wedding of
@@ -77,7 +77,7 @@ export function HeroSection() {
         {/* Date — Prominently Larger */}
         <AnimatedText delay={0.8} variant="scaleUp" className="w-full text-center my-4">
           <p
-            className="text-lg md:text-xl tracking-[7px] md:tracking-[9px] uppercase text-[#f3e5ab] font-extrabold text-center font-serif leading-none drop-shadow-md"
+            className="text-lg md:text-xl tracking-[7px] md:tracking-[9px] uppercase text-[#8a662d] font-extrabold text-center font-serif leading-none drop-shadow-md"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             10 • 10 • 2026
@@ -101,7 +101,7 @@ export function HeroSection() {
           viewport={{ once: true, amount: 0.1 }}
           transition={{ duration: 0.8, delay: 1.4 }}
         >
-          <span className="text-[#f3e5ab] text-[9px] uppercase tracking-[3px] font-bold">
+          <span className="text-[#8a662d] text-[9px] uppercase tracking-[3px] font-bold">
             Scroll Down
           </span>
           <motion.div

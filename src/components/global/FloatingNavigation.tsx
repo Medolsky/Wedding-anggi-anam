@@ -23,9 +23,9 @@ export function FloatingNavigation() {
       {/* Floating hamburger button */}
       <motion.button
         className="fixed bottom-6 left-6 z-[90] w-12 h-12 rounded-full 
-          bg-[var(--color-primary)] text-white shadow-lg shadow-black/20
+          bg-[#d4af37] text-white shadow-lg shadow-amber-500/20
           flex items-center justify-center
-          hover:bg-[var(--color-primary-dark)] transition-colors"
+          hover:bg-[#b8860b] transition-colors border border-[#e6ca65]"
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 1.8, type: "spring", stiffness: 200 }}
@@ -78,8 +78,8 @@ export function FloatingNavigation() {
 
             {/* Menu */}
             <motion.nav
-              className="fixed bottom-20 left-6 z-[90] bg-[var(--color-surface)] 
-                rounded-[var(--radius-lg)] shadow-2xl overflow-hidden min-w-[200px]"
+              className="fixed bottom-20 left-6 z-[90] bg-white/95 backdrop-blur-md border border-[#d4af37]/40 
+                rounded-[var(--radius-lg)] shadow-2xl overflow-hidden min-w-[200px] text-[#2a2723]"
               initial={{ opacity: 0, scale: 0.8, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -90,7 +90,7 @@ export function FloatingNavigation() {
                   <motion.button
                     key={section.id}
                     className="w-full flex items-center gap-3 px-5 py-3 text-left
-                      hover:bg-[var(--color-secondary-light)] transition-colors"
+                      hover:bg-[#f7ebbf]/40 hover:text-[#b8860b] transition-colors"
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.05 }}
@@ -98,7 +98,7 @@ export function FloatingNavigation() {
                   >
                     <span className="text-base">{section.icon}</span>
                     <span
-                      className="text-sm tracking-wide"
+                      className="text-sm tracking-wide font-medium"
                       style={{ fontFamily: "var(--font-body)" }}
                     >
                       {section.label}

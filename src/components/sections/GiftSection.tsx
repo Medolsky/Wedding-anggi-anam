@@ -25,7 +25,7 @@ export function GiftSection() {
     <section
       id="gift"
       data-section="gift"
-      className="section-gift relative py-18 md:py-24 overflow-hidden flex flex-col items-center justify-center text-center bg-[#1c0a08] text-white"
+      className="section-gift relative py-18 md:py-24 overflow-hidden flex flex-col items-center justify-center text-center bg-[#faf8f5] text-[#2a2723]"
     >
       {/* Background Image from Unsplash — Clear & Vivid */}
       <div className="absolute inset-0">
@@ -33,7 +33,7 @@ export function GiftSection() {
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url('${sectionBgs.gift}')`,
-            filter: "brightness(0.6) contrast(1.05)",
+            filter: "brightness(0.85) contrast(1.05)",
           }}
           initial={{ scale: 1.15 }}
           whileInView={{ scale: 1 }}
@@ -45,30 +45,28 @@ export function GiftSection() {
       </div>
 
       <div className="relative z-20 max-w-md mx-auto px-6 w-full text-center flex flex-col items-center justify-center">
-        {/* Section header */}
-        <AnimatedText delay={0} variant="fadeUp" className="w-full text-center">
-          <p
-            className="text-[10px] uppercase tracking-[4px] text-[#d4af37] font-bold mb-1.5 text-center leading-none"
-            style={{ fontFamily: "var(--font-body)" }}
-          >
-            Wedding Gift
-          </p>
-        </AnimatedText>
+        {/* Section header frame card */}
+        <AnimatedText delay={0} variant="fadeUp" className="w-full flex justify-center mb-6">
+          <div className="gold-card-pro p-4 md:p-5 border border-[#d4af37]/40 shadow-xl rounded-2xl w-full max-w-xs text-center flex flex-col items-center justify-center">
+            <p
+              className="text-[10px] uppercase tracking-[4px] text-[#b8860b] font-bold mb-1.5 text-center leading-none"
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              Wedding Gift
+            </p>
 
-        <AnimatedText delay={0.1} variant="scaleUp" className="w-full text-center">
-          <h2
-            className="text-2xl md:text-3xl text-center mb-2 font-serif text-white drop-shadow-sm leading-snug"
-            style={{ fontFamily: "var(--font-heading)" }}
-          >
-            Hadiah Pernikahan
-          </h2>
-        </AnimatedText>
+            <h2
+              className="text-2xl md:text-3xl text-center mb-2 font-serif text-[#2a2723] drop-shadow-sm leading-snug"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              Hadiah Pernikahan
+            </h2>
 
-        <AnimatedText delay={0.2} variant="fadeUp" className="w-full text-center">
-          <p className="text-center text-xs opacity-90 mb-6 leading-relaxed text-white/90">
-            Kehadiran dan doa Anda adalah hadiah terindah. Namun jika ingin
-            memberikan tanda kasih, kami menyediakan opsi berikut.
-          </p>
+            <p className="text-center text-xs opacity-90 leading-relaxed text-[#555555]">
+              Kehadiran dan doa Anda adalah hadiah terindah. Namun jika ingin
+              memberikan tanda kasih, kami menyediakan opsi berikut.
+            </p>
+          </div>
         </AnimatedText>
 
         {/* Bank account cards */}
@@ -80,7 +78,7 @@ export function GiftSection() {
                 whileHover={{ y: -2 }}
                 transition={{ duration: 0.3 }}
               >
-                <p className="text-[9px] uppercase tracking-[2px] font-bold text-[#d4af37] mb-1 text-center leading-none">
+                <p className="text-[9px] uppercase tracking-[2px] font-bold text-[#b8860b] mb-1 text-center leading-none">
                   {account.bankName}
                 </p>
 
@@ -93,7 +91,7 @@ export function GiftSection() {
                 </p>
 
                 {/* Account name */}
-                <p className="text-xs text-white/80 font-medium mb-3 text-center leading-none">
+                <p className="text-xs text-[#66615c] font-medium mb-3 text-center leading-none">
                   a.n. {account.accountName}
                 </p>
 
@@ -185,22 +183,22 @@ export function GiftSection() {
       >
         <div className="py-2 space-y-3 text-center flex flex-col items-center">
           <div className="w-full text-center">
-            <p className="text-[9px] uppercase tracking-[1.5px] text-[#d4af37] mb-0.5 font-bold leading-none">
+            <p className="text-[9px] uppercase tracking-[1.5px] text-[#b8860b] mb-0.5 font-bold leading-none">
               Penerima
             </p>
-            <p className="font-bold text-sm text-white">{giftAddress.name}</p>
+            <p className="font-bold text-sm text-[#2a2723]">{giftAddress.name}</p>
           </div>
           <div className="w-full text-center">
-            <p className="text-[9px] uppercase tracking-[1.5px] text-[#d4af37] mb-0.5 font-bold leading-none">
+            <p className="text-[9px] uppercase tracking-[1.5px] text-[#b8860b] mb-0.5 font-bold leading-none">
               Alamat Lengkap
             </p>
-            <p className="text-xs leading-relaxed text-white/80 max-w-xs mx-auto">{giftAddress.address}</p>
+            <p className="text-xs leading-relaxed text-[#66615c] max-w-xs mx-auto">{giftAddress.address}</p>
           </div>
           <div className="w-full text-center">
-            <p className="text-[9px] uppercase tracking-[1.5px] text-[#d4af37] mb-0.5 font-bold leading-none">
+            <p className="text-[9px] uppercase tracking-[1.5px] text-[#b8860b] mb-0.5 font-bold leading-none">
               No. Telepon
             </p>
-            <p className="text-xs font-mono text-white font-semibold">{giftAddress.phone}</p>
+            <p className="text-xs font-mono text-[#2a2723] font-semibold">{giftAddress.phone}</p>
           </div>
           <button
             onClick={() =>

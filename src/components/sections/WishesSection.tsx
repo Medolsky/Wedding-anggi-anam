@@ -85,7 +85,7 @@ export function WishesSection() {
     <section
       id="wishes"
       data-section="wishes"
-      className="section-wishes relative py-18 md:py-24 overflow-hidden flex flex-col items-center justify-center text-center bg-[#1c0a08] text-white"
+      className="section-wishes relative py-18 md:py-24 overflow-hidden flex flex-col items-center justify-center text-center bg-[#faf8f5] text-[#2a2723]"
     >
       {/* Background Image from Unsplash — Clear & Vivid */}
       <div className="absolute inset-0">
@@ -93,7 +93,7 @@ export function WishesSection() {
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url('${sectionBgs.wishes}')`,
-            filter: "brightness(0.6) contrast(1.05)",
+            filter: "brightness(0.85) contrast(1.05)",
           }}
           initial={{ scale: 1.15 }}
           whileInView={{ scale: 1 }}
@@ -105,29 +105,27 @@ export function WishesSection() {
       </div>
 
       <div className="relative z-20 max-w-md mx-auto px-6 w-full text-center flex flex-col items-center justify-center">
-        {/* Section header */}
-        <AnimatedText delay={0} variant="fadeUp" className="w-full text-center">
-          <p
-            className="text-[10px] uppercase tracking-[4px] text-[#d4af37] font-bold mb-1.5 text-center leading-none"
-            style={{ fontFamily: "var(--font-body)" }}
-          >
-            Wishes &amp; Prayers
-          </p>
-        </AnimatedText>
+        {/* Section header frame card */}
+        <AnimatedText delay={0} variant="fadeUp" className="w-full flex justify-center mb-6">
+          <div className="gold-card-pro p-4 md:p-5 border border-[#d4af37]/40 shadow-xl rounded-2xl w-full max-w-xs text-center flex flex-col items-center justify-center">
+            <p
+              className="text-[10px] uppercase tracking-[4px] text-[#b8860b] font-bold mb-1.5 text-center leading-none"
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              Wishes &amp; Prayers
+            </p>
 
-        <AnimatedText delay={0.1} variant="scaleUp" className="w-full text-center">
-          <h2
-            className="text-2xl md:text-3xl text-center mb-2 font-serif text-white drop-shadow-sm leading-snug"
-            style={{ fontFamily: "var(--font-heading)" }}
-          >
-            Ucapan &amp; Doa
-          </h2>
-        </AnimatedText>
+            <h2
+              className="text-2xl md:text-3xl text-center mb-2 font-serif text-[#2a2723] drop-shadow-sm leading-snug"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              Ucapan &amp; Doa
+            </h2>
 
-        <AnimatedText delay={0.2} variant="fadeUp" className="w-full text-center">
-          <p className="text-center text-xs opacity-90 mb-6 leading-relaxed text-white/90">
-            Berikan ucapan dan doa terbaik Anda untuk kedua mempelai.
-          </p>
+            <p className="text-center text-xs opacity-90 leading-relaxed text-[#555555]">
+              Berikan ucapan dan doa terbaik Anda untuk kedua mempelai.
+            </p>
+          </div>
         </AnimatedText>
 
         {/* Form Card Frame */}
@@ -181,19 +179,19 @@ export function WishesSection() {
               >
                 <div className="flex items-start justify-between mb-1">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-[#d4af37] text-black 
+                    <div className="w-6 h-6 rounded-full bg-[#d4af37] text-white 
                       flex items-center justify-center text-[10px] font-bold shadow-xs">
                       {wish.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-white leading-none">{wish.name}</p>
+                      <p className="text-xs font-semibold text-[#2a2723] leading-none">{wish.name}</p>
                     </div>
                   </div>
-                  <span className="text-[9px] text-[#d4af37] font-mono">
+                  <span className="text-[9px] text-[#b8860b] font-mono">
                     {formatRelativeTime(wish.createdAt)}
                   </span>
                 </div>
-                <p className="text-xs text-white/90 leading-relaxed pl-8">
+                <p className="text-xs text-[#66615c] leading-relaxed pl-8">
                   {wish.message}
                 </p>
               </motion.div>
@@ -203,7 +201,7 @@ export function WishesSection() {
           {/* Load more */}
           {wishes.length > 5 && !showAll && (
             <motion.button
-              className="w-full py-2 text-[11px] uppercase tracking-widest font-bold text-[#d4af37] hover:underline transition-all"
+              className="w-full py-2 text-[11px] uppercase tracking-widest font-bold text-[#b8860b] hover:underline transition-all"
               onClick={() => setShowAll(true)}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -213,7 +211,7 @@ export function WishesSection() {
           )}
 
           {wishes.length === 0 && (
-            <p className="text-center text-xs text-white/70 py-3 italic font-medium">
+            <p className="text-center text-xs text-[#66615c] py-3 italic font-medium">
               Jadilah yang pertama memberikan ucapan! 💕
             </p>
           )}

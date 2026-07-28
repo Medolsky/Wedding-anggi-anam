@@ -12,7 +12,7 @@ export function QuoteSection() {
     <section
       id="quote"
       data-section="quote"
-      className="section-quote relative py-20 md:py-24 overflow-hidden flex flex-col items-center justify-center text-center bg-[#1c0a08] text-white transform-gpu"
+      className="section-quote relative py-20 md:py-24 overflow-hidden flex flex-col items-center justify-center text-center bg-[#faf8f5] text-[#2a2723] transform-gpu"
     >
       {/* Unsplash Background Photo — Clear & Vivid */}
       <div className="absolute inset-0">
@@ -20,7 +20,7 @@ export function QuoteSection() {
           className="absolute inset-0 bg-cover bg-center transform-gpu"
           style={{
             backgroundImage: `url('${sectionBgs.quote}')`,
-            filter: "brightness(0.6) contrast(1.05)",
+            filter: "brightness(0.85) contrast(1.05)",
           }}
         />
         <div className="absolute inset-0 photo-overlay-cinematic" />
@@ -88,7 +88,7 @@ export function QuoteSection() {
             {quote.text.split("\n\n").map((para, idx) => (
               <p
                 key={idx}
-                className="text-xs md:text-sm leading-relaxed text-white/95 text-center font-normal"
+                className="text-xs md:text-sm leading-relaxed text-[#2a2723] text-center font-normal"
               >
                 {para}
               </p>
@@ -102,7 +102,7 @@ export function QuoteSection() {
           </div>
 
           <p
-            className="text-[10px] tracking-[2.5px] uppercase font-bold text-[#d4af37] text-center leading-relaxed italic font-serif"
+            className="text-[10px] tracking-[2.5px] uppercase font-bold text-[#b8860b] text-center leading-relaxed italic font-serif"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             {quote.source}

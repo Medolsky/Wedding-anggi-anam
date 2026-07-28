@@ -64,9 +64,9 @@ export function MusicPlayer() {
     <AnimatePresence>
       <motion.button
         className="fixed bottom-6 right-6 z-[90] w-12 h-12 rounded-full 
-          bg-[var(--color-primary)] text-white shadow-lg shadow-black/20
+          bg-[#d4af37] text-white shadow-lg shadow-amber-500/20
           flex items-center justify-center
-          hover:bg-[var(--color-primary-dark)] transition-colors"
+          hover:bg-[#b8860b] transition-colors border border-[#e6ca65]"
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 1.5, type: "spring", stiffness: 200 }}

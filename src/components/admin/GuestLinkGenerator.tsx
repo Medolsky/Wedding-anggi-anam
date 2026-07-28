@@ -5,11 +5,15 @@ import { weddingData } from "@/data/weddingData";
 
 export interface GeneratedGuest {
   id: string;
+  code?: string;
   name: string;
   phone?: string;
   category: string;
   template: "Formal" | "Hangat" | "Singkat";
   status?: "pending" | "sending" | "sent" | "failed";
+  checkedIn?: boolean;
+  checkInTime?: string;
+  pax?: number;
   createdAt: string;
 }
 
@@ -115,17 +119,27 @@ export function GuestLinkGenerator() {
     return cleaned;
   }
 
+  function generateUniqueCode(name: string): string {
+    const cleanName = name.replace(/[^a-zA-Z0-9]/g, "").substring(0, 4).toUpperCase() || "VIP";
+    const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+    return `${cleanName}-${rand}`;
+  }
+
   function handleGenerate(e: React.FormEvent) {
     e.preventDefault();
     if (!guestName.trim()) return;
 
+    const code = generateUniqueCode(guestName.trim());
     const newGuest: GeneratedGuest = {
       id: Date.now().toString(),
+      code,
       name: guestName.trim(),
       phone: phone.trim() ? formatPhoneNumber(phone.trim()) : undefined,
       category,
       template,
       status: "pending",
+      checkedIn: false,
+      pax: 1,
       createdAt: new Date().toLocaleTimeString("id-ID", {
         hour: "2-digit",
         minute: "2-digit",
@@ -171,11 +185,14 @@ export function GuestLinkGenerator() {
       if (name) {
         newGuests.push({
           id: (Date.now() + index).toString(),
+          code: generateUniqueCode(name),
           name,
           phone: rawPhone ? formatPhoneNumber(rawPhone) : undefined,
           category,
           template,
           status: "pending",
+          checkedIn: false,
+          pax: 1,
           createdAt: new Date().toLocaleTimeString("id-ID", {
             hour: "2-digit",
             minute: "2-digit",
@@ -198,13 +215,14 @@ export function GuestLinkGenerator() {
     saveGuests(updated);
   }
 
-  function getGuestUrl(name: string) {
-    const encoded = encodeURIComponent(name);
-    return `${origin}/?to=${encoded}`;
+  function getGuestUrl(name: string, code?: string) {
+    const encodedName = encodeURIComponent(name);
+    const codeParam = code ? `&code=${encodeURIComponent(code)}` : "";
+    return `${origin}/?to=${encodedName}${codeParam}`;
   }
 
-  function getWaMessage(name: string, tmpl: "Formal" | "Hangat" | "Singkat" = "Formal") {
-    const url = getGuestUrl(name);
+  function getWaMessage(name: string, tmpl: "Formal" | "Hangat" | "Singkat" = "Formal", code?: string) {
+    const url = getGuestUrl(name, code);
 
     if (tmpl === "Singkat") {
       return `Halo *${name}*,
@@ -693,35 +711,43 @@ Budi Santoso, 081987654321`}
                   g.status === "sent" ? "border-emerald-500/40 bg-emerald-950/10" : "border-[#d4af37]/30"
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-white font-serif">{g.name}</span>
-                    <span className="text-[9px] bg-[#d4af37]/20 border border-[#d4af37]/40 text-[#f3e5ab] px-2 py-0.5 rounded-full font-semibold">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-bold text-[#2a2723] font-serif">{g.name}</span>
+                    <span className="text-[9px] bg-[#d4af37]/20 border border-[#d4af37]/40 text-[#8a662d] px-2 py-0.5 rounded-full font-semibold">
                       {g.category}
                     </span>
-                    {g.status === "sent" && (
-                      <span className="text-[9px] bg-emerald-950 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded-full font-bold">
+                    <span className="text-[9px] bg-[#f7ebbf] border border-[#d4af37]/50 text-[#8a662d] px-2 py-0.5 rounded-full font-mono font-bold">
+                      🎫 Barcode: {g.code || g.id}
+                    </span>
+                    {g.checkedIn && (
+                      <span className="text-[9px] bg-emerald-100 text-emerald-800 border border-emerald-400 px-2 py-0.5 rounded-full font-extrabold animate-pulse">
+                        ✓ HADIR ({g.checkInTime || "Checked-In"})
+                      </span>
+                    )}
+                    {g.status === "sent" && !g.checkedIn && (
+                      <span className="text-[9px] bg-emerald-50 text-emerald-700 border border-emerald-300 px-2 py-0.5 rounded-full font-bold">
                         ✓ Terkirim Bot
                       </span>
                     )}
                     {g.status === "failed" && (
-                      <span className="text-[9px] bg-rose-950 text-rose-300 border border-rose-500/40 px-2 py-0.5 rounded-full font-bold">
+                      <span className="text-[9px] bg-rose-50 text-rose-700 border border-rose-300 px-2 py-0.5 rounded-full font-bold">
                         ⚠️ Gagal
                       </span>
                     )}
                   </div>
-                  <span className="text-[10px] text-white/50">{g.createdAt}</span>
+                  <span className="text-[10px] text-[#66615c]">{g.createdAt}</span>
                 </div>
 
                 {g.phone && (
-                  <div className="text-[11px] text-emerald-400 font-mono flex items-center gap-1.5">
+                  <div className="text-[11px] text-emerald-700 font-mono flex items-center gap-1.5">
                     <span>📱 WA Target:</span>
                     <span className="font-bold">+{g.phone}</span>
                   </div>
                 )}
 
-                <div className="bg-[#120605] p-2 rounded-lg text-[10px] font-mono text-[#f3e5ab] truncate border border-[#d4af37]/20">
-                  {getGuestUrl(g.name)}
+                <div className="bg-white p-2 rounded-lg text-[10px] font-mono text-[#8a662d] truncate border border-[#d4af37]/30">
+                  {getGuestUrl(g.name, g.code)}
                 </div>
 
                 <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">

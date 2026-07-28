@@ -6,22 +6,23 @@ import { weddingData } from "@/data/weddingData";
 import { GuestLinkGenerator } from "@/components/admin/GuestLinkGenerator";
 import { RSVPManager } from "@/components/admin/RSVPManager";
 import { WishesManager } from "@/components/admin/WishesManager";
+import { BarcodeScannerManager } from "@/components/admin/BarcodeScannerManager";
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState<"links" | "rsvp" | "wishes" | "info">("links");
+  const [activeTab, setActiveTab] = useState<"links" | "scanner" | "rsvp" | "wishes" | "info">("scanner");
 
   return (
-    <main className="min-h-screen bg-[#120605] text-white flex justify-center selection:bg-[#d4af37] selection:text-black">
+    <main className="min-h-screen bg-[#faf8f5] text-[#2a2723] flex justify-center selection:bg-[#d4af37] selection:text-white">
       {/* Mobile Stage Container (480px Centered Wrapper) */}
-      <div className="w-full max-w-[480px] min-h-screen bg-[#1c0a08] relative shadow-2xl flex flex-col justify-between border-x border-[#d4af37]/20 pb-12">
+      <div className="w-full max-w-[480px] min-h-screen bg-[#faf8f5] relative shadow-2xl flex flex-col justify-between border-x border-[#d4af37]/30 pb-12">
         {/* Header Bar */}
-        <header className="sticky top-0 z-30 bg-[#1c0a08]/90 backdrop-blur-md border-b border-[#d4af37]/30 px-5 py-4 flex items-center justify-between">
+        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-[#d4af37]/30 px-5 py-4 flex items-center justify-between">
           <div>
-            <span className="text-[10px] uppercase tracking-[3px] text-[#d4af37] font-extrabold block">
-              Wevitation Admin
+            <span className="text-[10px] uppercase tracking-[3px] text-[#b8860b] font-extrabold block">
+              Wevitation Admin Panel
             </span>
             <h1
-              className="text-lg md:text-xl font-bold font-serif text-white leading-tight"
+              className="text-lg md:text-xl font-bold font-serif text-[#2a2723] leading-tight"
               style={{ fontFamily: "var(--font-heading)" }}
             >
               {weddingData.couple.bride.nickname} &amp; {weddingData.couple.groom.nickname}
@@ -43,24 +44,35 @@ export default function AdminPage() {
         </header>
 
         {/* Tab Buttons Navigation */}
-        <div className="p-4 bg-[#140706] border-b border-[#d4af37]/20 flex gap-1.5 overflow-x-auto no-scrollbar">
+        <div className="p-3 bg-white/80 border-b border-[#d4af37]/30 flex gap-1 overflow-x-auto no-scrollbar">
           <button
-            onClick={() => setActiveTab("links")}
-            className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
-              activeTab === "links"
-                ? "bg-[#d4af37] text-black shadow-lg"
-                : "bg-white/5 text-white/70 hover:bg-white/10"
+            onClick={() => setActiveTab("scanner")}
+            className={`py-2 px-3 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-1 whitespace-nowrap cursor-pointer ${
+              activeTab === "scanner"
+                ? "bg-[#d4af37] text-white shadow-md"
+                : "bg-white/80 text-[#66615c] hover:bg-[#f7ebbf]/40 border border-[#d4af37]/20"
             }`}
           >
-            <span>🔗 Link Tamu</span>
+            <span>📷 Scanner Check-In</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("links")}
+            className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 whitespace-nowrap cursor-pointer ${
+              activeTab === "links"
+                ? "bg-[#d4af37] text-white shadow-md"
+                : "bg-white/80 text-[#66615c] hover:bg-[#f7ebbf]/40 border border-[#d4af37]/20"
+            }`}
+          >
+            <span>🔗 Tamu</span>
           </button>
 
           <button
             onClick={() => setActiveTab("rsvp")}
-            className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
+            className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 whitespace-nowrap cursor-pointer ${
               activeTab === "rsvp"
-                ? "bg-[#d4af37] text-black shadow-lg"
-                : "bg-white/5 text-white/70 hover:bg-white/10"
+                ? "bg-[#d4af37] text-white shadow-md"
+                : "bg-white/80 text-[#66615c] hover:bg-[#f7ebbf]/40 border border-[#d4af37]/20"
             }`}
           >
             <span>📅 RSVP</span>
@@ -68,10 +80,10 @@ export default function AdminPage() {
 
           <button
             onClick={() => setActiveTab("wishes")}
-            className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
+            className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 whitespace-nowrap cursor-pointer ${
               activeTab === "wishes"
-                ? "bg-[#d4af37] text-black shadow-lg"
-                : "bg-white/5 text-white/70 hover:bg-white/10"
+                ? "bg-[#d4af37] text-white shadow-md"
+                : "bg-white/80 text-[#66615c] hover:bg-[#f7ebbf]/40 border border-[#d4af37]/20"
             }`}
           >
             <span>💌 Ucapan</span>
@@ -79,10 +91,10 @@ export default function AdminPage() {
 
           <button
             onClick={() => setActiveTab("info")}
-            className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
+            className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 whitespace-nowrap cursor-pointer ${
               activeTab === "info"
-                ? "bg-[#d4af37] text-black shadow-lg"
-                : "bg-white/5 text-white/70 hover:bg-white/10"
+                ? "bg-[#d4af37] text-white shadow-md"
+                : "bg-white/80 text-[#66615c] hover:bg-[#f7ebbf]/40 border border-[#d4af37]/20"
             }`}
           >
             <span>⚙️ Info</span>
@@ -91,6 +103,8 @@ export default function AdminPage() {
 
         {/* Tab Content */}
         <div className="p-5 flex-1 space-y-6">
+          {activeTab === "scanner" && <BarcodeScannerManager />}
+
           {activeTab === "links" && <GuestLinkGenerator />}
 
           {activeTab === "rsvp" && <RSVPManager />}

@@ -11,7 +11,7 @@ export function StorySection() {
     <section
       id="story"
       data-section="story"
-      className="section-story relative py-18 md:py-24 overflow-hidden flex flex-col items-center justify-center text-center bg-[#1c0a08] text-white"
+      className="section-story relative py-18 md:py-24 overflow-hidden flex flex-col items-center justify-center text-center bg-[#faf8f5] text-[#2a2723]"
     >
       {/* Background Image from Unsplash — Clear & Vivid */}
       <div className="absolute inset-0">
@@ -19,7 +19,7 @@ export function StorySection() {
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url('${sectionBgs.story}')`,
-            filter: "brightness(0.6) contrast(1.05)",
+            filter: "brightness(0.85) contrast(1.05)",
           }}
           initial={{ scale: 1.15 }}
           whileInView={{ scale: 1 }}
@@ -31,23 +31,23 @@ export function StorySection() {
       </div>
 
       <div className="relative z-20 max-w-md mx-auto px-6 w-full text-center flex flex-col items-center justify-center">
-        {/* Section header */}
-        <AnimatedText delay={0} variant="fadeUp" className="w-full text-center">
-          <p
-            className="text-[10px] uppercase tracking-[4px] text-[#d4af37] font-bold mb-1.5 text-center leading-none"
-            style={{ fontFamily: "var(--font-body)" }}
-          >
-            Our Journey
-          </p>
-        </AnimatedText>
+        {/* Section header frame card */}
+        <AnimatedText delay={0} variant="fadeUp" className="w-full flex justify-center mb-8">
+          <div className="gold-card-pro p-4 md:p-5 border border-[#d4af37]/40 shadow-xl rounded-2xl w-full max-w-xs text-center flex flex-col items-center justify-center">
+            <p
+              className="text-[10px] uppercase tracking-[4px] text-[#b8860b] font-bold mb-1.5 text-center leading-none"
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              Our Journey
+            </p>
 
-        <AnimatedText delay={0.1} variant="scaleUp" className="w-full text-center">
-          <h2
-            className="text-2xl md:text-3xl text-center mb-10 font-serif text-white drop-shadow-sm leading-snug"
-            style={{ fontFamily: "var(--font-heading)" }}
-          >
-            Kisah Cinta
-          </h2>
+            <h2
+              className="text-2xl md:text-3xl text-center font-serif text-[#2a2723] drop-shadow-sm leading-snug"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              Kisah Cinta
+            </h2>
+          </div>
         </AnimatedText>
 
         {/* Timeline */}
@@ -79,7 +79,7 @@ export function StorySection() {
                 {/* Timeline dot */}
                 <div className="relative flex-shrink-0">
                   <motion.div
-                    className="w-9 h-9 rounded-full bg-[#1c0a08] border-2 border-[#d4af37]
+                    className="w-9 h-9 rounded-full bg-white border-2 border-[#d4af37]
                       flex items-center justify-center shadow-[0_0_10px_rgba(212,175,55,0.4)]"
                     whileInView={{ scale: [0, 1.2, 1] }}
                     viewport={{ once: false, amount: 0.2 }}
@@ -92,20 +92,20 @@ export function StorySection() {
                 {/* Card Frame */}
                 <div className="gold-card-pro p-4 border border-[#d4af37]/40 flex-1 shadow-xl rounded-2xl">
                   <span
-                    className="inline-block text-[9px] font-extrabold uppercase tracking-[2px] text-[#000000] bg-gradient-to-r from-[#f4e8c1] to-[#d4af37] px-2 py-0.5 rounded-full mb-1.5 shadow-xs leading-none"
+                    className="inline-block text-[9px] font-extrabold uppercase tracking-[2px] text-white bg-gradient-to-r from-[#d4af37] to-[#b8860b] px-2 py-0.5 rounded-full mb-1.5 shadow-xs leading-none"
                     style={{ fontFamily: "var(--font-body)" }}
                   >
                     {story.year}
                   </span>
 
                   <h3
-                    className="text-sm md:text-base font-serif mb-1 font-bold text-white leading-snug"
+                    className="text-sm md:text-base font-serif mb-1 font-bold text-[#2a2723] leading-snug"
                     style={{ fontFamily: "var(--font-heading)" }}
                   >
                     {story.title}
                   </h3>
 
-                  <p className="text-[11px] leading-relaxed text-white/90 mb-2.5">
+                  <p className="text-[11px] leading-relaxed text-[#66615c] mb-2.5">
                     {story.description}
                   </p>
 

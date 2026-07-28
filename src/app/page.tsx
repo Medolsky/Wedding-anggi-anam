@@ -62,16 +62,16 @@ function InvitationContent() {
   }, [setState, setMusicPlaying]);
 
   return (
-    <div className="min-h-screen w-full bg-[#120605] text-[var(--color-text)] flex justify-center items-center relative overflow-x-hidden">
+    <div className="min-h-screen w-full bg-[#faf8f5] text-[var(--color-text)] flex justify-center items-center relative overflow-x-hidden">
       {/* Desktop Ambient Background */}
       <div
         className="fixed inset-0 hidden md:block bg-cover bg-center pointer-events-none opacity-25 filter blur-2xl scale-110"
         style={{ backgroundImage: `url('${weddingData.couple.heroCover}')` }}
       />
-      <div className="fixed inset-0 hidden md:block bg-gradient-to-b from-[#1c0a08]/80 via-[#2e0f0c]/70 to-[#1c0a08]/90 pointer-events-none" />
+      <div className="fixed inset-0 hidden md:block bg-gradient-to-b from-[#faf8f5]/90 via-[#f4efe6]/80 to-[#faf8f5]/95 pointer-events-none" />
 
       {/* Main Centered Mobile Frame Stage */}
-      <div className="w-full max-w-[480px] min-h-screen relative bg-[var(--color-background)] shadow-[0_0_60px_rgba(0,0,0,0.5)] border-x border-[#5c1d18]/40 overflow-x-hidden">
+      <div className="w-full max-w-[480px] min-h-screen relative bg-[var(--color-background)] shadow-[0_0_60px_rgba(212,175,55,0.15)] border-x border-[#d4af37]/30 overflow-x-hidden">
         {/* ==========================================
             WELCOME PAGE OVERLAY (CLOSED / OPENING)
             Direct smooth slide-up reveal into Main Page
@@ -79,7 +79,7 @@ function InvitationContent() {
         <AnimatePresence>
           {(state === "CLOSED" || state === "OPENING") && (
             <motion.div
-              className="fixed inset-0 z-[100] h-full w-full max-w-[480px] mx-auto bg-[#1c0a08]"
+              className="fixed inset-0 z-[100] h-full w-full max-w-[480px] mx-auto bg-[#faf8f5]"
               initial={{ y: 0, opacity: 1 }}
               animate={
                 state === "OPENING"
@@ -138,7 +138,7 @@ export default function HomePage() {
     <Suspense
       fallback={
         <div
-          className="fixed inset-0 flex items-center justify-center bg-[#1c0a08]"
+          className="fixed inset-0 flex items-center justify-center bg-[#faf8f5]"
         >
           <motion.div
             className="text-[var(--color-accent)] text-sm uppercase tracking-[4px]"

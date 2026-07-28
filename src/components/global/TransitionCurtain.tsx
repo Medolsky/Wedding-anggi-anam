@@ -19,7 +19,7 @@ export function TransitionCurtain({
     <div className="fixed inset-0 z-[300] pointer-events-none overflow-hidden">
       {/* Left Curtain Panel */}
       <motion.div
-        className="absolute top-0 left-0 w-1/2 h-full bg-[#1c0a08] border-r border-[#d4af37]/40 shadow-2xl flex items-center justify-end"
+        className="absolute top-0 left-0 w-1/2 h-full bg-[#faf8f5] border-r border-[#d4af37]/40 shadow-2xl flex items-center justify-end"
         initial={{ x: 0 }}
         animate={{ x: "-100%" }}
         transition={{
@@ -35,7 +35,7 @@ export function TransitionCurtain({
 
       {/* Right Curtain Panel */}
       <motion.div
-        className="absolute top-0 right-0 w-1/2 h-full bg-[#1c0a08] border-l border-[#d4af37]/40 shadow-2xl flex items-center justify-start"
+        className="absolute top-0 right-0 w-1/2 h-full bg-[#faf8f5] border-l border-[#d4af37]/40 shadow-2xl flex items-center justify-start"
         initial={{ x: 0 }}
         animate={{ x: "100%" }}
         transition={{
@@ -59,7 +59,7 @@ export function TransitionCurtain({
           delay: 0.2,
         }}
       >
-        <div className="w-16 h-16 rounded-full bg-[#260c09] border-2 border-[#d4af37] shadow-[0_0_25px_rgba(212,175,55,0.5)] flex items-center justify-center">
+        <div className="w-16 h-16 rounded-full bg-white border-2 border-[#d4af37] shadow-[0_0_25px_rgba(212,175,55,0.5)] flex items-center justify-center">
           <span
             className="text-lg font-script text-gold-gradient font-bold"
             style={{ fontFamily: "var(--font-script)" }}

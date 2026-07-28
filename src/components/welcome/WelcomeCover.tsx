@@ -11,7 +11,7 @@ export function WelcomeCover() {
         className="absolute inset-0 bg-cover bg-center"
         style={{
           backgroundImage: `url('${weddingData.couple.welcomeCover}')`,
-          filter: "brightness(0.65) contrast(1.05)",
+          filter: "brightness(0.85) contrast(1.05)",
         }}
         initial={{ scale: 1.12 }}
         animate={{ scale: 1 }}
@@ -141,7 +141,7 @@ export function WelcomeContent({
           Kepada Yth.
         </p>
         <p
-          className="text-base md:text-lg font-bold tracking-wide text-white text-center font-serif leading-snug"
+          className="text-base md:text-lg font-bold tracking-wide text-[#2a2723] text-center font-serif leading-snug"
           style={{ fontFamily: "var(--font-heading)" }}
         >
           {guestName}

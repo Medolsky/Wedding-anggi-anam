@@ -13,7 +13,7 @@ export function GallerySection() {
     <section
       id="gallery"
       data-section="gallery"
-      className="section-gallery relative py-20 md:py-28 overflow-hidden flex flex-col items-center justify-center text-center bg-[#1c0a08] text-white"
+      className="section-gallery relative py-20 md:py-28 overflow-hidden flex flex-col items-center justify-center text-center bg-[#faf8f5] text-[#2a2723]"
     >
       {/* Background Image from Unsplash — Clear & Vivid */}
       <div className="absolute inset-0">
@@ -21,7 +21,7 @@ export function GallerySection() {
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url('${sectionBgs.gallery}')`,
-            filter: "brightness(0.6) contrast(1.05)",
+            filter: "brightness(0.85) contrast(1.05)",
           }}
           initial={{ scale: 1.15 }}
           whileInView={{ scale: 1 }}
@@ -33,23 +33,23 @@ export function GallerySection() {
       </div>
 
       <div className="relative z-20 max-w-lg mx-auto px-6 w-full text-center flex flex-col items-center justify-center">
-        {/* Section header */}
-        <AnimatedText delay={0} variant="fadeUp" className="w-full text-center">
-          <p
-            className="text-xs uppercase tracking-[5px] text-[#d4af37] font-bold mb-2 text-center"
-            style={{ fontFamily: "var(--font-body)" }}
-          >
-            Our Moments
-          </p>
-        </AnimatedText>
+        {/* Section header frame card */}
+        <AnimatedText delay={0} variant="fadeUp" className="w-full flex justify-center mb-10">
+          <div className="gold-card-pro p-4 md:p-5 border border-[#d4af37]/40 shadow-xl rounded-2xl w-full max-w-xs text-center flex flex-col items-center justify-center">
+            <p
+              className="text-xs uppercase tracking-[5px] text-[#b8860b] font-bold mb-1.5 text-center"
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              Our Moments
+            </p>
 
-        <AnimatedText delay={0.1} variant="scaleUp" className="w-full text-center">
-          <h2
-            className="text-3xl md:text-4xl text-center mb-12 font-serif text-white drop-shadow-sm"
-            style={{ fontFamily: "var(--font-heading)" }}
-          >
-            Galeri Foto
-          </h2>
+            <h2
+              className="text-3xl md:text-4xl text-center font-serif text-[#2a2723] drop-shadow-sm"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              Galeri Foto
+            </h2>
+          </div>
         </AnimatedText>
 
         {/* Masonry-style grid */}

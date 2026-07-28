@@ -12,7 +12,7 @@ export function FooterSection() {
     <section
       id="footer"
       data-section="footer"
-      className="section-footer relative py-18 md:py-24 overflow-hidden flex flex-col items-center justify-center text-center bg-[#1c0a08] text-white"
+      className="section-footer relative py-18 md:py-24 overflow-hidden flex flex-col items-center justify-center text-center bg-[#faf8f5] text-[#2a2723]"
     >
       {/* Closing Background Photo from Unsplash — Clear & Vivid */}
       <div className="absolute inset-0">
@@ -20,7 +20,7 @@ export function FooterSection() {
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url('${sectionBgs.footer}')`,
-            filter: "brightness(0.6) contrast(1.05)",
+            filter: "brightness(0.85) contrast(1.05)",
           }}
           initial={{ scale: 1.1 }}
           whileInView={{ scale: 1 }}
@@ -76,7 +76,7 @@ export function FooterSection() {
         {/* Thank you message */}
         <AnimatedText delay={0.2} variant="fadeUp" className="w-full text-center">
           <p
-            className="text-base md:text-lg leading-relaxed opacity-95 mb-5 whitespace-pre-line font-serif text-white text-center font-semibold"
+            className="text-base md:text-lg leading-relaxed opacity-95 mb-5 whitespace-pre-line font-serif text-[#2a2723] text-center font-semibold"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             {footer.message}
@@ -86,7 +86,7 @@ export function FooterSection() {
         {/* Closing */}
         <AnimatedText delay={0.3} variant="fadeUp" className="w-full text-center">
           <p
-            className="text-[10px] uppercase tracking-[3px] text-[#d4af37] mb-2 text-center font-bold leading-none"
+            className="text-[10px] uppercase tracking-[3px] text-[#b8860b] mb-2 text-center font-bold leading-none"
             style={{ fontFamily: "var(--font-body)" }}
           >
             {footer.closing}
@@ -106,7 +106,7 @@ export function FooterSection() {
 
         {/* Hashtag */}
         <AnimatedText delay={0.7} variant="scaleUp" className="w-full text-center">
-          <p className="text-[11px] uppercase tracking-[4px] text-[#f3e5ab] font-extrabold mb-8 text-center leading-none">
+          <p className="text-[11px] uppercase tracking-[4px] text-[#8a662d] font-extrabold mb-8 text-center leading-none">
             {footer.hashtag}
           </p>
         </AnimatedText>
@@ -122,7 +122,7 @@ export function FooterSection() {
 
         {/* Copyright */}
         <AnimatedText delay={0.9} variant="fadeUp" className="w-full text-center">
-          <div className="opacity-80 text-[10px] uppercase tracking-[2.5px] space-y-1 text-center text-white/70 font-medium">
+          <div className="opacity-80 text-[10px] uppercase tracking-[2.5px] space-y-1 text-center text-[#66615c] font-medium">
             <p>© {footer.year} Wedding Invitation</p>
             <p>Made with ❤️</p>
           </div>
@@ -130,7 +130,7 @@ export function FooterSection() {
 
         {/* Back to top */}
         <motion.button
-          className="mt-6 mx-auto flex flex-col items-center justify-center gap-1 text-[#d4af37] hover:text-[#f3e5ab] transition-colors"
+          className="mt-6 mx-auto flex flex-col items-center justify-center gap-1 text-[#b8860b] hover:text-[#d4af37] transition-colors"
           onClick={() => scrollToSection("home")}
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}

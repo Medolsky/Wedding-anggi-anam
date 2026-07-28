@@ -49,7 +49,7 @@ export function Modal({
 
           {/* Modal Content — Bottom sheet on mobile, centered modal on desktop */}
           <motion.div
-            className={`relative z-10 w-full md:max-w-lg bg-[var(--color-surface)] 
+            className={`relative z-10 w-full md:max-w-lg bg-[#faf8f5] text-[#2a2723] border border-[#d4af37]/40 
               rounded-t-[24px] md:rounded-[var(--radius-lg)] 
               max-h-[85vh] overflow-y-auto shadow-2xl ${className}`}
             initial={{ opacity: 0, y: 100, scale: 0.95 }}
@@ -62,14 +62,14 @@ export function Modal({
           >
             {/* Handle bar (mobile) */}
             <div className="flex justify-center pt-3 md:hidden">
-              <div className="w-10 h-1 rounded-full bg-[var(--color-secondary)]" />
+              <div className="w-10 h-1 rounded-full bg-[#d4af37]" />
             </div>
 
             {/* Header */}
             {title && (
-              <div className="flex items-center justify-between px-6 pt-4 pb-2">
+              <div className="flex items-center justify-between px-6 pt-4 pb-2 border-b border-[#d4af37]/20">
                 <h3
-                  className="text-lg font-semibold"
+                  className="text-lg font-semibold text-[#2a2723]"
                   style={{ fontFamily: "var(--font-heading)" }}
                 >
                   {title}
@@ -77,7 +77,7 @@ export function Modal({
                 <button
                   onClick={onClose}
                   className="w-8 h-8 flex items-center justify-center rounded-full 
-                    hover:bg-[var(--color-secondary-light)] transition-colors text-xl"
+                    hover:bg-[#f7ebbf]/50 text-[#2a2723] transition-colors text-xl"
                   aria-label="Tutup"
                 >
                   ×

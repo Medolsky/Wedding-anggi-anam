@@ -12,7 +12,7 @@ export function GroomSection() {
     <section
       id="groom"
       data-section="groom"
-      className="section-groom relative min-h-screen flex flex-col items-center justify-center text-center overflow-hidden py-18 md:py-24 bg-[#1c0a08] text-white transform-gpu"
+      className="section-groom relative min-h-screen flex flex-col items-center justify-center text-center overflow-hidden py-18 md:py-24 bg-[#faf8f5] text-[#2a2723] transform-gpu"
     >
       {/* Background Image from Unsplash — Clear & Vivid */}
       <div className="absolute inset-0">
@@ -20,7 +20,7 @@ export function GroomSection() {
           className="absolute inset-0 bg-cover bg-center transform-gpu"
           style={{
             backgroundImage: `url('${sectionBgs.groom}')`,
-            filter: "brightness(0.6) contrast(1.05)",
+            filter: "brightness(0.85) contrast(1.05)",
           }}
         />
         <div className="absolute inset-0 photo-overlay-cinematic" />
@@ -31,7 +31,7 @@ export function GroomSection() {
         {/* Section label */}
         <AnimatedText delay={0.1} variant="fadeUp" className="w-full text-center">
           <p
-            className="text-[10px] uppercase tracking-[4px] text-[#d4af37] font-bold mb-1.5 text-center leading-none"
+            className="text-[10px] uppercase tracking-[4px] text-[#b8860b] font-bold mb-1.5 text-center leading-none"
             style={{ fontFamily: "var(--font-body)" }}
           >
             The Groom
@@ -40,7 +40,7 @@ export function GroomSection() {
 
         <AnimatedText delay={0.2} variant="fadeUp" className="w-full text-center">
           <h2
-            className="text-2xl md:text-4xl uppercase tracking-[2.5px] text-white font-serif mb-5 text-center leading-snug"
+            className="text-2xl md:text-4xl uppercase tracking-[2.5px] text-[#2a2723] font-serif mb-5 text-center leading-snug"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             Mempelai Pria
@@ -49,7 +49,7 @@ export function GroomSection() {
 
         {/* Groom Photo Card Frame */}
         <motion.div
-          className="relative w-48 h-60 md:w-56 md:h-70 mx-auto mb-5 rounded-2xl overflow-hidden shadow-[0_12px_35px_rgba(0,0,0,0.7)] border-2 border-[#d4af37]/50 group transform-gpu"
+          className="relative w-48 h-60 md:w-56 md:h-70 mx-auto mb-5 rounded-2xl overflow-hidden shadow-[0_12px_35px_rgba(212,175,55,0.2)] border-2 border-[#d4af37]/50 group transform-gpu"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.1 }}
@@ -90,12 +90,12 @@ export function GroomSection() {
         <AnimatedText delay={0.5} variant="fadeUp" className="w-full flex justify-center">
           <div className="gold-card-pro p-4 border border-[#d4af37]/40 text-center w-full max-w-xs shadow-xl">
             <p
-              className="text-center text-xs md:text-sm text-white font-medium leading-relaxed font-serif mb-1"
+              className="text-center text-xs md:text-sm text-[#2a2723] font-medium leading-relaxed font-serif mb-1"
               style={{ fontFamily: "var(--font-heading)" }}
             >
               {groom.parents}
             </p>
-            <p className="text-center text-[10px] text-[#d4af37] italic opacity-90 leading-normal">
+            <p className="text-center text-[10px] text-[#b8860b] italic opacity-90 leading-normal">
               "{groom.description}"
             </p>
           </div>

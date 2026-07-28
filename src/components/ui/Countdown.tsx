@@ -10,7 +10,7 @@ interface CountdownProps {
 
 function CountdownUnit({ value, label }: { value: number; label: string }) {
   return (
-    <div className="flex flex-col items-center justify-center py-2 px-1.5 md:py-2.5 md:px-2 rounded-xl bg-[#1c0a08]/80 border border-[#d4af37]/40 shadow-inner w-full">
+    <div className="flex flex-col items-center justify-center py-2 px-1.5 md:py-2.5 md:px-2 rounded-xl bg-white/90 border border-[#d4af37]/40 shadow-sm w-full">
       <div className="h-7 md:h-8 flex items-center justify-center overflow-hidden w-full">
         <AnimatePresence mode="wait">
           <motion.span
@@ -27,7 +27,7 @@ function CountdownUnit({ value, label }: { value: number; label: string }) {
         </AnimatePresence>
       </div>
       <span
-        className="text-[9px] uppercase tracking-[1.5px] mt-1 text-[#f3e5ab]/90 font-bold leading-none text-center"
+        className="text-[9px] uppercase tracking-[1.5px] mt-1 text-[#8a662d] font-bold leading-none text-center"
         style={{ fontFamily: "var(--font-body)" }}
       >
         {label}

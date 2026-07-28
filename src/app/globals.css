@@ -1,26 +1,26 @@
 @import "tailwindcss";
 
 /* ========================================
-   TERRACOTTA (MERAH BATA) & GOLD DESIGN SYSTEM
+   WHITE & GOLD ELEGANT DESIGN SYSTEM
    ======================================== */
 
 @theme inline {
   --color-gold: #d4af37;
-  --color-gold-light: #f3e5ab;
+  --color-gold-light: #f7ebbf;
   --color-gold-bright: #e6ca65;
-  --color-gold-dark: #aa820a;
+  --color-gold-dark: #8a662d;
   --color-accent: #c5a059;
 
-  /* Terracotta / Merah Bata Theme Surfaces */
-  --color-terracotta-dark: #1c0a08;
-  --color-terracotta-base: #2e0f0c;
-  --color-terracotta-accent: #8b261d;
+  /* White & Ivory Theme Surfaces */
+  --color-terracotta-dark: #faf8f5;
+  --color-terracotta-base: #f5f0e6;
+  --color-terracotta-accent: #d4af37;
   
-  --color-background: #1c0a08;
-  --color-surface: #260c09;
+  --color-background: #faf8f5;
+  --color-surface: #ffffff;
 
-  --color-text: #ffffff;
-  --color-text-muted: rgba(255, 255, 255, 0.8);
+  --color-text: #2a2723;
+  --color-text-muted: #66615c;
 
   --font-script: "Great Vibes", cursive;
   --font-heading: "Cormorant Garamond", serif;
@@ -44,14 +44,14 @@
   html {
     scroll-behavior: smooth;
     overflow-x: hidden;
-    background-color: #120605;
+    background-color: #faf8f5;
     -webkit-overflow-scrolling: touch;
   }
 
   body {
     font-family: var(--font-body);
-    background-color: #1c0a08;
-    color: #ffffff;
+    background-color: #faf8f5;
+    color: #2a2723;
     min-height: 100vh;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
@@ -98,15 +98,15 @@ section {
 }
 
 .text-gold {
-  color: #d4af37;
+  color: #b8860b;
 }
 
 .text-gold-light {
-  color: #f3e5ab;
+  color: #d4af37;
 }
 
 .text-gold-gradient {
-  background: linear-gradient(135deg, #f4e8c1 0%, #d4af37 50%, #aa820a 100%);
+  background: linear-gradient(135deg, #d4af37 0%, #b8860b 50%, #8a662d 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -120,7 +120,7 @@ section {
 }
 
 ::-webkit-scrollbar-track {
-  background: #1c0a08;
+  background: #faf8f5;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -129,15 +129,15 @@ section {
 }
 
 /* ========================================
-   TERRACOTTA (MERAH BATA) PHOTO OVERLAY
+   WHITE & GOLD PHOTO OVERLAY
    ======================================== */
 
 .photo-overlay-cinematic {
   background: linear-gradient(
     to bottom,
-    rgba(46, 15, 12, 0.55) 0%,
-    rgba(34, 10, 8, 0.35) 50%,
-    rgba(28, 8, 6, 0.75) 100%
+    rgba(250, 248, 245, 0.2) 0%,
+    rgba(212, 175, 55, 0.08) 50%,
+    rgba(250, 248, 245, 0.45) 100%
   );
 }
 
@@ -145,7 +145,7 @@ section {
   content: "";
   position: absolute;
   inset: 0;
-  opacity: 0.04;
+  opacity: 0.03;
   pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   background-repeat: repeat;
@@ -153,22 +153,22 @@ section {
 }
 
 /* ========================================
-   TERRACOTTA GOLD GLASS CARDS
+   WHITE GOLD GLASS CARDS
    ======================================== */
 
 .gold-card-pro {
-  background: rgba(36, 12, 10, 0.75);
+  background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(212, 175, 55, 0.38);
+  border: 1px solid rgba(212, 175, 55, 0.45);
   border-radius: 18px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9);
   transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .gold-card-pro:hover {
-  border-color: rgba(212, 175, 55, 0.65);
-  box-shadow: 0 14px 35px rgba(139, 38, 29, 0.3);
+  border-color: rgba(212, 175, 55, 0.8);
+  box-shadow: 0 14px 35px rgba(212, 175, 55, 0.25);
 }
 
 /* ========================================
@@ -200,8 +200,8 @@ section {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background: linear-gradient(135deg, #d4af37 0%, #c5a059 50%, #96743e 100%);
-  color: #000000;
+  background: linear-gradient(135deg, #d4af37 0%, #c5a059 50%, #8a662d 100%);
+  color: #ffffff;
   padding: 7px 16px;
   font-family: var(--font-body);
   font-size: 10px;
@@ -211,12 +211,12 @@ section {
   cursor: pointer;
   border-radius: 9999px;
   border: none;
-  box-shadow: 0 3px 12px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 3px 12px rgba(212, 175, 55, 0.35);
   transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .btn-modern-primary:hover {
-  background: linear-gradient(135deg, #f4e8c1 0%, #d4af37 100%);
+  background: linear-gradient(135deg, #e6ca65 0%, #d4af37 100%);
   transform: translateY(-1px);
   box-shadow: 0 5px 16px rgba(212, 175, 55, 0.45);
 }
@@ -226,9 +226,9 @@ section {
   align-items: center;
   justify-content: center;
   gap: 5px;
-  background: rgba(36, 12, 10, 0.65);
-  color: #ffffff;
-  border: 1px solid rgba(212, 175, 55, 0.45);
+  background: rgba(255, 255, 255, 0.9);
+  color: #8a662d;
+  border: 1px solid rgba(212, 175, 55, 0.6);
   padding: 6px 14px;
   font-family: var(--font-body);
   font-size: 9.5px;
@@ -242,9 +242,9 @@ section {
 }
 
 .btn-modern-secondary:hover {
-  background: rgba(139, 38, 29, 0.4);
+  background: rgba(247, 235, 191, 0.4);
   border-color: #d4af37;
-  color: #f3e5ab;
+  color: #6b4d1b;
   transform: translateY(-1px);
 }
 
@@ -252,8 +252,8 @@ section {
   position: relative;
   overflow: hidden;
   border: 1.2px solid #d4af37;
-  background: rgba(36, 12, 10, 0.75);
-  color: #ffffff;
+  background: rgba(255, 255, 255, 0.92);
+  color: #2a2723;
   padding: 8px 22px;
   font-family: var(--font-body);
   font-size: 10.5px;
@@ -264,12 +264,12 @@ section {
   border-radius: 9999px;
   transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
   backdrop-filter: blur(8px);
-  box-shadow: 0 4px 16px rgba(139, 38, 29, 0.4);
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.25);
 }
 
 .btn-invitation:hover {
   background: #d4af37;
-  color: #000000;
+  color: #ffffff;
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(212, 175, 55, 0.45);
 }
@@ -281,12 +281,12 @@ section {
 .form-input {
   width: 100%;
   padding: 9px 14px;
-  border: 1px solid rgba(212, 175, 55, 0.35);
+  border: 1px solid rgba(212, 175, 55, 0.45);
   border-radius: 10px;
-  background: rgba(22, 7, 6, 0.7);
+  background: rgba(255, 255, 255, 0.95);
   font-family: var(--font-body);
   font-size: 12px;
-  color: #ffffff;
+  color: #2a2723;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   outline: none;
 }
@@ -294,11 +294,11 @@ section {
 .form-input:focus {
   border-color: #d4af37;
   box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.25);
-  background: rgba(22, 7, 6, 0.9);
+  background: #ffffff;
 }
 
 .form-input::placeholder {
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(42, 39, 35, 0.45);
 }
 
 .form-textarea {

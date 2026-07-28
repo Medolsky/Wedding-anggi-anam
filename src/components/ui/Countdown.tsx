@@ -10,7 +10,7 @@ interface CountdownProps {
 
 function CountdownUnit({ value, label }: { value: number; label: string }) {
   return (
-    <div className="flex flex-col items-center justify-center py-2 px-1.5 md:py-2.5 md:px-2 rounded-xl bg-white/30 backdrop-blur-md border border-[#d4af37]/60 shadow-sm w-full">
+    <div className="flex flex-col items-center justify-center py-2 px-1.5 md:py-2.5 md:px-2 rounded-xl bg-white/65 backdrop-blur-md border border-[#d4af37]/60 shadow-sm w-full">
       <div className="h-7 md:h-8 flex items-center justify-center overflow-hidden w-full">
         <AnimatePresence mode="wait">
           <motion.span

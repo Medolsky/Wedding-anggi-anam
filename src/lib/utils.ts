@@ -6,7 +6,12 @@
  * Get time-based greeting in Indonesian
  */
 export function getGreeting(): string {
-  const hour = new Date().getHours();
+  const hourStr = new Date().toLocaleTimeString("en-US", {
+    timeZone: "Asia/Jakarta",
+    hour12: false,
+    hour: "2-digit",
+  });
+  const hour = parseInt(hourStr, 10);
   if (hour >= 5 && hour < 11) return "Selamat Pagi";
   if (hour >= 11 && hour < 15) return "Selamat Siang";
   if (hour >= 15 && hour < 18) return "Selamat Sore";

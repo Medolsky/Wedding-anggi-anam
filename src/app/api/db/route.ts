@@ -233,7 +233,11 @@ export async function POST(req: Request) {
           matchedGuest = {
             ...g,
             checkedIn: true,
-            checkInTime: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+            checkInTime: new Date().toLocaleTimeString("id-ID", {
+              timeZone: "Asia/Jakarta",
+              hour: "2-digit",
+              minute: "2-digit",
+            }) + " WIB",
             pax: item?.pax || g.pax || 1,
           };
           return matchedGuest;
@@ -250,9 +254,17 @@ export async function POST(req: Request) {
           category: "Tamu General",
           template: "Formal",
           checkedIn: true,
-          checkInTime: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+          checkInTime: new Date().toLocaleTimeString("id-ID", {
+            timeZone: "Asia/Jakarta",
+            hour: "2-digit",
+            minute: "2-digit",
+          }) + " WIB",
           pax: item?.pax || 1,
-          createdAt: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+          createdAt: new Date().toLocaleTimeString("id-ID", {
+            timeZone: "Asia/Jakarta",
+            hour: "2-digit",
+            minute: "2-digit",
+          }) + " WIB",
         };
         updatedGuests.unshift(matchedGuest);
       }

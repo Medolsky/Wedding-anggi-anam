@@ -150,9 +150,10 @@ export function GuestLinkGenerator() {
       checkedIn: false,
       pax: 1,
       createdAt: new Date().toLocaleTimeString("id-ID", {
+        timeZone: "Asia/Jakarta",
         hour: "2-digit",
         minute: "2-digit",
-      }),
+      }) + " WIB",
     };
 
     const updated = [newGuest, ...guests];
@@ -203,9 +204,10 @@ export function GuestLinkGenerator() {
           checkedIn: false,
           pax: 1,
           createdAt: new Date().toLocaleTimeString("id-ID", {
+            timeZone: "Asia/Jakarta",
             hour: "2-digit",
             minute: "2-digit",
-          }),
+          }) + " WIB",
         });
       }
     });

@@ -53,7 +53,13 @@ export function WishesSection() {
       id: Date.now().toString(),
       name: name.trim(),
       message: message.trim(),
-      createdAt: new Date().toISOString(),
+      createdAt: new Date().toLocaleString("id-ID", {
+        timeZone: "Asia/Jakarta",
+        day: "numeric",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      }) + " WIB",
     };
 
     // Save to Cloud DB

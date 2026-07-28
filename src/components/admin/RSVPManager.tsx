@@ -62,12 +62,13 @@ export function RSVPManager() {
       attendance: manualAttendance,
       guestCount: manualAttendance === "Hadir" ? Number(manualPax) : 0,
       session: manualSession,
-      createdAt: new Date().toLocaleDateString("id-ID", {
+      createdAt: new Date().toLocaleString("id-ID", {
+        timeZone: "Asia/Jakarta",
         day: "numeric",
         month: "short",
         hour: "2-digit",
         minute: "2-digit",
-      }),
+      }) + " WIB",
     };
 
     try {

@@ -47,6 +47,10 @@ async function fetchFromExternalCloud() {
         supabase.from("config").select("*").eq("key", "bot_config").maybeSingle(),
       ]);
 
+      if (guestsRes.error) console.error("Supabase Guests Error:", guestsRes.error);
+      if (rsvpsRes.error) console.error("Supabase RSVPs Error:", rsvpsRes.error);
+      if (wishesRes.error) console.error("Supabase Wishes Error:", wishesRes.error);
+
       if (!guestsRes.error && Array.isArray(guestsRes.data)) {
         cloudStore.guests = guestsRes.data.map((g) => ({
           ...g,
@@ -69,8 +73,8 @@ async function fetchFromExternalCloud() {
       }
 
       return cloudStore;
-    } catch {
-      // Fallback below
+    } catch (err) {
+      console.error("Supabase fetch exception:", err);
     }
   }
 
@@ -113,7 +117,8 @@ async function saveToExternalCloud(updatedStore: any) {
           check_in_time: g.checkInTime || null,
           pax: g.pax || 1,
         }));
-        await supabase.from("guests").upsert(sqlGuests);
+        const { error: guestErr } = await supabase.from("guests").upsert(sqlGuests);
+        if (guestErr) console.error("Supabase Save Guests Error:", guestErr);
       }
 
       if (updatedStore.rsvps) {

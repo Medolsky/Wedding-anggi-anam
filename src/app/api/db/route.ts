@@ -1,10 +1,19 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
 /**
  * Universal Cloud Database API Route for Wedding Invitation App
  * Syncs Guests, RSVPs, and Wishes across all devices globally.
- * Uses JSONBin / Supabase / Cloud KV with fallback in-memory & persistent storage.
+ * Uses Supabase Cloud SQL (PostgreSQL) / JSONBin with fallback in-memory & persistent storage.
  */
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+const supabase =
+  SUPABASE_URL && SUPABASE_KEY && !SUPABASE_URL.includes("your-supabase-project")
+    ? createClient(SUPABASE_URL, SUPABASE_KEY)
+    : null;
 
 // Global cloud memory store for instant real-time sync across multi-devices
 let cloudStore: {
@@ -17,7 +26,7 @@ let cloudStore: {
   config: {
     customServerUrl: "https://wedding-anam-bot.loca.lt",
     provider: "fonnte",
-    waToken: "4Sf3SH6toe8ztYykjmMV"
+    waToken: "4Sf3SH6toe8ztYykjmMV",
   },
   rsvps: [],
   wishes: [],
@@ -28,25 +37,58 @@ const JSONBIN_BIN_ID = process.env.JSONBIN_BIN_ID;
 const JSONBIN_API_KEY = process.env.JSONBIN_API_KEY;
 
 async function fetchFromExternalCloud() {
-  if (!JSONBIN_BIN_ID || !JSONBIN_API_KEY) return cloudStore;
+  // 1. Try Supabase Cloud SQL first if configured
+  if (supabase) {
+    try {
+      const [guestsRes, rsvpsRes, wishesRes, configRes] = await Promise.all([
+        supabase.from("guests").select("*").order("created_at", { ascending: false }),
+        supabase.from("rsvps").select("*").order("created_at", { ascending: false }),
+        supabase.from("wishes").select("*").order("created_at", { ascending: false }),
+        supabase.from("config").select("*").eq("key", "bot_config").maybeSingle(),
+      ]);
 
-  try {
-    const res = await fetch(
-      `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`,
-      {
-        headers: {
-          "X-Master-Key": JSONBIN_API_KEY,
-        },
+      if (!guestsRes.error && Array.isArray(guestsRes.data)) {
+        cloudStore.guests = guestsRes.data.map((g) => ({
+          ...g,
+          checkedIn: g.checked_in,
+          checkInTime: g.check_in_time,
+        }));
       }
-    );
-    if (res.ok) {
-      const data = await res.json();
-      if (data.record) {
-        cloudStore = { ...cloudStore, ...data.record };
+      if (!rsvpsRes.error && Array.isArray(rsvpsRes.data)) {
+        cloudStore.rsvps = rsvpsRes.data.map((r) => ({
+          ...r,
+          checkedIn: r.checked_in,
+          checkInTime: r.check_in_time,
+        }));
       }
+      if (!wishesRes.error && Array.isArray(wishesRes.data)) {
+        cloudStore.wishes = wishesRes.data;
+      }
+      if (!configRes.error && configRes.data?.value) {
+        cloudStore.config = configRes.data.value;
+      }
+
+      return cloudStore;
+    } catch {
+      // Fallback below
     }
-  } catch {
-    // Return memory fallback
+  }
+
+  // 2. Fallback to JSONBin if configured
+  if (JSONBIN_BIN_ID && JSONBIN_API_KEY) {
+    try {
+      const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+        headers: { "X-Master-Key": JSONBIN_API_KEY },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.record) {
+          cloudStore = { ...cloudStore, ...data.record };
+        }
+      }
+    } catch {
+      // Fallback
+    }
   }
 
   return cloudStore;
@@ -55,19 +97,74 @@ async function fetchFromExternalCloud() {
 async function saveToExternalCloud(updatedStore: any) {
   cloudStore = updatedStore;
 
-  if (!JSONBIN_BIN_ID || !JSONBIN_API_KEY) return;
+  // 1. Save to Supabase Cloud SQL if configured
+  if (supabase) {
+    try {
+      if (updatedStore.guests) {
+        const sqlGuests = updatedStore.guests.map((g: any) => ({
+          id: g.id || Date.now().toString(),
+          code: g.code || `GUEST-${g.id}`,
+          name: g.name,
+          phone: g.phone || null,
+          category: g.category || "Tamu VIP",
+          template: g.template || "Formal",
+          status: g.status || "pending",
+          checked_in: !!g.checkedIn,
+          check_in_time: g.checkInTime || null,
+          pax: g.pax || 1,
+        }));
+        await supabase.from("guests").upsert(sqlGuests);
+      }
 
-  try {
-    await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Master-Key": JSONBIN_API_KEY,
-      },
-      body: JSON.stringify(cloudStore),
-    });
-  } catch {
-    // Fallback
+      if (updatedStore.rsvps) {
+        const sqlRsvps = updatedStore.rsvps.map((r: any) => ({
+          id: r.id || Date.now().toString(),
+          name: r.name,
+          status: r.status || "Hadir",
+          pax: r.pax || 1,
+          notes: r.notes || "",
+          checked_in: !!r.checkedIn,
+          check_in_time: r.checkInTime || null,
+        }));
+        await supabase.from("rsvps").upsert(sqlRsvps);
+      }
+
+      if (updatedStore.wishes) {
+        const sqlWishes = updatedStore.wishes.map((w: any) => ({
+          id: w.id || Date.now().toString(),
+          name: w.name,
+          message: w.message || "",
+          relationship: w.relationship || "Kerabat",
+          is_approved: w.is_approved !== false,
+        }));
+        await supabase.from("wishes").upsert(sqlWishes);
+      }
+
+      if (updatedStore.config) {
+        await supabase.from("config").upsert({
+          key: "bot_config",
+          value: updatedStore.config,
+        });
+      }
+    } catch {
+      // Fallback below
+    }
+  }
+
+  // 2. Save to JSONBin if configured
+  if (JSONBIN_BIN_ID && JSONBIN_API_KEY) {
+    try {
+      await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Master-Key": JSONBIN_API_KEY,
+        },
+        body: JSON.stringify(cloudStore),
+      });
+    } catch {
+      // Fallback
+    }
   }
 }
 

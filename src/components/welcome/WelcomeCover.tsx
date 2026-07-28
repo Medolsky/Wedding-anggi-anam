@@ -61,7 +61,7 @@ export function WelcomeContent({
   onOpen: () => void;
 }) {
   return (
-    <div className="relative z-20 flex flex-col items-center justify-center min-h-screen px-6 py-12 text-center text-white">
+    <div className="relative z-20 flex flex-col items-center justify-center min-h-screen px-6 py-12 text-center text-[#2a2723]">
       {/* Ornament Top */}
       <motion.div
         className="flex items-center justify-center gap-3 mb-4"
@@ -76,7 +76,7 @@ export function WelcomeContent({
 
       {/* The Wedding of */}
       <motion.p
-        className="text-[11px] uppercase tracking-[5px] text-[#f3e5ab] font-bold mb-2 leading-none drop-shadow-sm"
+        className="text-[11px] uppercase tracking-[5px] text-[#b8860b] font-extrabold mb-2 leading-none drop-shadow-sm"
         style={{ fontFamily: "var(--font-body)" }}
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
@@ -118,7 +118,7 @@ export function WelcomeContent({
 
       {/* Date */}
       <motion.p
-        className="text-xs tracking-[4px] uppercase text-[#f3e5ab] font-semibold mb-6 leading-none"
+        className="text-xs tracking-[4px] uppercase text-[#8a662d] font-extrabold mb-6 leading-none"
         style={{ fontFamily: "var(--font-heading)" }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

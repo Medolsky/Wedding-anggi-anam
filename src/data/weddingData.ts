@@ -171,10 +171,10 @@ export const weddingData = {
     phone: "0812-3456-7890",
   },
 
-  // Music — Catalyst - Weird Genius
+  // Music — Nuca - Masa Ini, Nanti, dan Masa Indah Lainnya
   music: {
-    src: "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=romantic-wedding-115316.mp3",
-    title: "Catalyst - Weird Genius",
+    src: "/music/nuca-masa-ini.mp3",
+    title: "Nuca - Masa Ini, Nanti, dan Masa Indah Lainnya",
     autoplay: false,
     defaultVolume: 0.45,
   },

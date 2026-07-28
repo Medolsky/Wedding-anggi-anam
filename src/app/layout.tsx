@@ -23,18 +23,33 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "The Wedding of Alya & Raka",
+  title: "The Wedding of Anam & Angi",
   description:
-    "Undangan pernikahan Alya Maharani & Raka Pratama, 12 Desember 2026.",
+    "Undangan Pernikahan Digital Misbakhul Anam Roziqin & Angi Sulistia — Sabtu, 10 Oktober 2026 di BALAI IKABAMA, Depok.",
+  keywords: ["Undangan Pernikahan", "Anam & Angi", "The Wedding of Anam & Angi", "Wedding Invitation"],
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
   openGraph: {
-    title: "The Wedding of Alya & Raka",
-    description: "Undangan pernikahan Alya & Raka, 12 Desember 2026",
+    title: "The Wedding of Anam & Angi",
+    description: "Undangan Pernikahan Digital Misbakhul Anam Roziqin & Angi Sulistia — Sabtu, 10 Oktober 2026 di BALAI IKABAMA, Depok.",
     type: "website",
     locale: "id_ID",
+    siteName: "The Wedding of Anam & Angi",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1200&auto=format&fit=crop",
+        width: 1200,
+        height: 630,
+        alt: "The Wedding of Anam & Angi",
+      },
+    ],
   },
   robots: {
-    index: false,
-    follow: false,
+    index: true,
+    follow: true,
   },
 };
 
@@ -49,8 +64,9 @@ export default function RootLayout({
       className={`${greatVibes.variable} ${cormorant.variable} ${manrope.variable}`}
     >
       <head>
-        <meta name="theme-color" content="#2b2522" />
+        <meta name="theme-color" content="#d4af37" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+        <link rel="icon" type="image/svg+xml" href="/icon.svg" />
       </head>
       <body
         className="min-h-screen"

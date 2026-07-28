@@ -99,8 +99,8 @@ export function FooterSection() {
             className="text-5xl md:text-6xl mb-5 text-gold-gradient font-script text-center font-bold drop-shadow-md leading-tight"
             style={{ fontFamily: "var(--font-script)" }}
           >
-            {weddingData.couple.bride.nickname} &{" "}
-            {weddingData.couple.groom.nickname}
+            {weddingData.couple.groom.nickname} &{" "}
+            {weddingData.couple.bride.nickname}
           </h3>
         </AnimatedText>
 

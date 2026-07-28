@@ -238,7 +238,7 @@ export function GuestLinkGenerator() {
 
 Tanpa mengurangi rasa hormat, kami mengundang kamu untuk hadir di acara pernikahan kami:
 
-*${weddingData.couple.bride.nickname} & ${weddingData.couple.groom.nickname}*
+*${weddingData.couple.groom.nickname} & ${weddingData.couple.bride.nickname}*
 🗓 Sabtu, 10 Oktober 2026
 📍 BALAI IKABAMA, Depok
 
@@ -246,7 +246,7 @@ Link Undangan Digital:
 ${url}
 
 Terima kasih atas doa restunya!
-- Angi & Anam`;
+- Anam & Angi`;
     }
 
     if (tmpl === "Hangat") {
@@ -257,8 +257,8 @@ Dear *${name}*,
 Semoga sehat dan bahagia selalu! 🌸
 Dengan penuh rasa syukur, kami ingin mengundang kamu untuk hadir menjadi bagian dari hari bahagia pernikahan kami:
 
-*${weddingData.couple.bride.nickname} & ${weddingData.couple.groom.nickname}*
-(Angi Sulistia & Misbakhul Anam Roziqin)
+*${weddingData.couple.groom.nickname} & ${weddingData.couple.bride.nickname}*
+(Misbakhul Anam Roziqin & Angi Sulistia)
 
 🗓 *Sabtu, 10 Oktober 2026*
 📍 *BALAI IKABAMA*, Depok
@@ -269,7 +269,7 @@ ${url}
 Kehadiran dan doa restumu sangat berarti bagi perjalanan kehidupan baru kami. Sampai jumpa di hari H!
 
 Warm regards,
-*Angi & Anam*`;
+*Anam & Angi*`;
     }
 
     return `Bismillah-ir-Rahman-ir-Rahim
@@ -279,8 +279,8 @@ Kepada Yth.
 
 Tanpa mengurangi rasa hormat, perkenankan kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara pernikahan kami:
 
-*${weddingData.couple.bride.nickname} & ${weddingData.couple.groom.nickname}*
-(Angi Sulistia & Misbakhul Anam Roziqin)
+*${weddingData.couple.groom.nickname} & ${weddingData.couple.bride.nickname}*
+(Misbakhul Anam Roziqin & Angi Sulistia)
 
 🗓 *Sabtu, 10 Oktober 2026*
 📍 *BALAI IKABAMA*, Depok
@@ -294,7 +294,7 @@ Terima kasih.
 Wassalamu'alaikum Wr. Wb.
 
 Hormat kami,
-*Angi & Anam*`;
+*Anam & Angi*`;
   }
 
   async function handleCopy(name: string, id: string) {

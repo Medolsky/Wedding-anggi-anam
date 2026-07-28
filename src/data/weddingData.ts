@@ -166,7 +166,7 @@ export const weddingData = {
 
   // Gift Shipping Address
   giftAddress: {
-    name: "Angi & Anam",
+    name: "Anam & Angi",
     address: "Jalan Kramat Burung II No. 39, RT.1/RW.5, Rangkapan Jaya, Pancoran Mas, Kota Depok",
     phone: "0812-3456-7890",
   },
@@ -183,7 +183,7 @@ export const weddingData = {
   footer: {
     message: "Atas kehadiran dan doa restunya,\nkami mengucapkan terima kasih.",
     closing: "Hormat kami yang berbahagia,",
-    hashtag: "#AngiAnamForever",
+    hashtag: "#AnamAngiForever",
     year: 2026,
     bgPhoto: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=1200&auto=format&fit=crop",
   },

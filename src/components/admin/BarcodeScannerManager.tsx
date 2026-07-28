@@ -113,8 +113,15 @@ export function BarcodeScannerManager() {
   }
 
   // Camera QR Scanner using html5-qrcode
+  const [showCamera, setShowCamera] = useState(false);
+
   async function startCameraScanner() {
     setCameraError("");
+    // Show container FIRST so the DOM element is visible
+    setShowCamera(true);
+
+    // Wait for DOM to render the container
+    await new Promise((resolve) => setTimeout(resolve, 300));
 
     try {
       const { Html5Qrcode } = await import("html5-qrcode");
@@ -122,12 +129,22 @@ export function BarcodeScannerManager() {
       if (scannerRef.current) {
         try {
           await scannerRef.current.stop();
+          scannerRef.current.clear();
         } catch {
           // Already stopped
         }
+        scannerRef.current = null;
       }
 
       const scannerId = "qr-reader-container";
+      const el = document.getElementById(scannerId);
+      if (!el) {
+        setCameraError("❌ Container kamera tidak ditemukan. Coba reload halaman.");
+        return;
+      }
+      // Clear any previous content
+      el.innerHTML = "";
+
       const html5QrCode = new Html5Qrcode(scannerId);
       scannerRef.current = html5QrCode;
 
@@ -135,26 +152,27 @@ export function BarcodeScannerManager() {
         { facingMode: "environment" },
         {
           fps: 10,
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1.0,
+          qrbox: { width: 220, height: 220 },
         },
         (decodedText: string) => {
           // On successful scan
           handleCheckInCode(decodedText);
-          // Don't stop — allow continuous scanning
         },
         () => {
-          // QR code not found in frame — ignore
+          // QR code not found in frame — ignore silently
         }
       );
 
       setCameraActive(true);
     } catch (err: any) {
-      setCameraError(
-        err?.message?.includes("NotAllowedError") || err?.message?.includes("Permission")
-          ? "❌ Izin kamera ditolak. Mohon izinkan akses kamera di pengaturan browser."
-          : `❌ Gagal memulai kamera: ${err?.message || "Error tidak diketahui"}`
-      );
+      const msg = err?.message || String(err) || "";
+      if (msg.includes("NotAllowedError") || msg.includes("Permission") || msg.includes("denied")) {
+        setCameraError("❌ Izin kamera ditolak. Mohon izinkan akses kamera di pengaturan browser Anda.");
+      } else if (msg.includes("NotFoundError") || msg.includes("Requested device not found")) {
+        setCameraError("❌ Kamera tidak ditemukan. Pastikan perangkat Anda memiliki kamera.");
+      } else {
+        setCameraError(`❌ Gagal memulai kamera: ${msg}`);
+      }
       setCameraActive(false);
     }
   }
@@ -170,6 +188,7 @@ export function BarcodeScannerManager() {
       scannerRef.current = null;
     }
     setCameraActive(false);
+    setShowCamera(false);
   }
 
   // Calculate Metrics
@@ -244,10 +263,11 @@ export function BarcodeScannerManager() {
             </div>
           )}
 
-          {/* Camera Scanner View */}
+          {/* Camera Scanner View — Always rendered, visibility controlled by showCamera */}
           <div
             ref={scannerContainerRef}
-            className={`overflow-hidden rounded-xl border-2 border-[#d4af37]/40 ${cameraActive ? "block" : "hidden"}`}
+            style={{ display: showCamera ? "block" : "none" }}
+            className="rounded-xl border-2 border-[#d4af37]/40 overflow-hidden"
           >
             <div id="qr-reader-container" style={{ width: "100%" }} />
           </div>

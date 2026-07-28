@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 export interface CheckedInGuest {
   id: string;
@@ -23,18 +23,26 @@ export function BarcodeScannerManager() {
     guest?: CheckedInGuest;
   }>({ status: null, message: "" });
 
+  // Camera Scanner States
+  const [cameraActive, setCameraActive] = useState(false);
+  const [cameraError, setCameraError] = useState("");
+  const scannerRef = useRef<any>(null);
+  const scannerContainerRef = useRef<HTMLDivElement>(null);
+
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     loadCloudGuests();
-    // Auto-focus barcode input for instant USB/Bluetooth barcode scanner compatibility
     if (inputRef.current) {
       inputRef.current.focus();
     }
 
-    // Auto refresh data every 10s
     const interval = setInterval(loadCloudGuests, 10000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      stopCameraScanner();
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadCloudGuests() {
@@ -49,7 +57,7 @@ export function BarcodeScannerManager() {
     }
   }
 
-  async function handleCheckInCode(codeToSubmit: string) {
+  const handleCheckInCode = useCallback(async (codeToSubmit: string) => {
     if (!codeToSubmit.trim()) return;
 
     setIsScanning(true);
@@ -96,11 +104,72 @@ export function BarcodeScannerManager() {
       setIsScanning(false);
       if (inputRef.current) inputRef.current.focus();
     }
-  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleFormSubmit(e: React.FormEvent) {
     e.preventDefault();
     handleCheckInCode(scannedCode);
+  }
+
+  // Camera QR Scanner using html5-qrcode
+  async function startCameraScanner() {
+    setCameraError("");
+
+    try {
+      const { Html5Qrcode } = await import("html5-qrcode");
+
+      if (scannerRef.current) {
+        try {
+          await scannerRef.current.stop();
+        } catch {
+          // Already stopped
+        }
+      }
+
+      const scannerId = "qr-reader-container";
+      const html5QrCode = new Html5Qrcode(scannerId);
+      scannerRef.current = html5QrCode;
+
+      await html5QrCode.start(
+        { facingMode: "environment" },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.0,
+        },
+        (decodedText: string) => {
+          // On successful scan
+          handleCheckInCode(decodedText);
+          // Don't stop — allow continuous scanning
+        },
+        () => {
+          // QR code not found in frame — ignore
+        }
+      );
+
+      setCameraActive(true);
+    } catch (err: any) {
+      setCameraError(
+        err?.message?.includes("NotAllowedError") || err?.message?.includes("Permission")
+          ? "❌ Izin kamera ditolak. Mohon izinkan akses kamera di pengaturan browser."
+          : `❌ Gagal memulai kamera: ${err?.message || "Error tidak diketahui"}`
+      );
+      setCameraActive(false);
+    }
+  }
+
+  async function stopCameraScanner() {
+    if (scannerRef.current) {
+      try {
+        await scannerRef.current.stop();
+        scannerRef.current.clear();
+      } catch {
+        // Already stopped
+      }
+      scannerRef.current = null;
+    }
+    setCameraActive(false);
   }
 
   // Calculate Metrics
@@ -114,76 +183,112 @@ export function BarcodeScannerManager() {
     <div className="space-y-6">
       {/* Real-time Attendance Metrics Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="gold-card-pro p-3.5 border border-[#d4af37]/40 text-center rounded-xl bg-white/80">
+        <div className="bg-white p-3.5 border border-[#d4af37]/40 text-center rounded-xl shadow-sm">
           <p className="text-[10px] uppercase tracking-wider text-[#66615c] font-semibold">Total Tamu Diundang</p>
           <p className="text-2xl font-bold font-serif text-[#2a2723]">{totalGuests}</p>
         </div>
 
-        <div className="gold-card-pro p-3.5 border border-emerald-500/40 text-center rounded-xl bg-emerald-50/80">
-          <p className="text-[10px] uppercase tracking-wider text-emerald-800 font-extrabold">Tamu Hadir di Lokasi</p>
+        <div className="bg-emerald-50 p-3.5 border border-emerald-400/50 text-center rounded-xl shadow-sm">
+          <p className="text-[10px] uppercase tracking-wider text-emerald-700 font-extrabold">Tamu Hadir di Lokasi</p>
           <p className="text-2xl font-bold font-serif text-emerald-700">
-            {checkedInCount} <span className="text-xs font-semibold text-emerald-800">({totalPaxCheckedIn} PAX)</span>
+            {checkedInCount} <span className="text-xs font-semibold text-emerald-600">({totalPaxCheckedIn} PAX)</span>
           </p>
         </div>
 
-        <div className="gold-card-pro p-3.5 border border-amber-500/40 text-center rounded-xl bg-amber-50/80">
-          <p className="text-[10px] uppercase tracking-wider text-amber-800 font-semibold">Belum Check-In</p>
+        <div className="bg-amber-50 p-3.5 border border-amber-400/50 text-center rounded-xl shadow-sm">
+          <p className="text-[10px] uppercase tracking-wider text-amber-700 font-semibold">Belum Check-In</p>
           <p className="text-2xl font-bold font-serif text-amber-700">{pendingCount}</p>
         </div>
 
-        <div className="gold-card-pro p-3.5 border border-blue-500/40 text-center rounded-xl bg-blue-50/80">
-          <p className="text-[10px] uppercase tracking-wider text-blue-800 font-semibold">Persentase Kehadiran</p>
+        <div className="bg-blue-50 p-3.5 border border-blue-400/50 text-center rounded-xl shadow-sm">
+          <p className="text-[10px] uppercase tracking-wider text-blue-700 font-semibold">Persentase Kehadiran</p>
           <p className="text-2xl font-bold font-serif text-blue-700">
             {totalGuests > 0 ? Math.round((checkedInCount / totalGuests) * 100) : 0}%
           </p>
         </div>
       </div>
 
-      {/* Main Barcode Scanner Input Box */}
-      <div className="gold-card-pro p-5 md:p-6 border-2 border-[#d4af37] shadow-2xl rounded-2xl bg-white/95 text-center">
-        <div className="max-w-md mx-auto space-y-4">
+      {/* Main Scanner Area — Two Modes */}
+      <div className="bg-white p-5 md:p-6 border-2 border-[#d4af37] shadow-lg rounded-2xl text-center">
+        <div className="max-w-lg mx-auto space-y-4">
           <div className="flex items-center justify-center gap-2">
             <span className="text-2xl">📷</span>
             <h3 className="text-lg md:text-xl font-bold font-serif text-[#2a2723]" style={{ fontFamily: "var(--font-heading)" }}>
-              Scanner Check-In Barcode Tamu
+              Scanner Check-In QR Tamu
             </h3>
           </div>
 
           <p className="text-xs text-[#66615c] leading-relaxed">
-            Arahkan scanner barcode / ketik kode E-Ticket / nama tamu untuk konfirmasi kehadiran langsung di pintu masuk.
+            Scan QR code tamu via kamera atau ketik kode E-Ticket manual untuk konfirmasi kehadiran.
           </p>
 
-          <form onSubmit={handleFormSubmit} className="space-y-3">
-            <div className="relative">
-              <input
-                ref={inputRef}
-                type="text"
-                value={scannedCode}
-                onChange={(e) => setScannedCode(e.target.value)}
-                placeholder="Scan Barcode atau ketik Nama/Kode E-Ticket..."
-                className="form-input text-center text-sm md:text-base py-3 px-4 rounded-xl font-mono font-bold tracking-wider uppercase border-2 border-[#d4af37] bg-white shadow-inner focus:ring-2 focus:ring-[#d4af37]"
-                autoFocus
-              />
-            </div>
+          {/* Camera Scanner Toggle */}
+          <div className="flex gap-2 justify-center">
+            <button
+              type="button"
+              onClick={cameraActive ? stopCameraScanner : startCameraScanner}
+              className={`py-2.5 px-5 text-xs font-bold uppercase tracking-wider rounded-xl cursor-pointer transition-all shadow-md ${
+                cameraActive
+                  ? "bg-red-500 text-white hover:bg-red-600"
+                  : "bg-[#d4af37] text-white hover:bg-[#b8860b]"
+              }`}
+            >
+              {cameraActive ? "⏹ Matikan Kamera" : "📷 Buka Kamera Scanner"}
+            </button>
+          </div>
 
-            <div className="flex gap-2">
-              <button
-                type="submit"
-                disabled={isScanning || !scannedCode.trim()}
-                className="btn-modern-primary flex-1 py-3 text-xs font-bold uppercase tracking-wider shadow-lg cursor-pointer"
-              >
-                {isScanning ? "⌛ Verifikasi..." : "✓ CHECK-IN SEKARANG"}
-              </button>
+          {/* Camera Error */}
+          {cameraError && (
+            <div className="p-3 rounded-xl border border-red-300 bg-red-50 text-red-700 text-xs font-semibold">
+              {cameraError}
             </div>
-          </form>
+          )}
+
+          {/* Camera Scanner View */}
+          <div
+            ref={scannerContainerRef}
+            className={`overflow-hidden rounded-xl border-2 border-[#d4af37]/40 ${cameraActive ? "block" : "hidden"}`}
+          >
+            <div id="qr-reader-container" style={{ width: "100%" }} />
+          </div>
+
+          {/* Manual Input */}
+          <div className="border-t border-[#d4af37]/30 pt-4">
+            <p className="text-[10px] uppercase tracking-wider text-[#66615c] font-semibold mb-2">
+              Atau input manual:
+            </p>
+            <form onSubmit={handleFormSubmit} className="space-y-3">
+              <div className="relative">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={scannedCode}
+                  onChange={(e) => setScannedCode(e.target.value)}
+                  placeholder="Ketik Kode E-Ticket atau Nama Tamu..."
+                  className="w-full text-center text-sm md:text-base py-3 px-4 rounded-xl font-mono font-bold tracking-wider uppercase border-2 border-[#d4af37] bg-[#faf8f5] text-[#2a2723] shadow-inner focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+                  autoFocus
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={isScanning || !scannedCode.trim()}
+                  className="flex-1 py-3 text-xs font-bold uppercase tracking-wider shadow-lg cursor-pointer bg-[#d4af37] text-white hover:bg-[#b8860b] rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isScanning ? "⌛ Verifikasi..." : "✓ CHECK-IN SEKARANG"}
+                </button>
+              </div>
+            </form>
+          </div>
 
           {/* Real-time Scan Result Banner */}
           {scanResult.status && (
             <div
-              className={`p-4 rounded-xl border text-center transition-all animate-bounce ${
+              className={`p-4 rounded-xl border text-center transition-all ${
                 scanResult.status === "success"
-                  ? "bg-emerald-100 border-emerald-500 text-emerald-900"
-                  : "bg-rose-100 border-rose-500 text-rose-900"
+                  ? "bg-emerald-50 border-emerald-400 text-emerald-900"
+                  : "bg-rose-50 border-rose-400 text-rose-900"
               }`}
             >
               <p className="text-sm font-extrabold">{scanResult.message}</p>
@@ -200,14 +305,14 @@ export function BarcodeScannerManager() {
       </div>
 
       {/* Live Checked-In Guests Feed */}
-      <div className="gold-card-pro p-4 border border-[#d4af37]/30 rounded-xl bg-white/90">
+      <div className="bg-white p-4 border border-[#d4af37]/30 rounded-xl shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-xs uppercase tracking-[2px] font-bold text-[#b8860b]">
             📋 Daftar Riwayat Check-In Tamu ({checkedInCount})
           </h4>
           <button
             onClick={loadCloudGuests}
-            className="text-[10px] text-[#8a662d] bg-[#f7ebbf]/40 px-2.5 py-1 rounded-md border border-[#d4af37]/40 cursor-pointer font-bold"
+            className="text-[10px] text-[#8a662d] bg-[#f7ebbf]/40 hover:bg-[#f7ebbf] px-2.5 py-1 rounded-md border border-[#d4af37]/40 cursor-pointer font-bold transition-all"
           >
             🔄 Sync Real-Time
           </button>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { weddingData } from "@/data/weddingData";
+import { QRCodeCanvas } from "@/components/ui/QRCodeCanvas";
 
 export interface GeneratedGuest {
   id: string;
@@ -32,13 +33,16 @@ export function GuestLinkGenerator() {
   const [isBlasting, setIsBlasting] = useState(false);
   const [blastProgress, setBlastProgress] = useState({ current: 0, total: 0 });
 
-  // WA Gateway State (Local Bot / Meta Cloud API / Fonnte / Wablas)
+  // WA Gateway State
   const [provider, setProvider] = useState<"local" | "meta" | "fonnte" | "wablas">("fonnte");
-  const [waToken, setWaToken] = useState("4Sf3SH6toe8ztYykjmMV");
+  const [waToken, setWaToken] = useState("");
   const [phoneNumberId, setPhoneNumberId] = useState("");
-  const [customServerUrl, setCustomServerUrl] = useState("https://wedding-anam-bot.loca.lt");
+  const [customServerUrl, setCustomServerUrl] = useState("");
   const [showTokenInput, setShowTokenInput] = useState(false);
   const [sendingId, setSendingId] = useState<string | null>(null);
+
+  // QR Preview
+  const [qrPreviewId, setQrPreviewId] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -397,53 +401,74 @@ Hormat kami,
 
   return (
     <div className="space-y-6">
-      {/* Bot Gateway Setup Banner */}
-      <div className="gold-card-pro p-4 border border-[#d4af37]/40 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-3 bg-[#260c09]">
-        <div>
+      {/* Fonnte Token & Bot Config Card — Always Visible */}
+      <div className="bg-white border border-[#d4af37]/40 rounded-2xl shadow-sm p-4 md:p-5 space-y-3">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-[#f3e5ab]">
+            <span className="text-sm font-bold text-[#2a2723]">
               {provider === "fonnte" ? "🌐 Fonnte WA Gateway" : provider === "local" ? "🤖 Pure Bot WA (Nomor Baru)" : `🤖 ${provider.toUpperCase()}`}
             </span>
             <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase ${
-              provider === "fonnte" 
-                ? "bg-blue-950 text-blue-300 border border-blue-500/40" 
-                : "bg-emerald-950 text-emerald-300 border border-emerald-500/40"
+              waToken
+                ? "bg-emerald-100 text-emerald-700 border border-emerald-400"
+                : "bg-amber-100 text-amber-700 border border-amber-400"
             }`}>
-              {provider === "fonnte" ? "✓ Fonnte Aktif" : provider === "local" ? "✓ Pure Bot" : provider}
+              {waToken ? "✓ Token Aktif" : "⚠ Token Belum Diisi"}
             </span>
           </div>
-          <p className="text-[11px] text-white/70 mt-0.5">
-            {provider === "fonnte" 
-              ? <>Kirim undangan via Fonnte Gateway. Token sudah terpasang otomatis.</>
-              : <>Jalankan <code className="bg-black/50 px-1 py-0.5 rounded text-[#f3e5ab]">npm run wa-pure-bot</code> di terminal untuk konek WA nomor baru.</>
-            }
-          </p>
+
+          <button
+            onClick={() => setShowTokenInput(!showTokenInput)}
+            className="text-xs py-1.5 px-3 font-semibold whitespace-nowrap cursor-pointer bg-[#f7ebbf]/60 hover:bg-[#f7ebbf] text-[#8a662d] border border-[#d4af37]/40 rounded-lg transition-all"
+          >
+            ⚙️ {showTokenInput ? "Tutup" : "Pengaturan"}
+          </button>
         </div>
 
-        <button
-          onClick={() => setShowTokenInput(!showTokenInput)}
-          className="btn-modern-secondary text-xs py-1.5 px-3 font-semibold whitespace-nowrap cursor-pointer"
-        >
-          ⚙️ Pengaturan Provider
-        </button>
+        {/* Token Fonnte — Inline Quick Input */}
+        <div className="flex items-center gap-2">
+          <label className="text-[10px] uppercase text-[#b8860b] font-bold whitespace-nowrap">Token Fonnte:</label>
+          <input
+            type="text"
+            placeholder="Paste token Fonnte Anda di sini..."
+            value={waToken}
+            onChange={(e) => setWaToken(e.target.value)}
+            className="flex-1 text-xs py-1.5 px-3 font-mono rounded-lg border border-[#d4af37]/40 bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+          />
+          <button
+            onClick={async () => {
+              await saveConfig(waToken, phoneNumberId, provider, customServerUrl);
+              alert("✅ Token berhasil disimpan!");
+            }}
+            className="text-[10px] py-1.5 px-3 font-bold bg-[#d4af37] text-white hover:bg-[#b8860b] rounded-lg cursor-pointer transition-all whitespace-nowrap"
+          >
+            💾 Simpan
+          </button>
+        </div>
+
+        {provider === "fonnte" && !waToken && (
+          <p className="text-[10px] text-amber-600 bg-amber-50 border border-amber-300 rounded-lg px-3 py-1.5">
+            ⚠️ Token Fonnte belum diisi. Dapatkan token di <strong>fonnte.com</strong> → Dashboard → API Token, lalu paste di atas.
+          </p>
+        )}
       </div>
 
-      {/* Provider & Token Config Modal / Input Box */}
+      {/* Expanded Provider Config */}
       {showTokenInput && (
-        <div className="gold-card-pro p-4 border border-[#d4af37]/50 rounded-2xl space-y-3 bg-[#1e0a08]">
-          <h4 className="text-xs uppercase tracking-wider font-bold text-[#d4af37]">
+        <div className="bg-white border border-[#d4af37]/40 rounded-2xl shadow-sm p-4 space-y-3">
+          <h4 className="text-xs uppercase tracking-wider font-bold text-[#b8860b]">
             ⚙️ Pengaturan Server WhatsApp Bot Gateway
           </h4>
 
           <div className="space-y-3">
             <div>
-              <label className="block text-[10px] uppercase text-[#d4af37] font-semibold mb-1">
+              <label className="block text-[10px] uppercase text-[#b8860b] font-semibold mb-1">
                 Provider Bot Pengirim
               </label>
               <select
                 value={provider}
                 onChange={(e) => setProvider(e.target.value as any)}
-                className="form-input text-xs py-2 px-3 bg-[#1c0a08] rounded-xl w-full"
+                className="w-full text-xs py-2 px-3 bg-[#faf8f5] border border-[#d4af37]/40 rounded-xl text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
               >
                 <option value="fonnte">🌐 Fonnte WA Gateway (Token Aktif)</option>
                 <option value="local">🤖 Pure Bot WA Nomor Baru (npm run wa-pure-bot)</option>
@@ -452,38 +477,23 @@ Hormat kami,
               </select>
             </div>
 
-            {/* Custom Tunnel / Server URL Input - Always Visible */}
-            <div className="bg-[#120605] p-3 rounded-xl border border-[#d4af37]/30 space-y-1">
-              <label className="block text-[11px] uppercase text-[#f3e5ab] font-bold">
-                🔗 URL Server Bot Custom (Localtunnel / Cloudflare / Tunnel)
+            {/* Custom Tunnel URL */}
+            <div className="bg-[#faf8f5] p-3 rounded-xl border border-[#d4af37]/30 space-y-1">
+              <label className="block text-[11px] uppercase text-[#b8860b] font-bold">
+                🔗 URL Server Bot Custom (Localtunnel / Cloudflare)
               </label>
               <input
                 type="text"
-                placeholder="Paste URL Tunnel (contoh: https://mag-lie-source-involvement.trycloudflare.com)"
+                placeholder="Paste URL Tunnel (contoh: https://xxx.trycloudflare.com)"
                 value={customServerUrl}
                 onChange={(e) => setCustomServerUrl(e.target.value)}
-                className="form-input text-xs py-2 px-3 font-mono rounded-lg w-full bg-[#1c0a08]"
+                className="w-full text-xs py-2 px-3 font-mono rounded-lg border border-[#d4af37]/40 bg-white text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
               />
-              <div className="flex items-center gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={async () => {
-                    await saveConfig(waToken, phoneNumberId, provider, customServerUrl);
-                    alert("✅ URL Server Bot berhasil disimpan & disinkronkan ke Cloud!");
-                  }}
-                  className="btn-modern-primary text-xs py-1.5 px-4 font-bold bg-[#d4af37] text-black hover:bg-[#f3e5ab] cursor-pointer"
-                >
-                  💾 Simpan Pengaturan Bot
-                </button>
-              </div>
-              <p className="text-[10px] text-white/60 pt-1">
-                Tempel URL Tunnel di atas agar Admin Panel Netlify online dapat terhubung ke bot laptop Anda!
-              </p>
             </div>
 
             {provider === "meta" && (
               <div>
-                <label className="block text-[10px] uppercase text-[#d4af37] font-semibold mb-0.5">
+                <label className="block text-[10px] uppercase text-[#b8860b] font-semibold mb-0.5">
                   Meta Phone Number ID
                 </label>
                 <input
@@ -491,14 +501,14 @@ Hormat kami,
                   placeholder="Contoh: 104829381928301"
                   value={phoneNumberId}
                   onChange={(e) => setPhoneNumberId(e.target.value)}
-                  className="form-input text-xs py-1.5 px-3 font-mono"
+                  className="w-full text-xs py-1.5 px-3 font-mono border border-[#d4af37]/40 rounded-lg bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
                 />
               </div>
             )}
 
             {provider !== "local" && (
               <div>
-                <label className="block text-[10px] uppercase text-[#d4af37] font-semibold mb-0.5">
+                <label className="block text-[10px] uppercase text-[#b8860b] font-semibold mb-0.5">
                   API Token Key
                 </label>
                 <input
@@ -506,7 +516,7 @@ Hormat kami,
                   placeholder="Masukkan Token API..."
                   value={waToken}
                   onChange={(e) => setWaToken(e.target.value)}
-                  className="form-input text-xs py-1.5 px-3 font-mono"
+                  className="w-full text-xs py-1.5 px-3 font-mono border border-[#d4af37]/40 rounded-lg bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
                 />
               </div>
             )}
@@ -517,7 +527,7 @@ Hormat kami,
                 setShowTokenInput(false);
                 alert("✓ Pengaturan Provider WA Bot berhasil disimpan!");
               }}
-              className="btn-modern-primary text-xs py-2 px-4 font-bold w-full mt-2"
+              className="w-full text-xs py-2 px-4 font-bold bg-[#d4af37] text-white hover:bg-[#b8860b] rounded-xl cursor-pointer transition-all mt-2"
             >
               Simpan Pengaturan
             </button>
@@ -529,7 +539,7 @@ Hormat kami,
       <div className="flex gap-2.5">
         <button
           onClick={() => setShowBulkInput(!showBulkInput)}
-          className="btn-modern-secondary text-xs py-2.5 px-4 font-bold flex-1 flex items-center justify-center gap-1.5"
+          className="text-xs py-2.5 px-4 font-bold flex-1 flex items-center justify-center gap-1.5 bg-white border border-[#d4af37]/40 text-[#2a2723] hover:bg-[#f7ebbf]/40 rounded-xl cursor-pointer transition-all"
         >
           📋 {showBulkInput ? "Tutup Impor" : "Impor Banyak Tamu (Copas List)"}
         </button>
@@ -538,7 +548,7 @@ Hormat kami,
           <button
             onClick={handleBulkAutoBlast}
             disabled={isBlasting}
-            className="btn-modern-primary text-xs py-2.5 px-4 font-extrabold flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-none shadow-xl flex items-center justify-center gap-1.5 cursor-pointer hover:from-emerald-500 hover:to-teal-500"
+            className="text-xs py-2.5 px-4 font-extrabold flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-none shadow-lg flex items-center justify-center gap-1.5 cursor-pointer hover:from-emerald-500 hover:to-teal-500 rounded-xl transition-all"
           >
             {isBlasting
               ? `⏳ Sending ${blastProgress.current}/${blastProgress.total}`
@@ -549,14 +559,14 @@ Hormat kami,
 
       {/* Bulk Import Textarea Card */}
       {showBulkInput && (
-        <div className="gold-card-pro p-5 border border-[#d4af37]/50 rounded-2xl space-y-3 bg-[#1c0a08]">
-          <h4 className="text-sm font-bold font-serif text-[#f3e5ab]">
+        <div className="bg-white border border-[#d4af37]/40 rounded-2xl shadow-sm p-5 space-y-3">
+          <h4 className="text-sm font-bold font-serif text-[#2a2723]">
             📋 Copy-Paste Banyak Nama &amp; No HP Tamu Sekaligus
           </h4>
-          <p className="text-xs text-white/70">
+          <p className="text-xs text-[#66615c]">
             Paste daftar nama dan nomor HP tamu dari Excel / WhatsApp / Catatan.
             <br />
-            <span className="text-[#d4af37] font-semibold">Format per baris:</span> Nama Tamu, 08123456789
+            <span className="text-[#b8860b] font-semibold">Format per baris:</span> Nama Tamu, 08123456789
           </p>
 
           <textarea
@@ -566,19 +576,19 @@ Siti Aminah, 085712345678
 Budi Santoso, 081987654321`}
             value={bulkText}
             onChange={(e) => setBulkText(e.target.value)}
-            className="form-input text-xs p-3 font-mono leading-relaxed"
+            className="w-full text-xs p-3 font-mono leading-relaxed border border-[#d4af37]/40 rounded-xl bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
           />
 
           <div className="flex justify-end gap-2">
             <button
               onClick={() => setShowBulkInput(false)}
-              className="btn-modern-secondary text-xs py-2 px-4"
+              className="text-xs py-2 px-4 bg-white border border-[#d4af37]/40 text-[#66615c] hover:bg-[#faf8f5] rounded-xl cursor-pointer transition-all"
             >
               Batal
             </button>
             <button
               onClick={handleBulkImport}
-              className="btn-modern-primary text-xs py-2 px-5 font-bold"
+              className="text-xs py-2 px-5 font-bold bg-[#d4af37] text-white hover:bg-[#b8860b] rounded-xl cursor-pointer transition-all"
             >
               ✓ Impor ke Daftar
             </button>
@@ -587,9 +597,9 @@ Budi Santoso, 081987654321`}
       )}
 
       {/* Single Input Form Card */}
-      <div className="gold-card-pro p-5 md:p-6 border border-[#d4af37]/40 shadow-xl rounded-2xl">
+      <div className="bg-white border border-[#d4af37]/40 rounded-2xl shadow-sm p-5 md:p-6">
         <h3
-          className="text-lg md:text-xl font-bold font-serif text-[#f3e5ab] mb-1"
+          className="text-lg md:text-xl font-bold font-serif text-[#2a2723] mb-1"
           style={{ fontFamily: "var(--font-heading)" }}
         >
           ➕ Tambah Satu Tamu
@@ -598,7 +608,7 @@ Budi Santoso, 081987654321`}
         <form onSubmit={handleGenerate} className="space-y-3.5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] uppercase tracking-wider text-[#d4af37] font-semibold mb-1">
+              <label className="block text-[11px] uppercase tracking-wider text-[#b8860b] font-semibold mb-1">
                 Nama Tamu Undangan *
               </label>
               <input
@@ -607,12 +617,12 @@ Budi Santoso, 081987654321`}
                 placeholder="Contoh: Bapak Andi dan Keluarga"
                 value={guestName}
                 onChange={(e) => setGuestName(e.target.value)}
-                className="form-input text-xs py-2 px-3.5 rounded-xl"
+                className="w-full text-xs py-2 px-3.5 rounded-xl border border-[#d4af37]/40 bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] uppercase tracking-wider text-[#d4af37] font-semibold mb-1">
+              <label className="block text-[11px] uppercase tracking-wider text-[#b8860b] font-semibold mb-1">
                 Nomor WhatsApp (Opsional)
               </label>
               <input
@@ -620,20 +630,20 @@ Budi Santoso, 081987654321`}
                 placeholder="Contoh: 08123456789 atau 628123456789"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="form-input text-xs py-2 px-3.5 rounded-xl"
+                className="w-full text-xs py-2 px-3.5 rounded-xl border border-[#d4af37]/40 bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 items-center">
             <div>
-              <label className="block text-[11px] uppercase tracking-wider text-[#d4af37] font-semibold mb-1">
+              <label className="block text-[11px] uppercase tracking-wider text-[#b8860b] font-semibold mb-1">
                 Kategori Tamu
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="form-input text-xs py-2 px-3 rounded-xl bg-[#1c0a08]"
+                className="w-full text-xs py-2 px-3 rounded-xl border border-[#d4af37]/40 bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
               >
                 <option value="Tamu VIP">Tamu VIP</option>
                 <option value="Keluarga">Keluarga</option>
@@ -644,13 +654,13 @@ Budi Santoso, 081987654321`}
             </div>
 
             <div>
-              <label className="block text-[11px] uppercase tracking-wider text-[#d4af37] font-semibold mb-1">
+              <label className="block text-[11px] uppercase tracking-wider text-[#b8860b] font-semibold mb-1">
                 Template Pesan
               </label>
               <select
                 value={template}
                 onChange={(e) => setTemplate(e.target.value as any)}
-                className="form-input text-xs py-2 px-3 rounded-xl bg-[#1c0a08]"
+                className="w-full text-xs py-2 px-3 rounded-xl border border-[#d4af37]/40 bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
               >
                 <option value="Formal">Formal (Sopan)</option>
                 <option value="Hangat">Hangat (Teman/Sahabat)</option>
@@ -660,7 +670,7 @@ Budi Santoso, 081987654321`}
 
             <button
               type="submit"
-              className="btn-modern-primary py-2.5 px-5 text-xs font-bold col-span-2 md:col-span-1 mt-4 md:mt-5"
+              className="py-2.5 px-5 text-xs font-bold col-span-2 md:col-span-1 mt-4 md:mt-5 bg-[#d4af37] text-white hover:bg-[#b8860b] rounded-xl cursor-pointer transition-all shadow-md"
             >
               + Tambah ke Daftar
             </button>
@@ -671,7 +681,7 @@ Budi Santoso, 081987654321`}
       {/* Guest Links & WA Sender Feed */}
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
-          <h4 className="text-xs uppercase tracking-[2px] font-bold text-[#d4af37]">
+          <h4 className="text-xs uppercase tracking-[2px] font-bold text-[#b8860b]">
             Daftar Kirim Undangan ({guests.length})
           </h4>
           <div className="flex gap-2">
@@ -682,7 +692,7 @@ Budi Santoso, 081987654321`}
                 }
                 await loadCloudGuests();
               }}
-              className="text-[10px] text-[#f3e5ab] bg-[#3a1512] hover:bg-[#521c17] px-2 py-1 rounded border border-[#d4af37]/40 cursor-pointer font-bold transition-all"
+              className="text-[10px] text-[#8a662d] bg-[#f7ebbf]/40 hover:bg-[#f7ebbf] px-2 py-1 rounded border border-[#d4af37]/40 cursor-pointer font-bold transition-all"
             >
               🔄 Sync Cloud
             </button>
@@ -690,7 +700,7 @@ Budi Santoso, 081987654321`}
             {guests.length > 0 && (
               <button
                 onClick={() => saveGuests([])}
-                className="text-[10px] text-red-400 hover:underline cursor-pointer"
+                className="text-[10px] text-red-500 hover:underline cursor-pointer"
               >
                 Hapus Semua
               </button>
@@ -699,29 +709,29 @@ Budi Santoso, 081987654321`}
         </div>
 
         {guests.length === 0 ? (
-          <div className="gold-card-pro p-6 text-center text-xs text-white/60 rounded-xl">
-            Belum ada daftar tamu. Gunakan tombol "Impor Banyak Tamu" di atas untuk memasukkan seluruh daftar nama &amp; nomor HP sekaligus.
+          <div className="bg-white border border-[#d4af37]/20 p-6 text-center text-xs text-[#66615c] rounded-xl">
+            Belum ada daftar tamu. Gunakan tombol &quot;Impor Banyak Tamu&quot; di atas untuk memasukkan seluruh daftar nama &amp; nomor HP sekaligus.
           </div>
         ) : (
           <div className="space-y-3">
             {guests.map((g) => (
               <div
                 key={g.id}
-                className={`gold-card-pro p-4 border rounded-xl flex flex-col gap-2.5 ${
-                  g.status === "sent" ? "border-emerald-500/40 bg-emerald-950/10" : "border-[#d4af37]/30"
+                className={`bg-white p-4 border rounded-xl flex flex-col gap-2.5 shadow-sm ${
+                  g.status === "sent" ? "border-emerald-400/60" : "border-[#d4af37]/30"
                 }`}
               >
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm font-bold text-[#2a2723] font-serif">{g.name}</span>
-                    <span className="text-[9px] bg-[#d4af37]/20 border border-[#d4af37]/40 text-[#8a662d] px-2 py-0.5 rounded-full font-semibold">
+                    <span className="text-[9px] bg-[#f7ebbf] border border-[#d4af37]/40 text-[#8a662d] px-2 py-0.5 rounded-full font-semibold">
                       {g.category}
                     </span>
-                    <span className="text-[9px] bg-[#f7ebbf] border border-[#d4af37]/50 text-[#8a662d] px-2 py-0.5 rounded-full font-mono font-bold">
-                      🎫 Barcode: {g.code || g.id}
+                    <span className="text-[9px] bg-[#faf8f5] border border-[#d4af37]/50 text-[#8a662d] px-2 py-0.5 rounded-full font-mono font-bold">
+                      🎫 {g.code || g.id}
                     </span>
                     {g.checkedIn && (
-                      <span className="text-[9px] bg-emerald-100 text-emerald-800 border border-emerald-400 px-2 py-0.5 rounded-full font-extrabold animate-pulse">
+                      <span className="text-[9px] bg-emerald-100 text-emerald-800 border border-emerald-400 px-2 py-0.5 rounded-full font-extrabold">
                         ✓ HADIR ({g.checkInTime || "Checked-In"})
                       </span>
                     )}
@@ -746,9 +756,35 @@ Budi Santoso, 081987654321`}
                   </div>
                 )}
 
-                <div className="bg-white p-2 rounded-lg text-[10px] font-mono text-[#8a662d] truncate border border-[#d4af37]/30">
+                <div className="bg-[#faf8f5] p-2 rounded-lg text-[10px] font-mono text-[#8a662d] truncate border border-[#d4af37]/30">
                   {getGuestUrl(g.name, g.code)}
                 </div>
+
+                {/* QR Code Preview Toggle */}
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setQrPreviewId(qrPreviewId === g.id ? null : g.id)}
+                    className="text-[10px] py-1.5 px-3 bg-[#f7ebbf]/60 hover:bg-[#f7ebbf] text-[#8a662d] border border-[#d4af37]/40 rounded-lg cursor-pointer font-bold transition-all flex items-center gap-1"
+                  >
+                    {qrPreviewId === g.id ? "🔽 Sembunyikan QR" : "📱 Lihat QR Code"}
+                  </button>
+                </div>
+
+                {/* QR Code for this guest */}
+                {qrPreviewId === g.id && (
+                  <div className="flex flex-col items-center gap-2 p-3 bg-white border border-[#d4af37]/30 rounded-xl">
+                    <QRCodeCanvas
+                      data={g.code || g.id}
+                      size={160}
+                      className="rounded-lg"
+                    />
+                    <span className="text-[10px] font-mono font-bold text-[#2a2723] bg-[#faf8f5] px-3 py-1 rounded-lg border border-[#d4af37]/30">
+                      {g.code || g.id}
+                    </span>
+                    <p className="text-[9px] text-[#66615c]">QR Code unik untuk tamu ini. Scan saat check-in.</p>
+                  </div>
+                )}
 
                 <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
                   <div className="flex gap-2 flex-wrap">
@@ -757,7 +793,7 @@ Budi Santoso, 081987654321`}
                       <button
                         onClick={() => handleSingleAutoSend(g)}
                         disabled={sendingId === g.id || isBlasting}
-                        className="btn-modern-primary text-[10px] py-1.5 px-3 flex items-center gap-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-none shadow-md font-extrabold cursor-pointer hover:from-emerald-500 hover:to-teal-500"
+                        className="text-[10px] py-1.5 px-3 flex items-center gap-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-none shadow-md font-extrabold cursor-pointer hover:from-emerald-500 hover:to-teal-500 rounded-lg transition-all"
                       >
                         {sendingId === g.id ? "⏳..." : "⚡ Kirim Bot"}
                       </button>
@@ -766,7 +802,7 @@ Budi Santoso, 081987654321`}
                     {/* Direct WA Web Launcher Button */}
                     <button
                       onClick={() => handleDirectWaWeb(g)}
-                      className="btn-modern-secondary text-[10px] py-1.5 px-3 flex items-center gap-1"
+                      className="text-[10px] py-1.5 px-3 flex items-center gap-1 bg-white border border-[#d4af37]/40 text-[#2a2723] hover:bg-[#f7ebbf]/40 rounded-lg cursor-pointer transition-all"
                     >
                       <span>💬 Buka WA App</span>
                     </button>
@@ -774,7 +810,7 @@ Budi Santoso, 081987654321`}
                     {/* Copy Link Button */}
                     <button
                       onClick={() => handleCopy(g.name, g.id)}
-                      className="btn-modern-secondary text-[10px] py-1.5 px-3 flex items-center gap-1"
+                      className="text-[10px] py-1.5 px-3 flex items-center gap-1 bg-white border border-[#d4af37]/40 text-[#2a2723] hover:bg-[#f7ebbf]/40 rounded-lg cursor-pointer transition-all"
                     >
                       {copiedId === g.id ? "✓ Tersalin!" : "📋 Salin Link"}
                     </button>
@@ -782,7 +818,7 @@ Budi Santoso, 081987654321`}
 
                   <button
                     onClick={() => handleDelete(g.id)}
-                    className="text-white/40 hover:text-red-400 text-xs p-1 cursor-pointer transition-colors"
+                    className="text-[#999] hover:text-red-500 text-xs p-1 cursor-pointer transition-colors"
                     title="Hapus"
                   >
                     🗑️

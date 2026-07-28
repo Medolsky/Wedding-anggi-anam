@@ -75,15 +75,15 @@ export function WishesManager() {
 
   return (
     <div className="space-y-4">
-      <div className="gold-card-pro p-4 border border-[#d4af37]/30 rounded-xl flex items-center justify-between">
+      <div className="bg-white p-4 border border-[#d4af37]/30 rounded-xl shadow-sm flex items-center justify-between">
         <div>
           <h3
-            className="text-base font-bold font-serif text-[#f3e5ab]"
+            className="text-base font-bold font-serif text-[#2a2723]"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             💌 Moderasi Ucapan Tamu Undangan ({wishes.length})
           </h3>
-          <p className="text-[11px] text-white/60">
+          <p className="text-[11px] text-[#66615c]">
             Lihat dan kelola ucapan serta doa yang dikirimkan oleh para tamu undangan secara real-time dari semua device.
           </p>
         </div>
@@ -91,7 +91,7 @@ export function WishesManager() {
         <div className="flex gap-2">
           <button
             onClick={loadWishes}
-            className="btn-modern-secondary text-[10px] py-1.5 px-3"
+            className="text-[10px] py-1.5 px-3 bg-white border border-[#d4af37]/40 text-[#2a2723] hover:bg-[#f7ebbf]/40 rounded-lg cursor-pointer transition-all"
           >
             🔄 Sync Cloud
           </button>
@@ -99,7 +99,7 @@ export function WishesManager() {
           {wishes.length > 0 && (
             <button
               onClick={handleClearAll}
-              className="btn-modern-secondary text-[10px] py-1.5 px-3 text-rose-300 border-rose-500/40"
+              className="text-[10px] py-1.5 px-3 bg-white border border-rose-300 text-rose-600 hover:bg-rose-50 rounded-lg cursor-pointer transition-all"
             >
               Hapus Semua
             </button>
@@ -108,7 +108,7 @@ export function WishesManager() {
       </div>
 
       {wishes.length === 0 ? (
-        <div className="gold-card-pro p-8 text-center text-xs text-white/50 rounded-xl">
+        <div className="bg-white border border-[#d4af37]/20 p-8 text-center text-xs text-[#66615c] rounded-xl">
           Belum ada ucapan yang masuk dari tamu undangan.
         </div>
       ) : (
@@ -116,19 +116,19 @@ export function WishesManager() {
           {wishes.map((w) => (
             <div
               key={w.id}
-              className="gold-card-pro p-4 border border-[#d4af37]/30 rounded-xl space-y-2"
+              className="bg-white p-4 border border-[#d4af37]/30 rounded-xl shadow-sm space-y-2"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-white font-serif text-sm">{w.name}</span>
+                  <span className="font-bold text-[#2a2723] font-serif text-sm">{w.name}</span>
                   {w.attendance && (
                     <span
                       className={`text-[9px] px-2 py-0.5 rounded-full font-bold ${
                         w.attendance === "Hadir"
-                          ? "bg-emerald-950 text-emerald-300 border border-emerald-500/40"
+                          ? "bg-emerald-100 text-emerald-700 border border-emerald-400"
                           : w.attendance === "Ragu-ragu"
-                          ? "bg-amber-950 text-amber-300 border border-amber-500/40"
-                          : "bg-rose-950 text-rose-300 border border-rose-500/40"
+                          ? "bg-amber-100 text-amber-700 border border-amber-400"
+                          : "bg-rose-100 text-rose-700 border border-rose-400"
                       }`}
                     >
                       {w.attendance}
@@ -137,10 +137,10 @@ export function WishesManager() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-white/40">{w.createdAt}</span>
+                  <span className="text-[10px] text-[#999]">{w.createdAt}</span>
                   <button
                     onClick={() => handleDelete(w.id)}
-                    className="text-white/30 hover:text-red-400 text-xs p-1 cursor-pointer"
+                    className="text-[#999] hover:text-red-500 text-xs p-1 cursor-pointer transition-colors"
                     title="Hapus Ucapan"
                   >
                     🗑️
@@ -148,8 +148,8 @@ export function WishesManager() {
                 </div>
               </div>
 
-              <p className="text-xs text-white/85 italic leading-relaxed bg-[#120605] p-3 rounded-lg border border-white/5">
-                "{w.message}"
+              <p className="text-xs text-[#555] italic leading-relaxed bg-[#faf8f5] p-3 rounded-lg border border-[#d4af37]/20">
+                &quot;{w.message}&quot;
               </p>
             </div>
           ))}

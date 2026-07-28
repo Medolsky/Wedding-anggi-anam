@@ -24,9 +24,9 @@ let cloudStore: {
 } = {
   guests: [],
   config: {
-    customServerUrl: "https://wedding-anam-bot.loca.lt",
+    customServerUrl: "",
     provider: "fonnte",
-    waToken: "4Sf3SH6toe8ztYykjmMV",
+    waToken: "",
   },
   rsvps: [],
   wishes: [],
@@ -174,12 +174,15 @@ export async function GET(req: Request) {
 
   const data = await fetchFromExternalCloud();
 
-  if (type === "guests") return NextResponse.json({ success: true, data: data.guests });
-  if (type === "rsvps") return NextResponse.json({ success: true, data: data.rsvps });
-  if (type === "wishes") return NextResponse.json({ success: true, data: data.wishes });
-  if (type === "config") return NextResponse.json({ success: true, data: data.config });
+  // Check if using persistent database
+  const isUsingDB = !!supabase || (JSONBIN_BIN_ID && JSONBIN_API_KEY);
 
-  return NextResponse.json({ success: true, data });
+  if (type === "guests") return NextResponse.json({ success: true, data: data.guests, persistent: isUsingDB });
+  if (type === "rsvps") return NextResponse.json({ success: true, data: data.rsvps, persistent: isUsingDB });
+  if (type === "wishes") return NextResponse.json({ success: true, data: data.wishes, persistent: isUsingDB });
+  if (type === "config") return NextResponse.json({ success: true, data: data.config, persistent: isUsingDB });
+
+  return NextResponse.json({ success: true, data, persistent: isUsingDB });
 }
 
 export async function POST(req: Request) {

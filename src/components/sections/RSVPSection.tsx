@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { AnimatedText } from "@/components/ui/AnimatedText";
 import { useInvitationStore } from "@/stores/invitationStore";
 import { weddingData } from "@/data/weddingData";
+import { QRCodeCanvas } from "@/components/ui/QRCodeCanvas";
 
 type AttendanceStatus = "hadir" | "tidak_hadir" | null;
 
@@ -167,12 +168,10 @@ export function RSVPSection() {
 
               {/* QR / Barcode Card Frame */}
               <div className="bg-white p-3.5 rounded-2xl border-2 border-[#d4af37]/40 shadow-inner flex flex-col items-center justify-center my-3">
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(
-                    guest.code || guest.name || "GUEST-VIP"
-                  )}`}
-                  alt="QR Barcode E-Ticket"
-                  className="w-40 h-40 object-contain drop-shadow-sm"
+                <QRCodeCanvas
+                  data={guest.code || guest.name || "GUEST-VIP"}
+                  size={180}
+                  className="rounded-lg drop-shadow-sm"
                 />
                 <div className="mt-2.5 text-[11px] font-mono font-extrabold tracking-[3px] text-[#2a2723] bg-[#FAF8F5] px-3.5 py-1 rounded-lg border border-[#d4af37]/40 shadow-sm">
                   {guest.code || "GUEST-" + (guest.name || "VIP").replace(/[^a-zA-Z0-9]/g, "").substring(0, 6).toUpperCase()}

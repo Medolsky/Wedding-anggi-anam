@@ -27,8 +27,8 @@ export const weddingData = {
     welcomeCover: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1200&auto=format&fit=crop",
   },
 
-  // Wedding Date — 10 Oktober 2026
-  weddingDate: "2026-10-10T08:00:00+07:00",
+  // Wedding Date — 10 Oktober 2026 Jam 07:00 WIB
+  weddingDate: "2026-10-10T07:00:00+07:00",
 
   // Background photos for each section
   sectionBgs: {
@@ -52,7 +52,7 @@ export const weddingData = {
       type: "Akad Nikah",
       title: "Akad Nikah",
       date: "Sabtu, 10 Oktober 2026",
-      startTime: "08:00 WIB",
+      startTime: "07:00 WIB",
       endTime: "Selesai",
       venue: "BALAI IKABAMA",
       address: "Jl. Mawar I, RT.6/RW.4, Depok Jaya, Kec. Pancoran Mas, Kota Depok, Jawa Barat 16432",

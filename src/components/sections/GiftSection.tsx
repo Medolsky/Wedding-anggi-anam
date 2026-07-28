@@ -162,7 +162,7 @@ export function GiftSection() {
       {/* QRIS Modal */}
       <Modal isOpen={showQris} onClose={() => setShowQris(false)} title="QRIS Pembayaran">
         <div className="flex flex-col items-center justify-center text-center py-2">
-          <div className="w-48 h-48 bg-white p-2 rounded-xl shadow-xl flex flex-col items-center justify-center mb-3 border border-[#d4af37]">
+          <div className="w-48 h-48 bg-white/80 backdrop-blur-md p-2 rounded-xl shadow-xl flex flex-col items-center justify-center mb-3 border border-[#d4af37]">
             <img
               src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=Wedding-Raka-Alya-QRIS"
               alt="QRIS Wedding"

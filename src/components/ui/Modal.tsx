@@ -49,7 +49,7 @@ export function Modal({
 
           {/* Modal Content — Bottom sheet on mobile, centered modal on desktop */}
           <motion.div
-            className={`relative z-10 w-full md:max-w-lg bg-[#faf8f5] text-[#2a2723] border border-[#d4af37]/40 
+            className={`relative z-10 w-full md:max-w-lg bg-white/90 backdrop-blur-2xl text-[#2a2723] border-2 border-[#d4af37]/50 
               rounded-t-[24px] md:rounded-[var(--radius-lg)] 
               max-h-[85vh] overflow-y-auto shadow-2xl ${className}`}
             initial={{ opacity: 0, y: 100, scale: 0.95 }}

@@ -141,7 +141,7 @@ export function RSVPSection() {
             /* Digital E-Ticket Barcode Card (Primary View) */
             <motion.div
               key="eticket"
-              className="gold-card-pro p-5 md:p-6 border-2 border-[#d4af37] shadow-2xl text-center w-full max-w-xs rounded-2xl bg-white/95"
+              className="gold-card-pro p-5 md:p-6 border-2 border-[#d4af37] shadow-2xl text-center w-full max-w-xs rounded-2xl"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
@@ -167,7 +167,7 @@ export function RSVPSection() {
               </p>
 
               {/* QR / Barcode Card Frame */}
-              <div className="bg-white p-3.5 rounded-2xl border-2 border-[#d4af37]/40 shadow-inner flex flex-col items-center justify-center my-3">
+              <div className="bg-white/80 backdrop-blur-md p-3.5 rounded-2xl border-2 border-[#d4af37]/40 shadow-inner flex flex-col items-center justify-center my-3">
                 <QRCodeCanvas
                   data={guest.code || guest.name || "GUEST-VIP"}
                   size={180}

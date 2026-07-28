@@ -74,13 +74,19 @@ export function HeroSection() {
           />
         </div>
 
-        {/* Date — Prominently Larger */}
-        <AnimatedText delay={0.8} variant="scaleUp" className="w-full text-center my-4">
+        {/* Date, Time & Venue Info above Countdown */}
+        <AnimatedText delay={0.8} variant="scaleUp" className="w-full text-center my-3 space-y-1">
           <p
-            className="text-lg md:text-xl tracking-[7px] md:tracking-[9px] uppercase text-[#8a662d] font-extrabold text-center font-serif leading-none drop-shadow-md"
+            className="text-base md:text-lg font-extrabold text-[#2a2723] text-center font-serif leading-tight"
             style={{ fontFamily: "var(--font-heading)" }}
           >
-            10 • 10 • 2026
+            Sabtu, 10 Oktober 2026
+          </p>
+          <p className="text-xs text-[#8a662d] font-bold tracking-wide text-center">
+            08:00 WIB — Selesai
+          </p>
+          <p className="text-xs uppercase tracking-[2px] text-[#b8860b] font-extrabold text-center">
+            📍 BALAI IKABAMA
           </p>
         </AnimatedText>
 

@@ -71,8 +71,8 @@ function InvitationContent() {
       />
       <div className="fixed inset-0 hidden md:block bg-gradient-to-b from-[#faf8f5]/90 via-[#f4efe6]/80 to-[#faf8f5]/95 pointer-events-none" />
 
-      {/* Main Centered Mobile Frame Stage */}
-      <div className="w-full max-w-[480px] min-h-screen relative bg-[var(--color-background)] shadow-[0_0_60px_rgba(212,175,55,0.15)] border-x border-[#d4af37]/30 overflow-x-hidden">
+      {/* Main Centered Mobile Frame Stage — Frosted Glassmorphism */}
+      <div className="w-full max-w-[480px] min-h-screen relative main-stage-glass overflow-x-hidden">
         {/* ==========================================
             WELCOME PAGE OVERLAY (CLOSED / OPENING)
             Direct smooth slide-up reveal into Main Page

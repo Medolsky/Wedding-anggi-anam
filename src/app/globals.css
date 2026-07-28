@@ -167,22 +167,31 @@ section {
 }
 
 /* ========================================
-   WHITE GOLD GLASS CARDS (HIGH READABILITY)
+   WHITE GOLD GLASS CARDS & STAGE FRAME
    ======================================== */
 
+.main-stage-glass {
+  background: rgba(250, 248, 245, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-left: 1px solid rgba(212, 175, 55, 0.4);
+  border-right: 1px solid rgba(212, 175, 55, 0.4);
+  box-shadow: 0 0 80px rgba(212, 175, 55, 0.25);
+}
+
 .gold-card-pro {
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(212, 175, 55, 0.5);
-  border-radius: 18px;
-  box-shadow: 0 8px 30px rgba(212, 175, 55, 0.15), 0 2px 8px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 1);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(212, 175, 55, 0.55);
+  border-radius: 20px;
+  box-shadow: 0 10px 32px rgba(212, 175, 55, 0.18), 0 2px 8px rgba(0, 0, 0, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.9);
   transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .gold-card-pro:hover {
   border-color: rgba(212, 175, 55, 0.85);
-  box-shadow: 0 12px 35px rgba(212, 175, 55, 0.28);
+  box-shadow: 0 14px 40px rgba(212, 175, 55, 0.30);
 }
 
 /* ========================================

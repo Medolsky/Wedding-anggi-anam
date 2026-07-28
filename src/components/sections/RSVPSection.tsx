@@ -22,6 +22,7 @@ export function RSVPSection() {
   const rsvpSubmitted = useInvitationStore((s) => s.rsvpSubmitted);
   const setRsvpSubmitted = useInvitationStore((s) => s.setRsvpSubmitted);
   const { sectionBgs } = weddingData;
+  const [showForm, setShowForm] = useState(false);
 
   const [formData, setFormData] = useState<RSVPFormData>({
     name: "",
@@ -82,6 +83,7 @@ export function RSVPSection() {
 
 
     setIsSubmitting(false);
+    setShowForm(false);
     setRsvpSubmitted(true);
   }
 
@@ -134,58 +136,60 @@ export function RSVPSection() {
         </AnimatedText>
 
         <AnimatePresence mode="wait">
-          {rsvpSubmitted ? (
-            /* Success E-Ticket Barcode Card */
+          {!showForm ? (
+            /* Digital E-Ticket Barcode Card (Primary View) */
             <motion.div
-              key="success"
-              className="gold-card-pro p-5 border-2 border-[#d4af37] shadow-2xl text-center w-full max-w-xs rounded-2xl bg-white/95"
-              initial={{ opacity: 0, scale: 0.9 }}
+              key="eticket"
+              className="gold-card-pro p-5 md:p-6 border-2 border-[#d4af37] shadow-2xl text-center w-full max-w-xs rounded-2xl bg-white/95"
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.5 }}
             >
-              <div className="flex items-center justify-between border-b border-[#d4af37]/30 pb-2 mb-3">
-                <span className="text-[9px] uppercase tracking-[2px] font-extrabold text-[#b8860b]">
+              <div className="flex items-center justify-between border-b border-[#d4af37]/30 pb-2.5 mb-3">
+                <span className="text-[10px] uppercase tracking-[2px] font-extrabold text-[#b8860b]">
                   🎫 DIGITAL E-TICKET
                 </span>
                 <span className="text-[9px] bg-[#d4af37]/20 text-[#8a662d] px-2 py-0.5 rounded-full font-bold">
-                  AKAD &amp; RESEPSI
+                  {guest.category || "TAMU VIP"}
                 </span>
               </div>
 
               <h3
-                className="text-lg font-serif font-bold text-[#2a2723] leading-snug mb-0.5"
+                className="text-xl font-serif font-bold text-[#2a2723] leading-snug mb-1"
                 style={{ fontFamily: "var(--font-heading)" }}
               >
-                {formData.name || guest.name}
+                {guest.name || "Tamu Undangan"}
               </h3>
               <p className="text-[11px] text-[#66615c] mb-3">
-                Jumlah Kehadiran: <strong className="text-[#b8860b]">{formData.guestCount || 1} PAX</strong>
+                Acara: <strong className="text-[#b8860b]">Akad &amp; Resepsi</strong>
               </p>
 
-              {/* QR / Barcode Card */}
-              <div className="bg-white p-3 rounded-xl border border-[#d4af37]/40 shadow-inner flex flex-col items-center justify-center my-3">
+              {/* QR / Barcode Card Frame */}
+              <div className="bg-white p-3.5 rounded-2xl border-2 border-[#d4af37]/40 shadow-inner flex flex-col items-center justify-center my-3">
                 <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
-                    guest.code || formData.name || "GUEST-VIP"
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(
+                    guest.code || guest.name || "GUEST-VIP"
                   )}`}
                   alt="QR Barcode E-Ticket"
-                  className="w-36 h-36 object-contain"
+                  className="w-40 h-40 object-contain drop-shadow-sm"
                 />
-                <div className="mt-2 text-[10px] font-mono font-bold tracking-[2px] text-[#2a2723] bg-[#FAF8F5] px-3 py-1 rounded-md border border-[#d4af37]/30">
-                  {guest.code || "GUEST-" + (formData.name || "VIP").replace(/[^a-zA-Z0-9]/g, "").substring(0, 6).toUpperCase()}
+                <div className="mt-2.5 text-[11px] font-mono font-extrabold tracking-[3px] text-[#2a2723] bg-[#FAF8F5] px-3.5 py-1 rounded-lg border border-[#d4af37]/40 shadow-sm">
+                  {guest.code || "GUEST-" + (guest.name || "VIP").replace(/[^a-zA-Z0-9]/g, "").substring(0, 6).toUpperCase()}
                 </div>
               </div>
 
-              <p className="text-[10px] text-[#66615c] leading-relaxed mb-3">
-                Tunjukkan QR/Barcode ini kepada panitia / admin di lokasi acara untuk konfirmasi kedatangan Anda.
+              <p className="text-[10.5px] text-[#555555] leading-relaxed mb-4">
+                Tunjukkan QR/Barcode ini kepada panitia / admin di pintu masuk acara untuk konfirmasi kedatangan Anda.
               </p>
 
-              <div className="pt-2 border-t border-[#d4af37]/30 flex gap-2">
+              <div className="pt-2 border-t border-[#d4af37]/30">
                 <button
-                  onClick={() => setRsvpSubmitted(false)}
-                  className="btn-modern-secondary text-[10px] flex-1 py-1.5 font-semibold"
+                  type="button"
+                  onClick={() => setShowForm(true)}
+                  className="btn-modern-secondary text-[11px] w-full py-2 font-bold flex items-center justify-center gap-1.5 cursor-pointer hover:bg-[#f7ebbf]/40"
                 >
-                  ✏️ Edit Konfirmasi
+                  <span>✏️ Isi / Ubah Form Kehadiran</span>
                 </button>
               </div>
             </motion.div>
@@ -353,7 +357,7 @@ export function RSVPSection() {
                     {/* Submit */}
                     <motion.button
                       type="submit"
-                      className="btn-modern-primary w-full py-2 rounded-full text-[10px] uppercase tracking-[1.5px] font-bold shadow-md mt-1"
+                      className="btn-modern-primary w-full py-2.5 rounded-full text-[10px] uppercase tracking-[1.5px] font-bold shadow-md mt-1"
                       disabled={isSubmitting || !formData.name}
                       whileHover={{ scale: 1.01 }}
                       whileTap={{ scale: 0.99 }}
@@ -372,9 +376,17 @@ export function RSVPSection() {
                           Mengirim...
                         </span>
                       ) : (
-                        "Kirim Konfirmasi"
+                        "Simpan & Tampilkan Barcode"
                       )}
                     </motion.button>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowForm(false)}
+                      className="text-[10px] text-[#66615c] hover:underline pt-1 cursor-pointer hover:text-[#2a2723] block text-center w-full font-semibold"
+                    >
+                      ← Kembali ke Barcode E-Ticket
+                    </button>
                   </motion.div>
                 )}
               </AnimatePresence>

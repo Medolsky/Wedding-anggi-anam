@@ -26,7 +26,7 @@ export function WelcomeCover() {
         {Array.from({ length: 10 }).map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-1.5 h-1.5 rounded-full bg-[#d4af37] shadow-[0_0_8px_#d4af37]"
+            className="absolute w-1.5 h-1.5 rounded-full bg-[#C8A96B] shadow-[0_0_8px_#C8A96B]"
             style={{
               left: `${10 + i * 9}%`,
               top: `${15 + (i % 4) * 20}%`,
@@ -58,7 +58,7 @@ export function WelcomeContent({
   onOpen: () => void;
 }) {
   return (
-    <div className="relative z-20 flex flex-col items-center justify-center min-h-screen px-6 py-12 text-center text-[#2a2723]">
+    <div className="relative z-20 flex flex-col items-center justify-center min-h-screen px-6 py-12 text-center text-[#C8C5BE]">
       {/* Ornament Top */}
       <motion.div
         className="flex items-center justify-center gap-3 mb-4"
@@ -73,7 +73,7 @@ export function WelcomeContent({
 
       {/* The Wedding of */}
       <motion.p
-        className="text-[11px] uppercase tracking-[5px] text-[#b8860b] font-extrabold mb-2 leading-none drop-shadow-sm"
+        className="text-[11px] uppercase tracking-[5px] text-[#D2B573] font-extrabold mb-2 leading-none drop-shadow-sm"
         style={{ fontFamily: "var(--font-body)" }}
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
@@ -94,7 +94,7 @@ export function WelcomeContent({
       </motion.h1>
 
       <motion.p
-        className="text-2xl md:text-3xl my-1 text-[#d4af37] font-serif leading-none"
+        className="text-2xl md:text-3xl my-1 text-[#E0C98F] font-serif leading-none"
         style={{ fontFamily: "var(--font-heading)" }}
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -115,7 +115,7 @@ export function WelcomeContent({
 
       {/* Date */}
       <motion.p
-        className="text-xs tracking-[4px] uppercase text-[#8a662d] font-extrabold mb-6 leading-none"
+        className="text-xs tracking-[4px] uppercase text-[#C8A96B] font-extrabold mb-6 leading-none"
         style={{ fontFamily: "var(--font-heading)" }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -126,19 +126,19 @@ export function WelcomeContent({
 
       {/* Guest Name Card */}
       <motion.div
-        className="mb-6 gold-card-pro px-5 py-4 border border-[#d4af37]/40 shadow-2xl max-w-xs w-full text-center"
+        className="mb-6 gold-card-pro px-5 py-4 border border-[#806A42] shadow-2xl max-w-xs w-full text-center"
         initial={{ opacity: 0, y: 15, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.8, delay: 1.4 }}
       >
         <p
-          className="text-[10px] uppercase tracking-[3px] text-[#d4af37] font-bold mb-1 leading-none text-center"
+          className="text-[10px] uppercase tracking-[3px] text-[#C8A96B] font-bold mb-1 leading-none text-center"
           style={{ fontFamily: "var(--font-body)" }}
         >
           Kepada Yth.
         </p>
         <p
-          className="text-base md:text-lg font-bold tracking-wide text-[#2a2723] text-center font-serif leading-snug"
+          className="text-base md:text-lg font-bold tracking-wide text-[#F5F1E8] text-center font-serif leading-snug"
           style={{ fontFamily: "var(--font-heading)" }}
         >
           {guestName}

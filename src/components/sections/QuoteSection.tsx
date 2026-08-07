@@ -12,7 +12,7 @@ export function QuoteSection() {
     <section
       id="quote"
       data-section="quote"
-      className="section-quote relative py-20 md:py-24 overflow-hidden flex flex-col items-center justify-center text-center bg-[#faf8f5] text-[#2a2723] transform-gpu"
+      className="section-quote relative py-20 md:py-24 overflow-hidden flex flex-col items-center justify-center text-center bg-[#0E0E0F] text-[#C8C5BE] transform-gpu"
     >
       {/* Background Photo — Clear & Vivid */}
       <div className="absolute inset-0">
@@ -36,7 +36,7 @@ export function QuoteSection() {
         transition={{ duration: 0.8, delay: 0.2 }}
       >
         <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0 0L0 40C0 20 20 0 40 0L0 0Z" stroke="#d4af37" strokeWidth="1.5" />
+          <path d="M0 0L0 40C0 20 20 0 40 0L0 0Z" stroke="#C8A96B" strokeWidth="1.5" />
         </svg>
       </motion.div>
 
@@ -48,7 +48,7 @@ export function QuoteSection() {
         transition={{ duration: 0.8, delay: 0.4 }}
       >
         <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0 0L0 40C0 20 20 0 40 0L0 0Z" stroke="#d4af37" strokeWidth="1.5" />
+          <path d="M0 0L0 40C0 20 20 0 40 0L0 0Z" stroke="#C8A96B" strokeWidth="1.5" />
         </svg>
       </motion.div>
 
@@ -57,7 +57,7 @@ export function QuoteSection() {
         {/* Opening quote mark */}
         <AnimatedText delay={0.1} variant="scaleUp" className="flex justify-center w-full">
           <div
-            className="text-4xl text-[#d4af37] opacity-90 mb-1 leading-none text-center font-serif"
+            className="text-4xl text-[#C8A96B] opacity-90 mb-1 leading-none text-center font-serif"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             ❝
@@ -78,7 +78,7 @@ export function QuoteSection() {
 
         {/* Quote Card Frame */}
         <motion.div
-          className="gold-card-pro p-5 md:p-6 border border-[#d4af37]/60 shadow-2xl w-full my-2 text-center transform-gpu"
+          className="gold-card-pro p-5 md:p-6 border border-[#806A42] shadow-2xl w-full my-2 text-center transform-gpu"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.1 }}
@@ -88,7 +88,7 @@ export function QuoteSection() {
             {quote.text.split("\n\n").map((para, idx) => (
               <p
                 key={idx}
-                className="text-xs md:text-sm leading-relaxed text-[#1f1d1a] font-medium text-center"
+                className="text-xs md:text-sm leading-relaxed text-[#F5F1E8] font-medium text-center"
               >
                 {para}
               </p>
@@ -102,7 +102,7 @@ export function QuoteSection() {
           </div>
 
           <p
-            className="text-[10px] tracking-[2.5px] uppercase font-extrabold text-[#996e00] text-center leading-relaxed italic font-serif"
+            className="text-[10px] tracking-[2.5px] uppercase font-extrabold text-[#D2B573] text-center leading-relaxed italic font-serif"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             {quote.source}

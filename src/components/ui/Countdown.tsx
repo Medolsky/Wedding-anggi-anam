@@ -10,7 +10,7 @@ interface CountdownProps {
 
 function CountdownUnit({ value, label }: { value: number; label: string }) {
   return (
-    <div className="flex flex-col items-center justify-center py-2 px-1.5 md:py-2.5 md:px-2 rounded-xl bg-[#faf8f5]/80 backdrop-blur-md border border-[#d4af37]/60 shadow-sm w-full">
+    <div className="flex flex-col items-center justify-center py-2 px-1.5 md:py-2.5 md:px-2 rounded-xl bg-[#171719] backdrop-blur-md border border-[#806A42] shadow-md w-full">
       <div className="h-7 md:h-8 flex items-center justify-center overflow-hidden w-full relative">
         <span
           className="block text-2xl md:text-3xl font-bold font-serif text-gold-gradient tabular-nums leading-none text-center"
@@ -20,7 +20,7 @@ function CountdownUnit({ value, label }: { value: number; label: string }) {
         </span>
       </div>
       <span
-        className="text-[9px] uppercase tracking-[1.5px] mt-1 text-[#8a662d] font-bold leading-none text-center"
+        className="text-[9px] uppercase tracking-[1.5px] mt-1 text-[#E0C98F] font-extrabold leading-none text-center"
         style={{ fontFamily: "var(--font-body)" }}
       >
         {label}

@@ -59,12 +59,12 @@ export function WelcomeContent({
 }) {
   return (
     <div className="relative z-20 flex flex-col items-center justify-end min-h-screen px-6 pb-28 md:pb-36 text-center">
-      {/* Guest Name Card — Transparent with Gold Trim, Appearing at 7 Seconds */}
+      {/* Guest Name Card — Transparent with Gold Trim, Appearing at 8 Seconds */}
       <motion.div
         className="mb-3.5 px-4 py-2.5 bg-black/35 backdrop-blur-xs border border-[#C8A96B] shadow-[0_8px_30px_rgba(0,0,0,0.6)] max-w-[230px] w-full text-center rounded-2xl"
         initial={{ opacity: 0, y: 25, scale: 0.94 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 1.0, delay: 7.0, ease: "easeOut" }}
+        transition={{ duration: 1.0, delay: 8.0, ease: "easeOut" }}
       >
         <p
           className="text-[9px] uppercase tracking-[2.5px] text-[#E0C98F] font-extrabold mb-0.5 leading-none text-center drop-shadow-xs"
@@ -80,12 +80,12 @@ export function WelcomeContent({
         </p>
       </motion.div>
 
-      {/* Open Button — Appearing at 7.2 Seconds */}
+      {/* Open Button — Appearing at 8.2 Seconds */}
       <motion.button
         className="btn-invitation group text-[10.5px] py-2 px-6 shadow-xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.0, delay: 7.2, ease: "easeOut" }}
+        transition={{ duration: 1.0, delay: 8.2, ease: "easeOut" }}
         onClick={onOpen}
         whileHover={{ scale: 1.04 }}
         whileTap={{ scale: 0.96 }}

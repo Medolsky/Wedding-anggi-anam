@@ -8,8 +8,11 @@ import { RSVPManager, RSVPItem } from "@/components/admin/RSVPManager";
 import { WishesManager, WishItem } from "@/components/admin/WishesManager";
 import { BarcodeScannerManager } from "@/components/admin/BarcodeScannerManager";
 
+type AdminTab = "dashboard" | "scanner" | "links" | "rsvp" | "wishes" | "info";
+
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState<"dashboard" | "scanner" | "links" | "rsvp" | "wishes" | "info">("dashboard");
+  const [activeTab, setActiveTab] = useState<AdminTab>("dashboard");
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // Summary Metrics State
   const [guests, setGuests] = useState<GeneratedGuest[]>([]);
@@ -78,59 +81,274 @@ export default function AdminPage() {
     document.body.removeChild(link);
   }
 
-  return (
-    <main className="min-h-screen bg-[#faf8f5] text-[#2a2723] selection:bg-[#d4af37] selection:text-white pb-16 font-sans">
-      {/* Container */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5 space-y-5">
-        
-        {/* Header Bar */}
-        <header className="bg-white border border-[#d4af37]/40 rounded-2xl shadow-sm p-4 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1 flex-wrap">
-              <span className="text-[10px] uppercase tracking-[3px] text-[#b8860b] font-extrabold bg-[#f7ebbf]/40 px-3 py-0.5 rounded-full border border-[#d4af37]/30">
-                👑 Professional Admin Panel
-              </span>
+  const sidebarNavItems = [
+    {
+      id: "dashboard" as AdminTab,
+      label: "Dashboard Utama",
+      badge: null,
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="3" y="3" width="7" height="7" rx="1.5" />
+          <rect x="14" y="3" width="7" height="7" rx="1.5" />
+          <rect x="14" y="14" width="7" height="7" rx="1.5" />
+          <rect x="3" y="14" width="7" height="7" rx="1.5" />
+        </svg>
+      ),
+    },
+    {
+      id: "scanner" as AdminTab,
+      label: "Scanner Check-In",
+      badge: checkedInCount > 0 ? checkedInCount : null,
+      badgeColor: "bg-emerald-500 text-white",
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+          <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+          <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+          <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+          <line x1="7" y1="12" x2="17" y2="12" />
+        </svg>
+      ),
+    },
+    {
+      id: "links" as AdminTab,
+      label: "Daftar Tamu & WA Bot",
+      badge: totalGuests > 0 ? totalGuests : null,
+      badgeColor: "bg-[#C8A96B] text-white",
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+      ),
+    },
+    {
+      id: "rsvp" as AdminTab,
+      label: "Rekap RSVP",
+      badge: attendingRsvpCount > 0 ? attendingRsvpCount : null,
+      badgeColor: "bg-amber-500 text-white",
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+          <line x1="16" y1="2" x2="16" y2="6" />
+          <line x1="8" y1="2" x2="8" y2="6" />
+          <line x1="3" y1="10" x2="21" y2="10" />
+          <path d="m9 16 2 2 4-4" />
+        </svg>
+      ),
+    },
+    {
+      id: "wishes" as AdminTab,
+      label: "Ucapan & Doa",
+      badge: totalWishes > 0 ? totalWishes : null,
+      badgeColor: "bg-blue-500 text-white",
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+      ),
+    },
+    {
+      id: "info" as AdminTab,
+      label: "Info Acara & Kado",
+      badge: null,
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="16" x2="12" y2="12" />
+          <line x1="12" y1="8" x2="12.01" y2="8" />
+        </svg>
+      ),
+    },
+  ];
 
-              {/* Cloud Sync Badge */}
-              <span
-                className={`text-[9.5px] px-2.5 py-0.5 rounded-full font-extrabold flex items-center gap-1 border ${
-                  isCloudSynced === true
-                    ? "bg-emerald-50 text-emerald-700 border-emerald-300"
-                    : isCloudSynced === false
-                    ? "bg-amber-50 text-amber-700 border-amber-300"
-                    : "bg-gray-100 text-gray-600 border-gray-300"
-                }`}
-              >
-                <span className={`w-1.5 h-1.5 rounded-full ${isCloudSynced ? "bg-emerald-500 animate-ping" : "bg-amber-500"}`} />
-                {isCloudSynced ? "Supabase Cloud Connected" : "Local Memory Store"}
-              </span>
+  return (
+    <div className="min-h-screen bg-[#F4F4F6] text-[#1A1815] font-sans flex flex-col md:flex-row">
+      {/* ==========================================
+          SIDEBAR NAVIGATION (DESKTOP & MOBILE DRAWER)
+          ========================================== */}
+      
+      {/* Mobile Backdrop Overlay */}
+      {isMobileSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-xs transition-opacity"
+          onClick={() => setIsMobileSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar Container */}
+      <aside
+        className={`fixed md:sticky top-0 left-0 bottom-0 z-50 w-72 bg-[#121214] text-[#E5E3DF] border-r border-[#27272A] flex flex-col justify-between transition-transform duration-300 ease-in-out md:translate-x-0 ${
+          isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } h-screen overflow-y-auto`}
+      >
+        <div>
+          {/* Sidebar Header Brand */}
+          <div className="p-6 border-b border-[#27272A] flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#E0C98F] via-[#C8A96B] to-[#8A6B35] flex items-center justify-center text-white font-bold text-lg shadow-md">
+                👑
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-white tracking-wide leading-tight">
+                  ADMIN PANEL
+                </h2>
+                <p className="text-[11px] text-[#C8A96B] font-serif">
+                  {weddingData.couple.bride.nickname} &amp; {weddingData.couple.groom.nickname}
+                </p>
+              </div>
             </div>
 
-            <h1
-              className="text-xl sm:text-2xl font-bold font-serif text-[#2a2723]"
-              style={{ fontFamily: "var(--font-heading)" }}
+            {/* Mobile Close Button */}
+            <button
+              onClick={() => setIsMobileSidebarOpen(false)}
+              className="md:hidden text-[#A1A1AA] hover:text-white p-1"
             >
-              Pernikahan {weddingData.couple.bride.nickname} &amp; {weddingData.couple.groom.nickname}
-            </h1>
-            <p className="text-xs text-[#66615c] mt-0.5">
-              Sabtu, 10 Oktober 2026 • BALAI IKABAMA, Depok
-            </p>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
           </div>
 
-          <div className="flex items-center gap-2.5 flex-wrap">
+          {/* Cloud Sync Status Pill */}
+          <div className="px-6 py-4">
+            <div className="bg-[#1C1C20] border border-[#27272A] p-3 rounded-xl flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full ${isCloudSynced ? "bg-emerald-400 animate-ping" : "bg-amber-400"}`} />
+                <span className="text-[11px] font-semibold text-[#A1A1AA]">
+                  {isCloudSynced ? "Supabase Cloud" : "Local Memory"}
+                </span>
+              </div>
+              <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${isCloudSynced ? "bg-emerald-950 text-emerald-300 border border-emerald-800" : "bg-amber-950 text-amber-300 border border-amber-800"}`}>
+                {isCloudSynced ? "CONNECTED" : "OFFLINE"}
+              </span>
+            </div>
+          </div>
+
+          {/* Sidebar Menu Items */}
+          <nav className="px-4 space-y-1.5">
+            <p className="px-3 text-[10px] font-bold uppercase tracking-[2px] text-[#71717A] mb-2">
+              Menu Utama
+            </p>
+            {sidebarNavItems.map((item) => {
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    setIsMobileSidebarOpen(false);
+                  }}
+                  className={`w-full py-3 px-3.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between cursor-pointer group ${
+                    isActive
+                      ? "bg-gradient-to-r from-[#C8A96B] to-[#B8860B] text-white shadow-lg shadow-[#C8A96B]/20"
+                      : "text-[#A1A1AA] hover:bg-[#1E1E22] hover:text-white"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className={isActive ? "text-white" : "text-[#71717A] group-hover:text-[#C8A96B]"}>
+                      {item.icon}
+                    </span>
+                    <span>{item.label}</span>
+                  </div>
+
+                  {item.badge !== null && (
+                    <span
+                      className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                        isActive
+                          ? "bg-white/20 text-white"
+                          : item.badgeColor || "bg-[#27272A] text-[#E5E3DF]"
+                      }`}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Sidebar Footer Quick Links */}
+        <div className="p-4 border-t border-[#27272A] space-y-2">
+          <button
+            onClick={exportFullDataCSV}
+            className="w-full py-2.5 px-3 bg-[#1C1C20] hover:bg-[#27272A] border border-[#3F3F46] text-[#E5E3DF] rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            <span>Export CSV Report</span>
+          </button>
+
+          <Link
+            href="/"
+            target="_blank"
+            className="w-full py-2.5 px-3 bg-[#C8A96B]/15 hover:bg-[#C8A96B]/25 border border-[#C8A96B]/40 text-[#E0C98F] rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-xs"
+          >
+            <span>Preview Live Web</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+          </Link>
+        </div>
+      </aside>
+
+      {/* ==========================================
+          MAIN CONTENT STAGE
+          ========================================== */}
+      <div className="flex-1 flex flex-col min-w-0 min-h-screen overflow-x-hidden">
+        {/* Top Header Bar for Mobile & Desktop */}
+        <header className="bg-white border-b border-[#E4E4E7] sticky top-0 z-30 px-4 sm:px-8 py-4 flex items-center justify-between shadow-xs">
+          <div className="flex items-center gap-3">
+            {/* Mobile Hamburger Toggle Button */}
+            <button
+              onClick={() => setIsMobileSidebarOpen(true)}
+              className="md:hidden p-2 text-[#52525B] hover:text-[#18181B] bg-[#F4F4F6] rounded-xl border border-[#E4E4E7] cursor-pointer"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            </button>
+
+            <div>
+              <h1 className="text-lg sm:text-xl font-bold font-serif text-[#18181B] leading-tight">
+                {sidebarNavItems.find((n) => n.id === activeTab)?.label}
+              </h1>
+              <p className="text-[11px] text-[#71717A] hidden sm:block">
+                Wedding Admin • {weddingData.couple.bride.nickname} &amp; {weddingData.couple.groom.nickname} (10 Oktober 2026)
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
             <button
               onClick={exportFullDataCSV}
-              className="py-2 px-3.5 bg-white border border-[#d4af37]/40 text-[#2a2723] hover:bg-[#f7ebbf]/40 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+              className="hidden sm:flex py-2 px-3.5 bg-[#F4F4F6] hover:bg-[#E4E4E7] text-[#27272A] border border-[#E4E4E7] rounded-xl text-xs font-bold transition-all items-center gap-1.5 cursor-pointer"
             >
-              <span>📥 Export Laporan CSV</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              <span>Export CSV</span>
             </button>
 
             <Link
               href="/"
               target="_blank"
-              className="py-2 px-4 bg-[#d4af37] text-white hover:bg-[#b8860b] rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5 whitespace-nowrap"
+              className="py-2 px-3.5 bg-gradient-to-r from-[#C8A96B] to-[#B8860B] text-white hover:opacity-95 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
             >
-              <span>👁️ Lihat Undangan Live</span>
+              <span>Lihat Web</span>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
                 <polyline points="15 3 21 3 21 9" />
@@ -140,199 +358,157 @@ export default function AdminPage() {
           </div>
         </header>
 
-        {/* Navigation Tabs */}
-        <nav className="bg-white border border-[#d4af37]/30 rounded-2xl shadow-sm p-1.5 flex flex-wrap gap-1.5">
-          <button
-            onClick={() => setActiveTab("dashboard")}
-            className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
-              activeTab === "dashboard"
-                ? "bg-[#d4af37] text-white shadow-md"
-                : "bg-transparent text-[#66615c] hover:bg-[#f7ebbf]/30 hover:text-[#2a2723]"
-            }`}
-          >
-            <span>📊 Dashboard Utama</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("scanner")}
-            className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
-              activeTab === "scanner"
-                ? "bg-[#d4af37] text-white shadow-md"
-                : "bg-transparent text-[#66615c] hover:bg-[#f7ebbf]/30 hover:text-[#2a2723]"
-            }`}
-          >
-            <span>📷 Scanner Check-In</span>
-            {checkedInCount > 0 && (
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${activeTab === "scanner" ? "bg-white text-[#b8860b]" : "bg-emerald-100 text-emerald-800"}`}>
-                {checkedInCount}
-              </span>
-            )}
-          </button>
-
-          <button
-            onClick={() => setActiveTab("links")}
-            className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
-              activeTab === "links"
-                ? "bg-[#d4af37] text-white shadow-md"
-                : "bg-transparent text-[#66615c] hover:bg-[#f7ebbf]/30 hover:text-[#2a2723]"
-            }`}
-          >
-            <span>🔗 Daftar Tamu &amp; WA Bot</span>
-            {totalGuests > 0 && (
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${activeTab === "links" ? "bg-white text-[#b8860b]" : "bg-[#f7ebbf] text-[#8a662d]"}`}>
-                {totalGuests}
-              </span>
-            )}
-          </button>
-
-          <button
-            onClick={() => setActiveTab("rsvp")}
-            className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
-              activeTab === "rsvp"
-                ? "bg-[#d4af37] text-white shadow-md"
-                : "bg-transparent text-[#66615c] hover:bg-[#f7ebbf]/30 hover:text-[#2a2723]"
-            }`}
-          >
-            <span>📅 Rekap RSVP</span>
-            {attendingRsvpCount > 0 && (
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${activeTab === "rsvp" ? "bg-white text-[#b8860b]" : "bg-emerald-100 text-emerald-800"}`}>
-                {attendingRsvpCount}
-              </span>
-            )}
-          </button>
-
-          <button
-            onClick={() => setActiveTab("wishes")}
-            className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
-              activeTab === "wishes"
-                ? "bg-[#d4af37] text-white shadow-md"
-                : "bg-transparent text-[#66615c] hover:bg-[#f7ebbf]/30 hover:text-[#2a2723]"
-            }`}
-          >
-            <span>💌 Ucapan &amp; Doa</span>
-            {totalWishes > 0 && (
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${activeTab === "wishes" ? "bg-white text-[#b8860b]" : "bg-[#f7ebbf] text-[#8a662d]"}`}>
-                {totalWishes}
-              </span>
-            )}
-          </button>
-
-          <button
-            onClick={() => setActiveTab("info")}
-            className={`py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
-              activeTab === "info"
-                ? "bg-[#d4af37] text-white shadow-md"
-                : "bg-transparent text-[#66615c] hover:bg-[#f7ebbf]/30 hover:text-[#2a2723]"
-            }`}
-          >
-            <span>⚙️ Info Acara &amp; Kado</span>
-          </button>
-        </nav>
-
-        {/* Tab Content */}
-        <div className="space-y-6">
-          {/* Overview Dashboard Tab */}
+        {/* Content Body */}
+        <main className="p-4 sm:p-8 flex-1 space-y-6 max-w-7xl mx-auto w-full">
           {activeTab === "dashboard" && (
             <div className="space-y-6">
               {/* Summary Stats Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
-                <div className="bg-white p-4 border border-[#d4af37]/40 rounded-2xl shadow-sm space-y-1">
-                  <p className="text-[10.5px] uppercase tracking-wider text-[#66615c] font-bold">Total Tamu Diundang</p>
-                  <p className="text-3xl font-bold font-serif text-[#2a2723]">{totalGuests}</p>
-                  <p className="text-[10px] text-[#8a662d]">Undangan terbuat</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-white p-5 border border-[#E4E4E7] rounded-2xl shadow-xs space-y-1">
+                  <div className="flex items-center justify-between text-[#71717A] mb-1">
+                    <span className="text-[10.5px] uppercase tracking-wider font-bold">Total Tamu</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                    </svg>
+                  </div>
+                  <p className="text-3xl font-bold font-serif text-[#18181B]">{totalGuests}</p>
+                  <p className="text-[10.5px] text-[#71717A]">Undangan terbuat</p>
                 </div>
 
-                <div className="bg-white p-4 border border-emerald-400/50 rounded-2xl shadow-sm space-y-1">
-                  <p className="text-[10.5px] uppercase tracking-wider text-emerald-800 font-bold">Tamu Hadir di Lokasi</p>
+                <div className="bg-white p-5 border border-emerald-200 rounded-2xl shadow-xs space-y-1">
+                  <div className="flex items-center justify-between text-emerald-700 mb-1">
+                    <span className="text-[10.5px] uppercase tracking-wider font-bold">Check-In Lokasi</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </div>
                   <p className="text-3xl font-bold font-serif text-emerald-700">
                     {checkedInCount} <span className="text-xs font-semibold text-emerald-600">({totalPaxCheckedIn} PAX)</span>
                   </p>
-                  <p className="text-[10px] text-emerald-700">Sudah scan QR di pintu</p>
+                  <p className="text-[10.5px] text-emerald-600">Sudah scan QR di lokasi</p>
                 </div>
 
-                <div className="bg-white p-4 border border-amber-400/50 rounded-2xl shadow-sm space-y-1">
-                  <p className="text-[10.5px] uppercase tracking-wider text-amber-800 font-bold">Konfirmasi RSVP Hadir</p>
+                <div className="bg-white p-5 border border-amber-200 rounded-2xl shadow-xs space-y-1">
+                  <div className="flex items-center justify-between text-amber-700 mb-1">
+                    <span className="text-[10.5px] uppercase tracking-wider font-bold">RSVP Hadir</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                    </svg>
+                  </div>
                   <p className="text-3xl font-bold font-serif text-amber-700">
                     {attendingRsvpCount} <span className="text-xs font-semibold text-amber-600">({totalPaxRsvp} Orang)</span>
                   </p>
-                  <p className="text-[10px] text-amber-700">Mengisi form RSVP web</p>
+                  <p className="text-[10.5px] text-amber-600">Konfirmasi via web</p>
                 </div>
 
-                <div className="bg-white p-4 border border-blue-400/50 rounded-2xl shadow-sm space-y-1">
-                  <p className="text-[10.5px] uppercase tracking-wider text-blue-800 font-bold">Total Ucapan &amp; Doa</p>
+                <div className="bg-white p-5 border border-blue-200 rounded-2xl shadow-xs space-y-1">
+                  <div className="flex items-center justify-between text-blue-700 mb-1">
+                    <span className="text-[10.5px] uppercase tracking-wider font-bold">Ucapan &amp; Doa</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    </svg>
+                  </div>
                   <p className="text-3xl font-bold font-serif text-blue-700">{totalWishes}</p>
-                  <p className="text-[10px] text-blue-700">Pesan dari tamu</p>
+                  <p className="text-[10.5px] text-blue-600">Pesan dari tamu</p>
                 </div>
               </div>
 
-              {/* Quick Actions Panel */}
-              <div className="bg-white p-5 border border-[#d4af37]/40 rounded-2xl shadow-sm space-y-4">
-                <h3 className="text-sm font-bold font-serif text-[#2a2723] uppercase tracking-wider">
-                  ⚡ Akses Cepat Fitur Utilitas
+              {/* Quick Action Panels */}
+              <div className="bg-white p-6 border border-[#E4E4E7] rounded-2xl shadow-xs space-y-4">
+                <h3 className="text-xs font-bold text-[#71717A] uppercase tracking-[2px]">
+                  Akses Cepat Fitur Utilitas
                 </h3>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <button
                     onClick={() => setActiveTab("scanner")}
-                    className="p-4 bg-[#faf8f5] hover:bg-[#f7ebbf]/40 border border-[#d4af37]/40 rounded-xl text-left transition-all cursor-pointer space-y-1"
+                    className="p-5 bg-[#F4F4F6] hover:bg-emerald-50 border border-[#E4E4E7] hover:border-emerald-300 rounded-2xl text-left transition-all cursor-pointer space-y-2 group"
                   >
-                    <div className="text-xl">📷</div>
-                    <p className="text-xs font-bold text-[#2a2723]">Scan Barcode Check-In</p>
-                    <p className="text-[10.5px] text-[#66615c]">Buka kamera untuk scan QR E-Ticket kedatangan tamu.</p>
+                    <div className="w-10 h-10 rounded-xl bg-white border border-[#E4E4E7] flex items-center justify-center text-emerald-600 group-hover:scale-105 transition-transform shadow-xs">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+                        <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+                        <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+                        <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+                        <line x1="7" y1="12" x2="17" y2="12" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-[#18181B]">Scan Barcode Check-In</p>
+                      <p className="text-[11px] text-[#71717A] mt-0.5">Buka kamera untuk scan QR E-Ticket kedatangan tamu.</p>
+                    </div>
                   </button>
 
                   <button
                     onClick={() => setActiveTab("links")}
-                    className="p-4 bg-[#faf8f5] hover:bg-[#f7ebbf]/40 border border-[#d4af37]/40 rounded-xl text-left transition-all cursor-pointer space-y-1"
+                    className="p-5 bg-[#F4F4F6] hover:bg-[#C8A96B]/10 border border-[#E4E4E7] hover:border-[#C8A96B]/50 rounded-2xl text-left transition-all cursor-pointer space-y-2 group"
                   >
-                    <div className="text-xl">🚀</div>
-                    <p className="text-xs font-bold text-[#2a2723]">Kirim WA Massal &amp; Impor</p>
-                    <p className="text-[10.5px] text-[#66615c]">Impor daftar tamu dari Excel/WA &amp; kirim via bot.</p>
+                    <div className="w-10 h-10 rounded-xl bg-white border border-[#E4E4E7] flex items-center justify-center text-[#B8860B] group-hover:scale-105 transition-transform shadow-xs">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <line x1="22" y1="2" x2="11" y2="13" />
+                        <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-[#18181B]">Kirim WA Massal &amp; Impor</p>
+                      <p className="text-[11px] text-[#71717A] mt-0.5">Impor daftar tamu dari Excel/WA &amp; blast link via bot.</p>
+                    </div>
                   </button>
 
                   <button
                     onClick={exportFullDataCSV}
-                    className="p-4 bg-[#faf8f5] hover:bg-[#f7ebbf]/40 border border-[#d4af37]/40 rounded-xl text-left transition-all cursor-pointer space-y-1"
+                    className="p-5 bg-[#F4F4F6] hover:bg-blue-50 border border-[#E4E4E7] hover:border-blue-300 rounded-2xl text-left transition-all cursor-pointer space-y-2 group"
                   >
-                    <div className="text-xl">📥</div>
-                    <p className="text-xs font-bold text-[#2a2723]">Download Rekap Laporan</p>
-                    <p className="text-[10.5px] text-[#66615c]">Export seluruh data tamu, RSVP, &amp; ucapan ke CSV.</p>
+                    <div className="w-10 h-10 rounded-xl bg-white border border-[#E4E4E7] flex items-center justify-center text-blue-600 group-hover:scale-105 transition-transform shadow-xs">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-[#18181B]">Download Laporan CSV</p>
+                      <p className="text-[11px] text-[#71717A] mt-0.5">Export seluruh data tamu, RSVP, &amp; ucapan ke file CSV.</p>
+                    </div>
                   </button>
                 </div>
               </div>
 
-              {/* Recent Activity Live Preview */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* Recent Activity Section */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Recent Check-Ins */}
-                <div className="bg-white p-4 border border-[#d4af37]/30 rounded-2xl shadow-sm space-y-3">
+                <div className="bg-white p-5 border border-[#E4E4E7] rounded-2xl shadow-xs space-y-3">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs uppercase tracking-wider font-bold text-[#b8860b]">
-                      📋 Check-In Terbaru ({checkedInCount})
+                    <h4 className="text-xs uppercase tracking-wider font-bold text-[#18181B]">
+                      Check-In Terbaru ({checkedInCount})
                     </h4>
                     <button
                       onClick={() => setActiveTab("scanner")}
-                      className="text-[10px] text-[#b8860b] hover:underline font-bold"
+                      className="text-[11px] text-[#B8860B] hover:underline font-bold"
                     >
                       Buka Scanner →
                     </button>
                   </div>
 
                   {guests.filter((g) => g.checkedIn).length === 0 ? (
-                    <p className="text-xs text-[#66615c] italic text-center py-4">Belum ada tamu yang check-in.</p>
+                    <p className="text-xs text-[#71717A] italic text-center py-6">Belum ada tamu yang check-in.</p>
                   ) : (
                     <div className="space-y-2">
                       {guests
                         .filter((g) => g.checkedIn)
                         .slice(0, 4)
                         .map((g) => (
-                          <div key={g.id} className="p-2.5 bg-emerald-50/70 border border-emerald-300 rounded-xl flex items-center justify-between text-xs">
+                          <div key={g.id} className="p-3 bg-emerald-50/60 border border-emerald-200 rounded-xl flex items-center justify-between text-xs">
                             <div>
-                              <span className="font-bold text-[#2a2723]">{g.name}</span>
-                              <div className="text-[10px] text-[#66615c]">
+                              <span className="font-bold text-[#18181B]">{g.name}</span>
+                              <div className="text-[10px] text-[#71717A]">
                                 {g.pax || 1} PAX • {g.checkInTime || "Baru saja"}
                               </div>
                             </div>
-                            <span className="text-[9px] bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded-full font-bold">
+                            <span className="text-[9.5px] bg-emerald-200 text-emerald-800 px-2.5 py-0.5 rounded-full font-bold">
                               ✓ HADIR
                             </span>
                           </div>
@@ -342,30 +518,30 @@ export default function AdminPage() {
                 </div>
 
                 {/* Recent Wishes */}
-                <div className="bg-white p-4 border border-[#d4af37]/30 rounded-2xl shadow-sm space-y-3">
+                <div className="bg-white p-5 border border-[#E4E4E7] rounded-2xl shadow-xs space-y-3">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs uppercase tracking-wider font-bold text-[#b8860b]">
-                      💌 Ucapan Terbaru ({totalWishes})
+                    <h4 className="text-xs uppercase tracking-wider font-bold text-[#18181B]">
+                      Ucapan Terbaru ({totalWishes})
                     </h4>
                     <button
                       onClick={() => setActiveTab("wishes")}
-                      className="text-[10px] text-[#b8860b] hover:underline font-bold"
+                      className="text-[11px] text-[#B8860B] hover:underline font-bold"
                     >
                       Lihat Semua →
                     </button>
                   </div>
 
                   {wishes.length === 0 ? (
-                    <p className="text-xs text-[#66615c] italic text-center py-4">Belum ada ucapan masuk.</p>
+                    <p className="text-xs text-[#71717A] italic text-center py-6">Belum ada ucapan masuk.</p>
                   ) : (
                     <div className="space-y-2">
                       {wishes.slice(0, 3).map((w) => (
-                        <div key={w.id} className="p-2.5 bg-[#faf8f5] border border-[#d4af37]/30 rounded-xl space-y-1 text-xs">
+                        <div key={w.id} className="p-3 bg-[#F4F4F6] border border-[#E4E4E7] rounded-xl space-y-1 text-xs">
                           <div className="flex justify-between items-center">
-                            <span className="font-bold text-[#2a2723]">{w.name}</span>
-                            <span className="text-[9.5px] text-[#888]">{w.createdAt}</span>
+                            <span className="font-bold text-[#18181B]">{w.name}</span>
+                            <span className="text-[9.5px] text-[#71717A]">{w.createdAt}</span>
                           </div>
-                          <p className="text-[11px] text-[#555] italic truncate">&quot;{w.message}&quot;</p>
+                          <p className="text-[11px] text-[#52525B] italic truncate">&quot;{w.message}&quot;</p>
                         </div>
                       ))}
                     </div>
@@ -385,34 +561,29 @@ export default function AdminPage() {
 
           {activeTab === "info" && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="gold-card-pro p-6 border border-[#d4af37]/40 rounded-2xl bg-white space-y-4 shadow-sm">
-                <h3 className="text-lg font-bold font-serif text-[#2a2723]">ℹ️ Ringkasan Informasi Acara</h3>
-                <div className="text-xs space-y-2 text-[#555555]">
+              <div className="p-6 border border-[#E4E4E7] rounded-2xl bg-white space-y-4 shadow-xs">
+                <h3 className="text-lg font-bold font-serif text-[#18181B]">Ringkasan Informasi Acara</h3>
+                <div className="text-xs space-y-2.5 text-[#52525B]">
                   <p><strong>Mempelai:</strong> {weddingData.couple.bride.fullName} &amp; {weddingData.couple.groom.fullName}</p>
                   <p><strong>Tanggal:</strong> Sabtu, 10 Oktober 2026</p>
                   <p><strong>Lokasi:</strong> BALAI IKABAMA, Depok</p>
-                  <p><strong>Musik:</strong> Catalyst - Weird Genius</p>
+                  <p><strong>Musik Background:</strong> Catalyst - Weird Genius</p>
                 </div>
               </div>
 
-              <div className="gold-card-pro p-6 border border-[#d4af37]/40 rounded-2xl bg-white space-y-4 shadow-sm">
-                <h3 className="text-lg font-bold font-serif text-[#2a2723]">💳 Rekening &amp; Hadiah</h3>
-                <div className="text-xs space-y-2 text-[#555555]">
+              <div className="p-6 border border-[#E4E4E7] rounded-2xl bg-white space-y-4 shadow-xs">
+                <h3 className="text-lg font-bold font-serif text-[#18181B]">Rekening &amp; Alamat Hadiah</h3>
+                <div className="text-xs space-y-2.5 text-[#52525B]">
                   {weddingData.giftAccounts.map((acc) => (
                     <p key={acc.id}>• <strong>{acc.bankName}:</strong> {acc.accountNumber} (a.n. {acc.accountName})</p>
                   ))}
-                  <p className="pt-2 border-t border-[#d4af37]/20"><strong>Alamat Kado:</strong> {weddingData.giftAddress.address}</p>
+                  <p className="pt-2 border-t border-[#E4E4E7]"><strong>Alamat Kado:</strong> {weddingData.giftAddress.address}</p>
                 </div>
               </div>
             </div>
           )}
-        </div>
-
-        {/* Footer info */}
-        <footer className="pt-6 border-t border-[#d4af37]/20 text-center text-xs text-[#66615c]">
-          Wevitation Wedding Digital Admin Panel Dashboard • 2026
-        </footer>
+        </main>
       </div>
-    </main>
+    </div>
   );
 }

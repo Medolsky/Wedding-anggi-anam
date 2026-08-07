@@ -12,55 +12,57 @@ export function QuoteSection() {
     <section
       id="quote"
       data-section="quote"
-      className="section-quote relative py-20 md:py-24 overflow-hidden flex flex-col items-center justify-center text-center bg-[#0E0E0F] text-[#C8C5BE] transform-gpu"
+      className="section-quote relative py-18 md:py-24 overflow-hidden flex flex-col items-center justify-center text-center bg-[#FAF8F5] text-[#1A1815]"
     >
-      {/* Background Photo — Clear & Vivid */}
+      {/* Background Image — Clear & Vivid Photo */}
       <div className="absolute inset-0">
-        <div
-          className="absolute inset-0 bg-cover bg-center transform-gpu"
+        <motion.div
+          className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url('${sectionBgs.quote}')`,
-            filter: "brightness(0.92) contrast(1.02)",
+            filter: "brightness(0.95) contrast(1.02)",
           }}
+          initial={{ scale: 1.15 }}
+          whileInView={{ scale: 1 }}
+          viewport={{ once: false, amount: 0.1 }}
+          transition={{ duration: 10, ease: "linear" }}
         />
         <div className="absolute inset-0 photo-overlay-cinematic" />
         <div className="absolute inset-0 film-grain" />
       </div>
 
-      {/* Decorative corner ornaments */}
-      <motion.div
-        className="absolute top-6 left-6 w-10 h-10 opacity-50 z-20"
-        initial={{ opacity: 0, scale: 0 }}
-        whileInView={{ opacity: 0.5, scale: 1 }}
-        viewport={{ once: true, amount: 0.1 }}
-        transition={{ duration: 0.8, delay: 0.2 }}
-      >
-        <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0 0L0 40C0 20 20 0 40 0L0 0Z" stroke="#C8A96B" strokeWidth="1.5" />
-        </svg>
-      </motion.div>
+      <div className="relative z-20 max-w-md mx-auto px-6 w-full text-center flex flex-col items-center justify-center">
+        {/* Card Frame containing Quote & Quranic Verse */}
+        <AnimatedText delay={0} variant="fadeUp" className="w-full flex justify-center">
+          <div className="gold-card-pro p-6 md:p-8 border border-[#C8A96B] shadow-2xl rounded-2xl w-full text-center flex flex-col items-center justify-center">
+            {/* Top ornament */}
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <span className="ornament-line" />
+              <span className="ornament-dot" />
+              <span className="ornament-line" />
+            </div>
 
-      <motion.div
-        className="absolute bottom-6 right-6 w-10 h-10 opacity-50 rotate-180 z-20"
-        initial={{ opacity: 0, scale: 0 }}
-        whileInView={{ opacity: 0.5, scale: 1 }}
-        viewport={{ once: true, amount: 0.1 }}
-        transition={{ duration: 0.8, delay: 0.4 }}
-      >
-        <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0 0L0 40C0 20 20 0 40 0L0 0Z" stroke="#C8A96B" strokeWidth="1.5" />
-        </svg>
-      </motion.div>
+            {/* Arabic Quranic Text */}
+            <p
+              className="text-xl md:text-2xl text-[#C8A96B] font-serif mb-4 leading-loose font-bold text-center"
+              style={{ fontFamily: "var(--font-heading)" }}
+              dir="rtl"
+            >
+              وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا لِّتَسْكُنُوا إِلَيْهَا وَجَعَلَ بَيْنَكُم مَّوَدَّةً وَرَحْمَةً
+            </p>
 
-      {/* Content */}
-      <div className="relative z-20 max-w-md mx-auto px-6 text-center flex flex-col items-center justify-center w-full">
-        {/* Opening quote mark */}
-        <AnimatedText delay={0.1} variant="scaleUp" className="flex justify-center w-full">
-          <div
-            className="text-4xl text-[#C8A96B] opacity-90 mb-1 leading-none text-center font-serif"
-            style={{ fontFamily: "var(--font-heading)" }}
-          >
-            ❝
+            {/* Indonesian Translation Quote */}
+            <blockquote
+              className="text-xs md:text-sm leading-relaxed text-[#1A1815] font-serif font-medium mb-4 italic opacity-95 text-center"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              "{quote.text}"
+            </blockquote>
+
+            {/* Source */}
+            <cite className="text-[10px] uppercase tracking-[3px] text-[#B8860B] font-extrabold not-italic text-center block leading-none">
+              — {quote.source} —
+            </cite>
           </div>
         </AnimatedText>
 

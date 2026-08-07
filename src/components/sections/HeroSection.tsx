@@ -12,7 +12,7 @@ export function HeroSection() {
     <section
       id="home"
       data-section="hero"
-      className="relative min-h-screen h-screen flex flex-col justify-between items-center overflow-hidden bg-[#0E0E0F] text-[#C8C5BE] transform-gpu py-8 px-6"
+      className="relative min-h-screen h-screen flex flex-col justify-between items-center overflow-hidden bg-[#FAF8F5] text-[#1A1815] transform-gpu py-8 px-6"
     >
       {/* Background Image — Clear & Vivid Photo */}
       <div className="absolute inset-0">
@@ -20,7 +20,7 @@ export function HeroSection() {
           className="absolute inset-0 bg-cover bg-center transform-gpu"
           style={{
             backgroundImage: `url('${sectionBgs.hero}')`,
-            filter: "brightness(0.92) contrast(1.02)",
+            filter: "brightness(0.95) contrast(1.02)",
           }}
         />
         <div className="absolute inset-0 photo-overlay-cinematic" />
@@ -40,7 +40,7 @@ export function HeroSection() {
         {/* The Wedding of — Enlarged & Prominent */}
         <AnimatedText delay={0.2} variant="fadeUp" className="w-full text-center mt-1">
           <p
-            className="text-xs md:text-sm uppercase tracking-[7px] text-[#D2B573] font-extrabold text-center leading-none drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]"
+            className="text-xs md:text-sm uppercase tracking-[7px] text-[#B8860B] font-extrabold text-center leading-none drop-shadow-[0_1px_3px_rgba(255,255,255,0.9)]"
             style={{ fontFamily: "var(--font-body)" }}
           >
             The Wedding of
@@ -54,11 +54,11 @@ export function HeroSection() {
         <div className="flex flex-col items-center justify-center w-full text-center my-2 py-2">
           <CharReveal
             text={couple.groom.nickname}
-            className="text-6xl md:text-7xl text-gold-gradient font-script text-center font-bold drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] leading-tight py-1"
+            className="text-6xl md:text-7xl text-gold-gradient font-script text-center font-bold drop-shadow-[0_2px_8px_rgba(0,0,0,0.15)] leading-tight py-1"
             delay={0.4}
           />
           <motion.span
-            className="text-3xl md:text-4xl text-[#E0C98F] font-serif my-1 leading-none font-bold drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]"
+            className="text-3xl md:text-4xl text-[#C8A96B] font-serif my-1 leading-none font-bold drop-shadow-[0_1px_3px_rgba(255,255,255,0.9)]"
             style={{ fontFamily: "var(--font-heading)" }}
             initial={{ opacity: 0, scale: 0.5 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -69,7 +69,7 @@ export function HeroSection() {
           </motion.span>
           <CharReveal
             text={couple.bride.nickname}
-            className="text-6xl md:text-7xl text-gold-gradient font-script text-center font-bold drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] leading-tight py-1"
+            className="text-6xl md:text-7xl text-gold-gradient font-script text-center font-bold drop-shadow-[0_2px_8px_rgba(0,0,0,0.15)] leading-tight py-1"
             delay={0.6}
           />
         </div>
@@ -77,22 +77,22 @@ export function HeroSection() {
         {/* Date, Time & Venue Info above Countdown */}
         <AnimatedText delay={0.8} variant="scaleUp" className="w-full text-center my-3 space-y-1">
           <p
-            className="text-base md:text-lg font-extrabold text-[#F5F1E8] text-center font-serif leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
+            className="text-base md:text-lg font-extrabold text-[#1A1815] text-center font-serif leading-tight drop-shadow-[0_1px_2px_rgba(255,255,255,0.9)]"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             Sabtu, 10 Oktober 2026
           </p>
-          <p className="text-xs text-[#E0C98F] font-extrabold tracking-wide text-center">
+          <p className="text-xs text-[#8A6B35] font-extrabold tracking-wide text-center">
             08:00 WIB — Selesai
           </p>
-          <p className="text-xs uppercase tracking-[2px] text-[#C8A96B] font-extrabold text-center">
+          <p className="text-xs uppercase tracking-[2px] text-[#B8860B] font-extrabold text-center">
             📍 BALAI IKABAMA
           </p>
         </AnimatedText>
 
         {/* Countdown Card Frame */}
         <AnimatedText delay={1.0} variant="scaleUp" className="w-full flex justify-center mt-1">
-          <div className="gold-card-pro p-3.5 border border-[#806A42] shadow-2xl w-full max-w-sm text-center">
+          <div className="gold-card-pro p-3.5 border border-[#C8A96B] shadow-2xl w-full max-w-sm text-center">
             <Countdown targetDate={weddingData.weddingDate} />
           </div>
         </AnimatedText>
@@ -107,7 +107,7 @@ export function HeroSection() {
           viewport={{ once: true, amount: 0.1 }}
           transition={{ duration: 0.8, delay: 1.4 }}
         >
-          <span className="text-[#C8A96B] text-[9px] uppercase tracking-[3px] font-bold">
+          <span className="text-[#8A6B35] text-[9px] uppercase tracking-[3px] font-bold">
             Scroll Down
           </span>
           <motion.div

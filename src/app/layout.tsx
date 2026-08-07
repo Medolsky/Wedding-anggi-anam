@@ -72,7 +72,7 @@ export default function RootLayout({
       className={`${greatVibes.variable} ${cormorant.variable} ${manrope.variable}`}
     >
       <head>
-        <meta name="theme-color" content="#0E0E0F" />
+        <meta name="theme-color" content="#FAF8F5" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
         <link rel="icon" type="image/svg+xml" href="/icon.svg" />
       </head>

@@ -91,7 +91,7 @@ export function WishesSection() {
     <section
       id="wishes"
       data-section="wishes"
-      className="section-wishes relative py-18 md:py-24 overflow-hidden flex flex-col items-center justify-center text-center bg-[#0E0E0F] text-[#C8C5BE]"
+      className="section-wishes relative py-18 md:py-24 overflow-hidden flex flex-col items-center justify-center text-center bg-[#FAF8F5] text-[#1A1815]"
     >
       {/* Background Image — Clear & Vivid */}
       <div className="absolute inset-0">
@@ -99,7 +99,7 @@ export function WishesSection() {
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url('${sectionBgs.wishes}')`,
-            filter: "brightness(0.92) contrast(1.02)",
+            filter: "brightness(0.95) contrast(1.02)",
           }}
           initial={{ scale: 1.15 }}
           whileInView={{ scale: 1 }}
@@ -113,22 +113,22 @@ export function WishesSection() {
       <div className="relative z-20 max-w-md mx-auto px-6 w-full text-center flex flex-col items-center justify-center">
         {/* Section header frame card */}
         <AnimatedText delay={0} variant="fadeUp" className="w-full flex justify-center mb-6">
-          <div className="gold-card-pro p-4 md:p-5 border border-[#806A42] shadow-xl rounded-2xl w-full max-w-xs text-center flex flex-col items-center justify-center">
+          <div className="gold-card-pro p-4 md:p-5 border border-[#C8A96B] shadow-xl rounded-2xl w-full max-w-xs text-center flex flex-col items-center justify-center">
             <p
-              className="text-[10px] uppercase tracking-[4px] text-[#C8A96B] font-extrabold mb-1.5 text-center leading-none"
+              className="text-[10px] uppercase tracking-[4px] text-[#B8860B] font-extrabold mb-1.5 text-center leading-none"
               style={{ fontFamily: "var(--font-body)" }}
             >
               Wishes &amp; Prayers
             </p>
 
             <h2
-              className="text-2xl md:text-3xl text-center font-serif text-[#F5F1E8] font-bold leading-snug"
+              className="text-2xl md:text-3xl text-center font-serif text-[#1A1815] font-bold leading-snug"
               style={{ fontFamily: "var(--font-heading)" }}
             >
               Ucapan &amp; Doa
             </h2>
 
-            <p className="text-center text-xs opacity-90 leading-relaxed text-[#C8C5BE]">
+            <p className="text-center text-xs opacity-90 leading-relaxed text-[#555555]">
               Berikan ucapan dan doa terbaik Anda untuk kedua mempelai.
             </p>
           </div>
@@ -137,7 +137,7 @@ export function WishesSection() {
         {/* Form Card Frame */}
         <motion.form
           onSubmit={handleSubmit}
-          className="gold-card-pro p-4 md:p-5 border border-[#806A42] shadow-2xl space-y-3 mb-6 w-full max-w-xs text-center flex flex-col items-center rounded-2xl"
+          className="gold-card-pro p-4 md:p-5 border border-[#C8A96B] shadow-2xl space-y-3 mb-6 w-full max-w-xs text-center flex flex-col items-center rounded-2xl"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: false, amount: 0.15 }}
@@ -177,7 +177,7 @@ export function WishesSection() {
             {displayedWishes.map((wish, index) => (
               <motion.div
                 key={wish.id}
-                className="gold-card-pro p-3 border border-[#806A42]/60 shadow-md text-left w-full rounded-xl"
+                className="gold-card-pro p-3 border border-[#C8A96B]/60 shadow-md text-left w-full rounded-xl"
                 initial={{ opacity: 0, y: 15, scale: 0.97 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -15 }}
@@ -185,19 +185,19 @@ export function WishesSection() {
               >
                 <div className="flex items-start justify-between mb-1">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-[#C8A96B] text-[#0E0E0F] 
-                      flex items-center justify-center text-[10px] font-extrabold shadow-xs">
+                    <div className="w-6 h-6 rounded-full bg-[#C8A96B] text-white 
+                      flex items-center justify-center text-[10px] font-bold shadow-xs">
                       {wish.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-[#F5F1E8] leading-none">{wish.name}</p>
+                      <p className="text-xs font-semibold text-[#1A1815] leading-none">{wish.name}</p>
                     </div>
                   </div>
-                  <span className="text-[9px] text-[#D2B573] font-mono">
+                  <span className="text-[9px] text-[#B8860B] font-mono">
                     {formatRelativeTime(wish.createdAt)}
                   </span>
                 </div>
-                <p className="text-xs text-[#C8C5BE] leading-relaxed pl-8">
+                <p className="text-xs text-[#66615C] leading-relaxed pl-8">
                   {wish.message}
                 </p>
               </motion.div>
@@ -207,7 +207,7 @@ export function WishesSection() {
           {/* Load more */}
           {wishes.length > 5 && !showAll && (
             <motion.button
-              className="w-full py-2 text-[11px] uppercase tracking-widest font-bold text-[#C8A96B] hover:underline transition-all"
+              className="w-full py-2 text-[11px] uppercase tracking-widest font-bold text-[#B8860B] hover:underline transition-all"
               onClick={() => setShowAll(true)}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -217,7 +217,7 @@ export function WishesSection() {
           )}
 
           {wishes.length === 0 && (
-            <p className="text-center text-xs text-[#8C8983] py-3 italic font-medium">
+            <p className="text-center text-xs text-[#66615C] py-3 italic font-medium">
               Jadilah yang pertama memberikan ucapan! 💕
             </p>
           )}

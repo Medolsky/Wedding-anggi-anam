@@ -23,6 +23,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://wedding-anam-anggi.netlify.app"),
   title: "The Wedding of Anam & Angi",
   description:
     "Undangan Pernikahan Digital Misbakhul Anam Roziqin & Angi Sulistia — Sabtu, 10 Oktober 2026 di BALAI IKABAMA, Depok.",
@@ -35,17 +36,24 @@ export const metadata: Metadata = {
   openGraph: {
     title: "The Wedding of Anam & Angi",
     description: "Undangan Pernikahan Digital Misbakhul Anam Roziqin & Angi Sulistia — Sabtu, 10 Oktober 2026 di BALAI IKABAMA, Depok.",
+    url: "https://wedding-anam-anggi.netlify.app",
     type: "website",
     locale: "id_ID",
     siteName: "The Wedding of Anam & Angi",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1200&auto=format&fit=crop",
+        url: "/image/hero.jpg",
         width: 1200,
         height: 630,
         alt: "The Wedding of Anam & Angi",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "The Wedding of Anam & Angi",
+    description: "Undangan Pernikahan Digital Misbakhul Anam Roziqin & Angi Sulistia — Sabtu, 10 Oktober 2026 di BALAI IKABAMA, Depok.",
+    images: ["/image/hero.jpg"],
   },
   robots: {
     index: true,

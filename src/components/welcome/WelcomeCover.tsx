@@ -54,7 +54,7 @@ export function WelcomeContent({
   onOpen: () => void;
 }) {
   return (
-    <div className="absolute inset-x-0 top-[55%] -translate-y-1/2 z-20 flex flex-col items-center justify-center px-6 text-center">
+    <div className="absolute inset-x-0 top-[81%] -translate-y-1/2 z-20 flex flex-col items-center justify-center px-6 text-center">
       {/* Guest Name Card — Locked in the empty space of the video, appearing at 8.0s */}
       <motion.div
         className="mb-3 px-5 py-3 bg-black/45 backdrop-blur-md border border-[#C8A96B] shadow-[0_8px_32px_rgba(0,0,0,0.5)] max-w-[240px] w-full text-center rounded-2xl"

@@ -58,78 +58,13 @@ export function WelcomeContent({
   onOpen: () => void;
 }) {
   return (
-    <div className="relative z-20 flex flex-col items-center justify-center min-h-screen px-6 py-12 text-center text-[#C8C5BE]">
-      {/* Ornament Top */}
-      <motion.div
-        className="flex items-center justify-center gap-3 mb-4"
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8, delay: 0.2 }}
-      >
-        <span className="ornament-line" />
-        <span className="ornament-dot" />
-        <span className="ornament-line" />
-      </motion.div>
-
-      {/* The Wedding of */}
-      <motion.p
-        className="text-[11px] uppercase tracking-[5px] text-[#D2B573] font-extrabold mb-2 leading-none drop-shadow-sm"
-        style={{ fontFamily: "var(--font-body)" }}
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.4 }}
-      >
-        The Wedding of
-      </motion.p>
-
-      {/* Couple Names */}
-      <motion.h1
-        className="text-5xl md:text-6xl mb-1 font-script text-gold-gradient drop-shadow-md leading-tight"
-        style={{ fontFamily: "var(--font-script)" }}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, delay: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      >
-        {weddingData.couple.groom.nickname}
-      </motion.h1>
-
-      <motion.p
-        className="text-2xl md:text-3xl my-1 text-[#E0C98F] font-serif leading-none"
-        style={{ fontFamily: "var(--font-heading)" }}
-        initial={{ opacity: 0, scale: 0.5 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6, delay: 0.8 }}
-      >
-        &amp;
-      </motion.p>
-
-      <motion.h1
-        className="text-5xl md:text-6xl mb-5 font-script text-gold-gradient drop-shadow-md leading-tight"
-        style={{ fontFamily: "var(--font-script)" }}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, delay: 1.0, ease: [0.22, 1, 0.36, 1] }}
-      >
-        {weddingData.couple.bride.nickname}
-      </motion.h1>
-
-      {/* Date */}
-      <motion.p
-        className="text-xs tracking-[4px] uppercase text-[#C8A96B] font-extrabold mb-6 leading-none"
-        style={{ fontFamily: "var(--font-heading)" }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8, delay: 1.2 }}
-      >
-        10 • 10 • 2026
-      </motion.p>
-
+    <div className="relative z-20 flex flex-col items-center justify-end min-h-screen px-6 pb-16 md:pb-20 text-center">
       {/* Guest Name Card */}
       <motion.div
-        className="mb-6 gold-card-pro px-5 py-4 border border-[#806A42] shadow-2xl max-w-xs w-full text-center"
-        initial={{ opacity: 0, y: 15, scale: 0.95 }}
+        className="mb-4 gold-card-pro px-6 py-4 border border-[#806A42] shadow-2xl max-w-xs w-full text-center"
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.8, delay: 1.4 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
       >
         <p
           className="text-[10px] uppercase tracking-[3px] text-[#C8A96B] font-bold mb-1 leading-none text-center"
@@ -150,7 +85,7 @@ export function WelcomeContent({
         className="btn-invitation group text-[11px] py-2.5 px-7"
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 1.6 }}
+        transition={{ duration: 0.8, delay: 0.4 }}
         onClick={onOpen}
         whileHover={{ scale: 1.03 }}
         whileTap={{ scale: 0.97 }}

@@ -6,17 +6,17 @@ import { weddingData } from "@/data/weddingData";
 export function WelcomeCover() {
   return (
     <div className="absolute inset-0 overflow-hidden">
-      {/* Background — Clear & Vivid Unsplash Wedding Photo */}
-      <motion.div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: `url('${weddingData.couple.welcomeCover}')`,
-          filter: "brightness(0.92) contrast(1.02)",
-        }}
-        initial={{ scale: 1.12 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 18, ease: "linear", repeat: Infinity, repeatType: "reverse" }}
-      />
+      {/* Background Video — welcome1.mp4 */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover transform-gpu scale-105"
+        style={{ filter: "brightness(0.92) contrast(1.02)" }}
+      >
+        <source src="/image/welcome1.mp4" type="video/mp4" />
+      </video>
 
       <div className="absolute inset-0 photo-overlay-cinematic" />
       <div className="absolute inset-0 film-grain" />

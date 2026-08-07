@@ -9,7 +9,7 @@ export const weddingData = {
       parents: "Putra dari Bpk. Heru Suwito Sano & Almh Ibu. Eniroh",
       photo: "/image/mempelai-pria.jpg",
       bgPhoto: "/image/mempelai-pria.jpg",
-      instagram: "@anamroziqin",
+      instagram: "@anamgoldluck",
       description:
         "Our journey begins with love and lasts a lifetime",
     },
@@ -19,7 +19,7 @@ export const weddingData = {
       parents: "Putri dari Bpk. Suhendi Widodo & Ibu. Lina",
       photo: "/image/mempelai-wanita.jpg",
       bgPhoto: "/image/mempelai-wanita.jpg",
-      instagram: "@angisulistia",
+      instagram: "@angisulistie",
       description:
         "The best chapter of our lives starts today",
     },

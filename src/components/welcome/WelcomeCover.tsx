@@ -73,7 +73,7 @@ export function WelcomeContent({
 
       {/* The Wedding of */}
       <motion.p
-        className="text-[11px] uppercase tracking-[5px] text-[#B8860B] font-extrabold mb-2 leading-none drop-shadow-sm"
+        className="text-[11px] uppercase tracking-[5px] text-[#D2B573] font-extrabold mb-2 leading-none drop-shadow-sm"
         style={{ fontFamily: "var(--font-body)" }}
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
@@ -94,7 +94,7 @@ export function WelcomeContent({
       </motion.h1>
 
       <motion.p
-        className="text-2xl md:text-3xl my-1 text-[#C8A96B] font-serif leading-none"
+        className="text-2xl md:text-3xl my-1 text-[#E0C98F] font-serif leading-none"
         style={{ fontFamily: "var(--font-heading)" }}
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -115,7 +115,7 @@ export function WelcomeContent({
 
       {/* Date */}
       <motion.p
-        className="text-xs tracking-[4px] uppercase text-[#8A6B35] font-extrabold mb-6 leading-none"
+        className="text-xs tracking-[4px] uppercase text-[#C8A96B] font-extrabold mb-6 leading-none"
         style={{ fontFamily: "var(--font-heading)" }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -126,19 +126,19 @@ export function WelcomeContent({
 
       {/* Guest Name Card */}
       <motion.div
-        className="mb-6 gold-card-pro px-5 py-4 border border-[#C8A96B] shadow-2xl max-w-xs w-full text-center"
+        className="mb-6 gold-card-pro px-5 py-4 border border-[#806A42] shadow-2xl max-w-xs w-full text-center"
         initial={{ opacity: 0, y: 15, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.8, delay: 1.4 }}
       >
         <p
-          className="text-[10px] uppercase tracking-[3px] text-[#B8860B] font-bold mb-1 leading-none text-center"
+          className="text-[10px] uppercase tracking-[3px] text-[#C8A96B] font-bold mb-1 leading-none text-center"
           style={{ fontFamily: "var(--font-body)" }}
         >
           Kepada Yth.
         </p>
         <p
-          className="text-base md:text-lg font-bold tracking-wide text-[#1A1815] text-center font-serif leading-snug"
+          className="text-base md:text-lg font-bold tracking-wide text-[#F5F1E8] text-center font-serif leading-snug"
           style={{ fontFamily: "var(--font-heading)" }}
         >
           {guestName}

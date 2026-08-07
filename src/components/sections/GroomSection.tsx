@@ -12,7 +12,7 @@ export function GroomSection() {
     <section
       id="groom"
       data-section="groom"
-      className="section-groom relative min-h-screen flex flex-col items-center justify-center text-center overflow-hidden py-18 md:py-24 bg-[#FAF8F5] text-[#1A1815] transform-gpu"
+      className="section-groom relative min-h-screen flex flex-col items-center justify-center text-center overflow-hidden py-18 md:py-24 bg-[#0E0E0F] text-[#C8C5BE] transform-gpu"
     >
       {/* Background Image — Clear & Vivid */}
       <div className="absolute inset-0">
@@ -20,7 +20,7 @@ export function GroomSection() {
           className="absolute inset-0 bg-cover bg-center transform-gpu"
           style={{
             backgroundImage: `url('${sectionBgs.groom}')`,
-            filter: "brightness(0.95) contrast(1.02)",
+            filter: "brightness(0.92) contrast(1.02)",
           }}
         />
         <div className="absolute inset-0 photo-overlay-cinematic" />
@@ -31,7 +31,7 @@ export function GroomSection() {
         {/* Section label */}
         <AnimatedText delay={0.1} variant="fadeUp" className="w-full text-center mb-2">
           <span
-            className="inline-block bg-gradient-to-r from-[#C8A96B] via-[#B8860B] to-[#8A6B35] text-white text-[10px] md:text-xs font-black uppercase tracking-[4px] px-4 py-1 rounded-full shadow-md"
+            className="inline-block bg-gradient-to-r from-[#E0C98F] via-[#C8A96B] to-[#8A6B35] text-[#0E0E0F] text-[10px] md:text-xs font-black uppercase tracking-[4px] px-4 py-1 rounded-full shadow-md"
             style={{ fontFamily: "var(--font-body)" }}
           >
             The Groom
@@ -40,10 +40,10 @@ export function GroomSection() {
 
         <AnimatedText delay={0.2} variant="fadeUp" className="w-full text-center">
           <h2
-            className="text-3xl md:text-5xl uppercase tracking-[3px] text-[#1A1815] font-serif mb-5 text-center leading-snug font-black"
+            className="text-3xl md:text-5xl uppercase tracking-[3px] text-[#F5F1E8] font-serif mb-5 text-center leading-snug font-black"
             style={{
               fontFamily: "var(--font-heading)",
-              textShadow: "0 0 16px #ffffff, 0 0 10px #ffffff, 0 0 4px #ffffff, 0 2px 6px rgba(0,0,0,0.15)",
+              textShadow: "0 0 16px #09090A, 0 0 10px #09090A, 0 2px 6px rgba(0,0,0,0.8)",
             }}
           >
             Mempelai Pria
@@ -51,10 +51,10 @@ export function GroomSection() {
         </AnimatedText>
 
         {/* Unified Card Frame containing Photo, Name, Parents & Ig */}
-        <div className="gold-card-pro p-5 md:p-6 border border-[#C8A96B] shadow-2xl w-full max-w-sm text-center flex flex-col items-center">
+        <div className="gold-card-pro p-5 md:p-6 border border-[#806A42] shadow-2xl w-full max-w-sm text-center flex flex-col items-center">
           {/* Groom Photo Frame */}
           <motion.div
-            className="relative w-44 h-56 md:w-52 md:h-64 mx-auto mb-4 rounded-2xl overflow-hidden shadow-[0_12px_30px_rgba(200,169,107,0.25)] border-2 border-[#C8A96B] group transform-gpu"
+            className="relative w-44 h-56 md:w-52 md:h-64 mx-auto mb-4 rounded-2xl overflow-hidden shadow-[0_12px_30px_rgba(0,0,0,0.6)] border-2 border-[#806A42] group transform-gpu"
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.1 }}
@@ -65,7 +65,7 @@ export function GroomSection() {
               alt={groom.fullName}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
-            <div className="absolute inset-1.5 border border-white/40 rounded-xl pointer-events-none" />
+            <div className="absolute inset-1.5 border border-[#E0C98F]/30 rounded-xl pointer-events-none" />
           </motion.div>
 
           {/* Name */}
@@ -86,13 +86,13 @@ export function GroomSection() {
 
           {/* Parents & Description */}
           <p
-            className="text-center text-xs md:text-sm text-[#1A1815] font-semibold leading-relaxed font-serif mb-1"
+            className="text-center text-xs md:text-sm text-[#F5F1E8] font-semibold leading-relaxed font-serif mb-1"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             {groom.parents}
           </p>
           {groom.description && (
-            <p className="text-center text-[10px] text-[#8A6B35] font-semibold italic opacity-95 leading-normal mb-3">
+            <p className="text-center text-[10px] text-[#D2B573] font-semibold italic opacity-95 leading-normal mb-3">
               "{groom.description}"
             </p>
           )}

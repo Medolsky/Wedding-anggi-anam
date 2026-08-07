@@ -92,7 +92,7 @@ export function RSVPSection() {
     <section
       id="rsvp"
       data-section="rsvp"
-      className="section-rsvp relative py-18 md:py-24 overflow-hidden flex flex-col items-center justify-center text-center bg-[#FAF8F5] text-[#1A1815]"
+      className="section-rsvp relative py-18 md:py-24 overflow-hidden flex flex-col items-center justify-center text-center bg-[#0E0E0F] text-[#C8C5BE]"
     >
       {/* Background Image — Clear & Vivid */}
       <div className="absolute inset-0">
@@ -100,7 +100,7 @@ export function RSVPSection() {
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url('${sectionBgs.rsvp}')`,
-            filter: "brightness(0.95) contrast(1.02)",
+            filter: "brightness(0.92) contrast(1.02)",
           }}
           initial={{ scale: 1.15 }}
           whileInView={{ scale: 1 }}
@@ -114,16 +114,16 @@ export function RSVPSection() {
       <div className="relative z-20 max-w-md mx-auto px-6 w-full text-center flex flex-col items-center justify-center">
         {/* Section header frame card */}
         <AnimatedText delay={0} variant="fadeUp" className="w-full flex justify-center mb-6">
-          <div className="gold-card-pro p-4 md:p-5 border border-[#C8A96B] shadow-xl rounded-2xl w-full max-w-xs text-center flex flex-col items-center justify-center">
+          <div className="gold-card-pro p-4 md:p-5 border border-[#806A42] shadow-xl rounded-2xl w-full max-w-xs text-center flex flex-col items-center justify-center">
             <p
-              className="text-[10px] uppercase tracking-[4px] text-[#B8860B] font-extrabold mb-1.5 text-center leading-none"
+              className="text-[10px] uppercase tracking-[4px] text-[#C8A96B] font-extrabold mb-1.5 text-center leading-none"
               style={{ fontFamily: "var(--font-body)" }}
             >
               RSVP
             </p>
 
             <h2
-              className="text-2xl md:text-3xl text-center font-serif text-[#1A1815] font-bold leading-snug"
+              className="text-2xl md:text-3xl text-center font-serif text-[#F5F1E8] font-bold leading-snug"
               style={{ fontFamily: "var(--font-heading)" }}
             >
               Konfirmasi Kehadiran
@@ -136,48 +136,48 @@ export function RSVPSection() {
             /* Digital E-Ticket Barcode Card (Primary View) */
             <motion.div
               key="eticket"
-              className="gold-card-pro p-5 md:p-6 border-2 border-[#C8A96B] shadow-2xl text-center w-full max-w-xs rounded-2xl"
+              className="gold-card-pro p-5 md:p-6 border-2 border-[#806A42] shadow-2xl text-center w-full max-w-xs rounded-2xl"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.5 }}
             >
-              <div className="flex items-center justify-between border-b border-[#C8A96B]/30 pb-2.5 mb-3">
-                <span className="text-[10px] uppercase tracking-[2px] font-extrabold text-[#B8860B]">
+              <div className="flex items-center justify-between border-b border-[#806A42]/40 pb-2.5 mb-3">
+                <span className="text-[10px] uppercase tracking-[2px] font-extrabold text-[#C8A96B]">
                   🎫 DIGITAL E-TICKET
                 </span>
-                <span className="text-[9px] bg-[#C8A96B]/20 text-[#8A6B35] px-2 py-0.5 rounded-full font-bold">
+                <span className="text-[9px] bg-[#C8A96B]/20 text-[#E0C98F] px-2 py-0.5 rounded-full font-bold border border-[#806A42]">
                   {guest.category || "TAMU VIP"}
                 </span>
               </div>
 
               <h3
-                className="text-xl font-serif font-bold text-[#1A1815] leading-snug mb-1"
+                className="text-xl font-serif font-bold text-[#F5F1E8] leading-snug mb-1"
                 style={{ fontFamily: "var(--font-heading)" }}
               >
                 {guest.name || "Tamu Undangan"}
               </h3>
-              <p className="text-[11px] text-[#66615C] mb-3">
-                Acara: <strong className="text-[#B8860B]">Akad &amp; Resepsi</strong>
+              <p className="text-[11px] text-[#C8C5BE] mb-3">
+                Acara: <strong className="text-[#E0C98F]">Akad &amp; Resepsi</strong>
               </p>
 
               {/* QR / Barcode Card Frame */}
-              <div className="bg-white/90 backdrop-blur-md p-3.5 rounded-2xl border-2 border-[#C8A96B]/40 shadow-inner flex flex-col items-center justify-center my-3">
+              <div className="bg-[#171719] p-3.5 rounded-2xl border-2 border-[#806A42] shadow-inner flex flex-col items-center justify-center my-3">
                 <QRCodeCanvas
                   data={guest.code || guest.name || "GUEST-VIP"}
                   size={180}
-                  className="rounded-lg drop-shadow-sm"
+                  className="rounded-lg drop-shadow-sm p-1 bg-white"
                 />
-                <div className="mt-2.5 text-[11px] font-mono font-extrabold tracking-[3px] text-[#1A1815] bg-[#FAF8F5] px-3.5 py-1 rounded-lg border border-[#C8A96B]/40 shadow-sm">
+                <div className="mt-2.5 text-[11px] font-mono font-extrabold tracking-[3px] text-[#F5F1E8] bg-[#0E0E0F] px-3.5 py-1 rounded-lg border border-[#806A42] shadow-sm">
                   {guest.code || "GUEST-" + (guest.name || "VIP").replace(/[^a-zA-Z0-9]/g, "").substring(0, 6).toUpperCase()}
                 </div>
               </div>
 
-              <p className="text-[10.5px] text-[#555555] leading-relaxed mb-4">
+              <p className="text-[10.5px] text-[#C8C5BE] leading-relaxed mb-4">
                 Tunjukkan QR/Barcode ini kepada panitia / admin di pintu masuk acara untuk konfirmasi kedatangan Anda.
               </p>
 
-              <div className="pt-2 border-t border-[#C8A96B]/30">
+              <div className="pt-2 border-t border-[#806A42]/40">
                 <button
                   type="button"
                   onClick={() => setShowForm(true)}
@@ -188,11 +188,11 @@ export function RSVPSection() {
               </div>
             </motion.div>
           ) : (
-            /* RSVP Form Card — Gold Glassmorphism */
+            /* RSVP Form Card — Soft Black & Muted Gold */
             <motion.form
               key="form"
               onSubmit={handleSubmit}
-              className="gold-card-pro p-4 md:p-5 border border-[#C8A96B] shadow-2xl space-y-3.5 w-full max-w-xs text-center flex flex-col items-center justify-center rounded-2xl"
+              className="gold-card-pro p-4 md:p-5 border border-[#806A42] shadow-2xl space-y-3.5 w-full max-w-xs text-center flex flex-col items-center justify-center rounded-2xl"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: false, amount: 0.15 }}
@@ -200,7 +200,7 @@ export function RSVPSection() {
             >
               {/* Attendance toggle */}
               <div className="w-full text-center">
-                <label className="block text-[10px] uppercase tracking-[2px] text-[#B8860B] mb-2 text-center font-bold">
+                <label className="block text-[10px] uppercase tracking-[2px] text-[#C8A96B] mb-2 text-center font-bold">
                   Apakah Anda akan hadir?
                 </label>
                 <div className="flex gap-2 w-full">
@@ -209,7 +209,7 @@ export function RSVPSection() {
                     className={`flex-1 py-2 rounded-full text-[10px] uppercase tracking-wider font-extrabold transition-all duration-300
                       ${formData.attendance === "hadir"
                         ? "btn-modern-primary shadow-md scale-[1.02]"
-                        : "btn-modern-secondary text-[#1A1815]"
+                        : "btn-modern-secondary text-[#C8C5BE]"
                       }`}
                     onClick={() =>
                       setFormData({ ...formData, attendance: "hadir" })
@@ -221,8 +221,8 @@ export function RSVPSection() {
                     type="button"
                     className={`flex-1 py-2 rounded-full text-[10px] uppercase tracking-wider font-extrabold transition-all duration-300
                       ${formData.attendance === "tidak_hadir"
-                        ? "bg-[#1A1815] text-white shadow-md scale-[1.02]"
-                        : "btn-modern-secondary text-[#1A1815]"
+                        ? "bg-[#806A42] text-[#F5F1E8] shadow-md scale-[1.02]"
+                        : "btn-modern-secondary text-[#C8C5BE]"
                       }`}
                     onClick={() =>
                       setFormData({ ...formData, attendance: "tidak_hadir" })
@@ -244,7 +244,7 @@ export function RSVPSection() {
                   >
                     {/* Name */}
                     <div className="w-full text-center">
-                      <label className="block text-[9px] uppercase tracking-[1.5px] text-[#66615C] mb-1 font-semibold text-center leading-none">
+                      <label className="block text-[9px] uppercase tracking-[1.5px] text-[#8C8983] mb-1 font-semibold text-center leading-none">
                         Nama Lengkap
                       </label>
                       <input
@@ -263,14 +263,14 @@ export function RSVPSection() {
                       <>
                         {/* Guest count */}
                         <div className="w-full text-center flex flex-col items-center">
-                          <label className="block text-[9px] uppercase tracking-[1.5px] text-[#66615C] mb-1 font-semibold text-center leading-none">
+                          <label className="block text-[9px] uppercase tracking-[1.5px] text-[#8C8983] mb-1 font-semibold text-center leading-none">
                             Jumlah Kehadiran (maks. {maxGuest})
                           </label>
                           <div className="flex items-center justify-center gap-3">
                             <button
                               type="button"
-                              className="w-7 h-7 rounded-full border border-[#C8A96B]/50 bg-[#F7EBBF]/40 text-[#B8860B]
-                                flex items-center justify-center hover:bg-[#C8A96B] hover:text-white transition-all font-bold text-sm"
+                              className="w-7 h-7 rounded-full border border-[#806A42] bg-[#171719] text-[#E0C98F]
+                                flex items-center justify-center hover:bg-[#C8A96B] hover:text-[#0E0E0F] transition-all font-bold text-sm"
                               onClick={() =>
                                 setFormData({
                                   ...formData,
@@ -281,14 +281,14 @@ export function RSVPSection() {
                               −
                             </button>
                             <span
-                              className="text-lg font-bold min-w-[20px] text-center font-serif text-[#B8860B]"
+                              className="text-lg font-bold min-w-[20px] text-center font-serif text-[#F5F1E8]"
                             >
                               {formData.guestCount}
                             </span>
                             <button
                               type="button"
-                              className="w-7 h-7 rounded-full border border-[#C8A96B]/50 bg-[#F7EBBF]/40 text-[#B8860B]
-                                flex items-center justify-center hover:bg-[#C8A96B] hover:text-white transition-all font-bold text-sm"
+                              className="w-7 h-7 rounded-full border border-[#806A42] bg-[#171719] text-[#E0C98F]
+                                flex items-center justify-center hover:bg-[#C8A96B] hover:text-[#0E0E0F] transition-all font-bold text-sm"
                               onClick={() =>
                                 setFormData({
                                   ...formData,
@@ -306,7 +306,7 @@ export function RSVPSection() {
 
                         {/* Session */}
                         <div className="w-full text-center">
-                          <label className="block text-[9px] uppercase tracking-[1.5px] text-[#66615C] mb-1 font-semibold text-center leading-none">
+                          <label className="block text-[9px] uppercase tracking-[1.5px] text-[#8C8983] mb-1 font-semibold text-center leading-none">
                             Sesi yang dihadiri
                           </label>
                           <select
@@ -317,7 +317,7 @@ export function RSVPSection() {
                                 session: e.target.value,
                               })
                             }
-                            className="form-input text-center py-1.5 text-xs bg-white text-[#1A1815]"
+                            className="form-input text-center py-1.5 text-xs bg-[#171719] text-[#F5F1E8]"
                           >
                             <option value="keduanya">Akad &amp; Resepsi</option>
                             <option value="akad">Akad Nikah</option>
@@ -329,7 +329,7 @@ export function RSVPSection() {
 
                     {/* Message */}
                     <div className="w-full text-center">
-                      <label className="block text-[9px] uppercase tracking-[1.5px] text-[#66615C] mb-1 font-semibold text-center leading-none">
+                      <label className="block text-[9px] uppercase tracking-[1.5px] text-[#8C8983] mb-1 font-semibold text-center leading-none">
                         Pesan Singkat (opsional)
                       </label>
                       <textarea
@@ -357,7 +357,7 @@ export function RSVPSection() {
                       {isSubmitting ? (
                         <span className="flex items-center justify-center gap-2">
                           <motion.span
-                            className="inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full"
+                            className="inline-block w-3 h-3 border-2 border-black/30 border-t-black rounded-full"
                             animate={{ rotate: 360 }}
                             transition={{
                               duration: 0.8,
@@ -375,7 +375,7 @@ export function RSVPSection() {
                     <button
                       type="button"
                       onClick={() => setShowForm(false)}
-                      className="text-[10px] text-[#66615C] hover:underline pt-1 cursor-pointer hover:text-[#1A1815] block text-center w-full font-semibold"
+                      className="text-[10px] text-[#8C8983] hover:underline pt-1 cursor-pointer hover:text-[#E0C98F] block text-center w-full font-semibold"
                     >
                       ← Kembali ke Barcode E-Ticket
                     </button>

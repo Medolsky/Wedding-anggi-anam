@@ -58,22 +58,22 @@ export function WelcomeContent({
   onOpen: () => void;
 }) {
   return (
-    <div className="relative z-20 flex flex-col items-center justify-end min-h-screen px-6 pb-16 md:pb-20 text-center">
-      {/* Guest Name Card */}
+    <div className="relative z-20 flex flex-col items-center justify-end min-h-screen px-6 pb-28 md:pb-36 text-center">
+      {/* Guest Name Card — Smaller & Compact */}
       <motion.div
-        className="mb-4 gold-card-pro px-6 py-4 border border-[#806A42] shadow-2xl max-w-xs w-full text-center"
+        className="mb-3.5 gold-card-pro px-4 py-2.5 border border-[#806A42] shadow-2xl max-w-[230px] w-full text-center rounded-2xl"
         initial={{ opacity: 0, y: 20, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.8, delay: 0.2 }}
       >
         <p
-          className="text-[10px] uppercase tracking-[3px] text-[#C8A96B] font-bold mb-1 leading-none text-center"
+          className="text-[9px] uppercase tracking-[2.5px] text-[#C8A96B] font-bold mb-0.5 leading-none text-center"
           style={{ fontFamily: "var(--font-body)" }}
         >
           Kepada Yth.
         </p>
         <p
-          className="text-base md:text-lg font-bold tracking-wide text-[#F5F1E8] text-center font-serif leading-snug"
+          className="text-sm md:text-base font-bold tracking-wide text-[#F5F1E8] text-center font-serif leading-snug"
           style={{ fontFamily: "var(--font-heading)" }}
         >
           {guestName}
@@ -82,7 +82,7 @@ export function WelcomeContent({
 
       {/* Open Button */}
       <motion.button
-        className="btn-invitation group text-[11px] py-2.5 px-7"
+        className="btn-invitation group text-[10.5px] py-2 px-6"
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.4 }}
@@ -90,10 +90,10 @@ export function WelcomeContent({
         whileHover={{ scale: 1.03 }}
         whileTap={{ scale: 0.97 }}
       >
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-1.5">
           <svg
-            width="14"
-            height="14"
+            width="13"
+            height="13"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"

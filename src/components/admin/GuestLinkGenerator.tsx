@@ -408,54 +408,62 @@ Hormat kami,
 
   return (
     <div className="space-y-6">
-      {/* Fonnte Token & Bot Config Card — Always Visible */}
-      <div className="bg-white border border-[#d4af37]/40 rounded-2xl shadow-sm p-4 md:p-5 space-y-3">
+      {/* Fonnte Token & Bot Config Card */}
+      <div className="bg-[#202125] border border-[#2D2E34] rounded-2xl shadow-xs p-5 space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-[#2a2723]">
-              {provider === "fonnte" ? "🌐 Fonnte WA Gateway" : provider === "local" ? "🤖 Pure Bot WA (Nomor Baru)" : `🤖 ${provider.toUpperCase()}`}
+          <div className="flex items-center gap-2.5">
+            <span className="text-sm font-bold text-[#F1F0EC] flex items-center gap-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E0C98F" strokeWidth="2">
+                <line x1="22" y1="2" x2="11" y2="13" />
+                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+              </svg>
+              <span>{provider === "fonnte" ? "Fonnte WA Gateway" : provider === "local" ? "Pure Bot WA (Nomor Baru)" : provider.toUpperCase()}</span>
             </span>
-            <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase ${
+            <span className={`text-[9.5px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
               waToken
-                ? "bg-emerald-100 text-emerald-700 border border-emerald-400"
-                : "bg-amber-100 text-amber-700 border border-amber-400"
+                ? "bg-emerald-950 text-emerald-300 border border-emerald-700"
+                : "bg-amber-950 text-amber-300 border border-amber-700"
             }`}>
-              {waToken ? "✓ Token Aktif" : "⚠ Token Belum Diisi"}
+              {waToken ? "Token Aktif" : "Token Belum Diisi"}
             </span>
           </div>
 
           <button
             onClick={() => setShowTokenInput(!showTokenInput)}
-            className="text-xs py-1.5 px-3 font-semibold whitespace-nowrap cursor-pointer bg-[#f7ebbf]/60 hover:bg-[#f7ebbf] text-[#8a662d] border border-[#d4af37]/40 rounded-lg transition-all"
+            className="text-xs py-1.5 px-3 font-semibold whitespace-nowrap cursor-pointer bg-[#28292F] hover:bg-[#32343B] text-[#E0C98F] border border-[#35373E] rounded-xl transition-all flex items-center gap-1.5"
           >
-            ⚙️ {showTokenInput ? "Tutup" : "Pengaturan"}
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+            <span>{showTokenInput ? "Tutup" : "Pengaturan"}</span>
           </button>
         </div>
 
         {/* Token Fonnte — Inline Quick Input */}
-        <div className="flex items-center gap-2">
-          <label className="text-[10px] uppercase text-[#b8860b] font-bold whitespace-nowrap">Token Fonnte:</label>
+        <div className="flex items-center gap-2.5">
+          <label className="text-[10px] uppercase text-[#E0C98F] font-bold whitespace-nowrap">Token Fonnte:</label>
           <input
             type="text"
             placeholder="Paste token Fonnte Anda di sini..."
             value={waToken}
             onChange={(e) => setWaToken(e.target.value)}
-            className="flex-1 text-xs py-1.5 px-3 font-mono rounded-lg border border-[#d4af37]/40 bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+            className="flex-1 text-xs py-2 px-3 font-mono rounded-xl border border-[#35373E] bg-[#28292F] text-[#F1F0EC] placeholder-[#71717A] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
           />
           <button
             onClick={async () => {
               await saveConfig(waToken, phoneNumberId, provider, customServerUrl);
-              alert("✅ Token berhasil disimpan!");
+              alert("Token berhasil disimpan!");
             }}
-            className="text-[10px] py-1.5 px-3 font-bold bg-[#d4af37] text-white hover:bg-[#b8860b] rounded-lg cursor-pointer transition-all whitespace-nowrap"
+            className="text-[11px] py-2 px-4 font-bold bg-gradient-to-r from-[#C8A96B] to-[#B8860B] text-white hover:opacity-95 rounded-xl cursor-pointer transition-all whitespace-nowrap shadow-sm flex items-center gap-1"
           >
-            💾 Simpan
+            <span>Simpan</span>
           </button>
         </div>
 
         {provider === "fonnte" && !waToken && (
-          <p className="text-[10px] text-amber-600 bg-amber-50 border border-amber-300 rounded-lg px-3 py-1.5">
-            ⚠️ Token Fonnte belum diisi. Dapatkan token di <strong>fonnte.com</strong> → Dashboard → API Token, lalu paste di atas.
+          <p className="text-[10.5px] text-amber-300 bg-amber-950/40 border border-amber-700/60 rounded-xl px-3.5 py-2">
+            Token Fonnte belum diisi. Dapatkan token di <strong>fonnte.com</strong> → Dashboard → API Token, lalu paste di atas.
           </p>
         )}
       </div>
@@ -546,9 +554,9 @@ Hormat kami,
       <div className="flex gap-2.5">
         <button
           onClick={() => setShowBulkInput(!showBulkInput)}
-          className="text-xs py-2.5 px-4 font-bold flex-1 flex items-center justify-center gap-1.5 bg-white border border-[#d4af37]/40 text-[#2a2723] hover:bg-[#f7ebbf]/40 rounded-xl cursor-pointer transition-all"
+          className="text-xs py-2.5 px-4 font-bold flex-1 flex items-center justify-center gap-1.5 bg-[#202125] border border-[#35373E] text-[#F1F0EC] hover:bg-[#28292F] rounded-xl cursor-pointer transition-all"
         >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
             <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
           </svg>
@@ -559,18 +567,18 @@ Hormat kami,
           <button
             onClick={handleBulkAutoBlast}
             disabled={isBlasting}
-            className="text-xs py-2.5 px-4 font-extrabold flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-none shadow-lg flex items-center justify-center gap-1.5 cursor-pointer hover:from-emerald-500 hover:to-teal-500 rounded-xl transition-all"
+            className="text-xs py-2.5 px-4 font-extrabold flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-none shadow-md flex items-center justify-center gap-1.5 cursor-pointer hover:from-emerald-500 hover:to-teal-500 rounded-xl transition-all"
           >
             {isBlasting ? (
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1.5">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="animate-spin">
                   <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
                 </svg>
                 <span>Sending {blastProgress.current}/{blastProgress.total}</span>
               </span>
             ) : (
-              <span className="flex items-center gap-1">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <span className="flex items-center gap-1.5">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <line x1="22" y1="2" x2="11" y2="13" />
                   <polygon points="22 2 15 22 11 13 2 9 22 2" />
                 </svg>
@@ -583,18 +591,18 @@ Hormat kami,
 
       {/* Bulk Import Textarea Card */}
       {showBulkInput && (
-        <div className="bg-white border border-[#d4af37]/40 rounded-2xl shadow-sm p-5 space-y-3">
-          <h4 className="text-sm font-bold font-serif text-[#2a2723] flex items-center gap-1.5">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <div className="bg-[#202125] border border-[#2D2E34] rounded-2xl shadow-xs p-5 space-y-3">
+          <h4 className="text-sm font-bold font-serif text-[#F1F0EC] flex items-center gap-2">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E0C98F" strokeWidth="2">
               <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
               <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
             </svg>
             <span>Copy-Paste Banyak Nama &amp; No HP Tamu Sekaligus</span>
           </h4>
-          <p className="text-xs text-[#66615c]">
+          <p className="text-xs text-[#9E9D98]">
             Paste daftar nama dan nomor HP tamu dari Excel / WhatsApp / Catatan.
             <br />
-            <span className="text-[#b8860b] font-semibold">Format per baris:</span> Nama Tamu, 08123456789
+            <span className="text-[#E0C98F] font-bold">Format per baris:</span> Nama Tamu, 08123456789
           </p>
 
           <textarea
@@ -604,39 +612,43 @@ Siti Aminah, 085712345678
 Budi Santoso, 081987654321`}
             value={bulkText}
             onChange={(e) => setBulkText(e.target.value)}
-            className="w-full text-xs p-3 font-mono leading-relaxed border border-[#d4af37]/40 rounded-xl bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+            className="w-full text-xs p-3 font-mono leading-relaxed border border-[#35373E] rounded-xl bg-[#28292F] text-[#F1F0EC] placeholder-[#71717A] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
           />
 
           <div className="flex justify-end gap-2">
             <button
               onClick={() => setShowBulkInput(false)}
-              className="text-xs py-2 px-4 bg-white border border-[#d4af37]/40 text-[#66615c] hover:bg-[#faf8f5] rounded-xl cursor-pointer transition-all"
+              className="text-xs py-2 px-4 bg-[#28292F] border border-[#35373E] text-[#9E9D98] hover:bg-[#32343B] rounded-xl cursor-pointer transition-all"
             >
               Batal
             </button>
             <button
               onClick={handleBulkImport}
-              className="text-xs py-2 px-5 font-bold bg-[#d4af37] text-white hover:bg-[#b8860b] rounded-xl cursor-pointer transition-all"
+              className="text-xs py-2 px-5 font-bold bg-gradient-to-r from-[#C8A96B] to-[#B8860B] text-white hover:opacity-95 rounded-xl cursor-pointer transition-all"
             >
-              ✓ Impor ke Daftar
+              Impor ke Daftar
             </button>
           </div>
         </div>
       )}
 
       {/* Single Input Form Card */}
-      <div className="bg-white border border-[#d4af37]/40 rounded-2xl shadow-sm p-5 md:p-6">
+      <div className="bg-[#202125] border border-[#2D2E34] rounded-2xl shadow-xs p-5 md:p-6 space-y-4">
         <h3
-          className="text-lg md:text-xl font-bold font-serif text-[#2a2723] mb-1"
+          className="text-lg font-bold font-serif text-[#F1F0EC] flex items-center gap-2"
           style={{ fontFamily: "var(--font-heading)" }}
         >
-          ➕ Tambah Satu Tamu
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E0C98F" strokeWidth="2.5">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          <span>Tambah Satu Tamu</span>
         </h3>
 
-        <form onSubmit={handleGenerate} className="space-y-3.5">
+        <form onSubmit={handleGenerate} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] uppercase tracking-wider text-[#b8860b] font-semibold mb-1">
+              <label className="block text-[10.5px] uppercase tracking-wider text-[#E0C98F] font-bold mb-1">
                 Nama Tamu Undangan *
               </label>
               <input
@@ -645,12 +657,12 @@ Budi Santoso, 081987654321`}
                 placeholder="Contoh: Bapak Andi dan Keluarga"
                 value={guestName}
                 onChange={(e) => setGuestName(e.target.value)}
-                className="w-full text-xs py-2 px-3.5 rounded-xl border border-[#d4af37]/40 bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+                className="w-full text-xs py-2.5 px-3.5 rounded-xl border border-[#35373E] bg-[#28292F] text-[#F1F0EC] placeholder-[#71717A] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] uppercase tracking-wider text-[#b8860b] font-semibold mb-1">
+              <label className="block text-[10.5px] uppercase tracking-wider text-[#E0C98F] font-bold mb-1">
                 Nomor WhatsApp (Opsional)
               </label>
               <input
@@ -658,20 +670,20 @@ Budi Santoso, 081987654321`}
                 placeholder="Contoh: 08123456789 atau 628123456789"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full text-xs py-2 px-3.5 rounded-xl border border-[#d4af37]/40 bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+                className="w-full text-xs py-2.5 px-3.5 rounded-xl border border-[#35373E] bg-[#28292F] text-[#F1F0EC] placeholder-[#71717A] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 items-center">
             <div>
-              <label className="block text-[11px] uppercase tracking-wider text-[#b8860b] font-semibold mb-1">
+              <label className="block text-[10.5px] uppercase tracking-wider text-[#E0C98F] font-bold mb-1">
                 Kategori Tamu
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full text-xs py-2 px-3 rounded-xl border border-[#d4af37]/40 bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+                className="w-full text-xs py-2.5 px-3 rounded-xl border border-[#35373E] bg-[#28292F] text-[#F1F0EC] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
               >
                 <option value="Tamu VIP">Tamu VIP</option>
                 <option value="Keluarga">Keluarga</option>
@@ -682,13 +694,13 @@ Budi Santoso, 081987654321`}
             </div>
 
             <div>
-              <label className="block text-[11px] uppercase tracking-wider text-[#b8860b] font-semibold mb-1">
+              <label className="block text-[10.5px] uppercase tracking-wider text-[#E0C98F] font-bold mb-1">
                 Template Pesan
               </label>
               <select
                 value={template}
                 onChange={(e) => setTemplate(e.target.value as any)}
-                className="w-full text-xs py-2 px-3 rounded-xl border border-[#d4af37]/40 bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+                className="w-full text-xs py-2.5 px-3 rounded-xl border border-[#35373E] bg-[#28292F] text-[#F1F0EC] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
               >
                 <option value="Formal">Formal (Sopan)</option>
                 <option value="Hangat">Hangat (Teman/Sahabat)</option>
@@ -698,7 +710,7 @@ Budi Santoso, 081987654321`}
 
             <button
               type="submit"
-              className="py-2.5 px-5 text-xs font-bold col-span-2 md:col-span-1 mt-4 md:mt-5 bg-[#d4af37] text-white hover:bg-[#b8860b] rounded-xl cursor-pointer transition-all shadow-md"
+              className="py-2.5 px-5 text-xs font-bold col-span-2 md:col-span-1 mt-4 md:mt-5 bg-gradient-to-r from-[#C8A96B] to-[#B8860B] text-white hover:opacity-95 rounded-xl cursor-pointer transition-all shadow-sm"
             >
               + Tambah ke Daftar
             </button>
@@ -732,23 +744,29 @@ Budi Santoso, 081987654321`}
         });
 
         return (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {/* Search & Filter Bar */}
-            <div className="bg-white p-3.5 border border-[#d4af37]/30 rounded-xl shadow-sm space-y-2.5">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5">
-                <input
-                  type="text"
-                  placeholder="🔍 Cari nama / No WA / Kode Barcode..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full sm:w-72 text-xs py-2 px-3 rounded-xl border border-[#d4af37]/40 bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
-                />
+            <div className="bg-[#202125] p-4 border border-[#2D2E34] rounded-2xl shadow-xs space-y-3">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="relative w-full sm:w-72">
+                  <input
+                    type="text"
+                    placeholder="Cari nama / No WA / Kode Barcode..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full text-xs py-2.5 pl-9 pr-3 rounded-xl border border-[#35373E] bg-[#28292F] text-[#F1F0EC] placeholder-[#71717A] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
+                  />
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9E9D98" strokeWidth="2" className="absolute left-3 top-3">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                </div>
 
-                <div className="flex gap-2 w-full sm:w-auto">
+                <div className="flex gap-2.5 w-full sm:w-auto">
                   <select
                     value={filterCategory}
                     onChange={(e) => setFilterCategory(e.target.value)}
-                    className="text-xs py-2 px-3 rounded-xl border border-[#d4af37]/40 bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none flex-1 sm:w-36"
+                    className="text-xs py-2.5 px-3 rounded-xl border border-[#35373E] bg-[#28292F] text-[#F1F0EC] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none flex-1 sm:w-36"
                   >
                     <option value="all">Semua Kategori</option>
                     <option value="Tamu VIP">Tamu VIP</option>
@@ -761,7 +779,7 @@ Budi Santoso, 081987654321`}
                   <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
-                    className="text-xs py-2 px-3 rounded-xl border border-[#d4af37]/40 bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none flex-1 sm:w-36"
+                    className="text-xs py-2.5 px-3 rounded-xl border border-[#35373E] bg-[#28292F] text-[#F1F0EC] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none flex-1 sm:w-36"
                   >
                     <option value="all">Semua Status</option>
                     <option value="pending">Belum Kirim</option>
@@ -773,8 +791,12 @@ Budi Santoso, 081987654321`}
             </div>
 
             <div className="flex items-center justify-between px-1">
-              <h4 className="text-xs uppercase tracking-[2px] font-bold text-[#b8860b]">
-                Daftar Undangan ({filteredGuests.length} dari {guests.length})
+              <h4 className="text-xs uppercase tracking-[2px] font-bold text-[#E0C98F] flex items-center gap-2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                </svg>
+                <span>Daftar Undangan ({filteredGuests.length} dari {guests.length})</span>
               </h4>
               <div className="flex gap-2">
                 <button
@@ -784,9 +806,12 @@ Budi Santoso, 081987654321`}
                     }
                     await loadCloudGuests();
                   }}
-                  className="text-[10px] text-[#8a662d] bg-[#f7ebbf]/40 hover:bg-[#f7ebbf] px-2 py-1 rounded border border-[#d4af37]/40 cursor-pointer font-bold transition-all"
+                  className="text-[11px] text-[#E0C98F] bg-[#28292F] hover:bg-[#32343B] px-3 py-1 rounded-xl border border-[#35373E] cursor-pointer font-bold transition-all flex items-center gap-1"
                 >
-                  🔄 Sync Cloud
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+                  </svg>
+                  <span>Sync Cloud</span>
                 </button>
 
                 {guests.length > 0 && (
@@ -796,7 +821,7 @@ Budi Santoso, 081987654321`}
                         saveGuests([]);
                       }
                     }}
-                    className="text-[10px] text-red-500 hover:underline cursor-pointer"
+                    className="text-[11px] text-rose-400 hover:underline cursor-pointer font-bold px-2 py-1"
                   >
                     Hapus Semua
                   </button>
@@ -805,7 +830,7 @@ Budi Santoso, 081987654321`}
             </div>
 
             {filteredGuests.length === 0 ? (
-              <div className="bg-white border border-[#d4af37]/20 p-6 text-center text-xs text-[#66615c] rounded-xl">
+              <div className="bg-[#202125] border border-[#2D2E34] p-8 text-center text-xs text-[#9E9D98] italic rounded-2xl">
                 {guests.length === 0
                   ? "Belum ada daftar tamu. Gunakan tombol 'Impor Banyak Tamu' di atas."
                   : "Tidak ada tamu yang cocok dengan pencarian / filter Anda."}
@@ -815,40 +840,40 @@ Budi Santoso, 081987654321`}
                 {filteredGuests.map((g) => (
               <div
                 key={g.id}
-                className={`bg-white p-4 border rounded-xl flex flex-col gap-2.5 shadow-sm ${
-                  g.status === "sent" ? "border-emerald-400/60" : "border-[#d4af37]/30"
+                className={`bg-[#202125] p-4.5 border rounded-2xl flex flex-col gap-3 shadow-xs ${
+                  g.status === "sent" ? "border-emerald-800/60" : "border-[#2D2E34]"
                 }`}
               >
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-bold text-[#2a2723] font-serif">{g.name}</span>
-                    <span className="text-[9px] bg-[#f7ebbf] border border-[#d4af37]/40 text-[#8a662d] px-2 py-0.5 rounded-full font-semibold">
+                    <span className="text-sm font-bold text-[#F1F0EC] font-serif">{g.name}</span>
+                    <span className="text-[9px] bg-[#28292F] border border-[#35373E] text-[#E0C98F] px-2.5 py-0.5 rounded-full font-semibold">
                       {g.category}
                     </span>
-                    <span className="text-[9px] bg-[#faf8f5] border border-[#d4af37]/50 text-[#8a662d] px-2 py-0.5 rounded-full font-mono font-bold">
-                      🎫 {g.code || g.id}
+                    <span className="text-[9px] bg-[#28292F] border border-[#35373E] text-[#E0C98F] px-2.5 py-0.5 rounded-full font-mono font-bold">
+                      {g.code || g.id}
                     </span>
                     {g.checkedIn && (
-                      <span className="text-[9px] bg-emerald-100 text-emerald-800 border border-emerald-400 px-2 py-0.5 rounded-full font-extrabold">
+                      <span className="text-[9px] bg-emerald-950 text-emerald-300 border border-emerald-700 px-2.5 py-0.5 rounded-full font-extrabold">
                         ✓ HADIR ({g.checkInTime || "Checked-In"})
                       </span>
                     )}
                     {g.status === "sent" && !g.checkedIn && (
-                      <span className="text-[9px] bg-emerald-50 text-emerald-700 border border-emerald-300 px-2 py-0.5 rounded-full font-bold">
+                      <span className="text-[9px] bg-emerald-950/60 text-emerald-300 border border-emerald-800 px-2.5 py-0.5 rounded-full font-bold">
                         ✓ Terkirim Bot
                       </span>
                     )}
                     {g.status === "failed" && (
-                      <span className="text-[9px] bg-rose-50 text-rose-700 border border-rose-300 px-2 py-0.5 rounded-full font-bold">
-                        ⚠️ Gagal
+                      <span className="text-[9px] bg-rose-950/60 text-rose-300 border border-rose-800 px-2.5 py-0.5 rounded-full font-bold">
+                        Gagal
                       </span>
                     )}
                   </div>
-                  <span className="text-[10px] text-[#66615c]">{g.createdAt}</span>
+                  <span className="text-[10px] text-[#9E9D98]">{g.createdAt}</span>
                 </div>
 
                 {g.phone && (
-                  <div className="text-[11px] text-emerald-700 font-mono flex items-center gap-1.5">
+                  <div className="text-[11px] text-emerald-400 font-mono flex items-center gap-1.5">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
                       <line x1="12" y1="18" x2="12.01" y2="18" />
@@ -858,7 +883,7 @@ Budi Santoso, 081987654321`}
                   </div>
                 )}
 
-                <div className="bg-[#faf8f5] p-2 rounded-lg text-[10px] font-mono text-[#8a662d] truncate border border-[#d4af37]/30">
+                <div className="bg-[#28292F] p-2.5 rounded-xl text-[10.5px] font-mono text-[#E0C98F] truncate border border-[#35373E]">
                   {getGuestUrl(g.name, g.code)}
                 </div>
 
@@ -867,9 +892,9 @@ Budi Santoso, 081987654321`}
                   <button
                     type="button"
                     onClick={() => setQrPreviewId(qrPreviewId === g.id ? null : g.id)}
-                    className="text-[10px] py-1.5 px-3 bg-[#f7ebbf]/60 hover:bg-[#f7ebbf] text-[#8a662d] border border-[#d4af37]/40 rounded-lg cursor-pointer font-bold transition-all flex items-center gap-1"
+                    className="text-[10.5px] py-1.5 px-3 bg-[#28292F] hover:bg-[#32343B] text-[#E0C98F] border border-[#35373E] rounded-xl cursor-pointer font-bold transition-all flex items-center gap-1.5"
                   >
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <rect x="3" y="3" width="7" height="7" />
                       <rect x="14" y="3" width="7" height="7" />
                       <rect x="14" y="14" width="7" height="7" />
@@ -881,16 +906,16 @@ Budi Santoso, 081987654321`}
 
                 {/* QR Code for this guest */}
                 {qrPreviewId === g.id && (
-                  <div className="flex flex-col items-center gap-2 p-3 bg-white border border-[#d4af37]/30 rounded-xl">
+                  <div className="flex flex-col items-center gap-2 p-4 bg-white border border-[#35373E] rounded-2xl">
                     <QRCodeCanvas
                       data={g.code || g.id}
                       size={160}
                       className="rounded-lg"
                     />
-                    <span className="text-[10px] font-mono font-bold text-[#2a2723] bg-[#faf8f5] px-3 py-1 rounded-lg border border-[#d4af37]/30">
+                    <span className="text-[10px] font-mono font-bold text-[#18181B] bg-[#F4F4F6] px-3 py-1 rounded-lg border border-[#E4E4E7]">
                       {g.code || g.id}
                     </span>
-                    <p className="text-[9px] text-[#66615c]">QR Code unik untuk tamu ini. Scan saat check-in.</p>
+                    <p className="text-[10px] text-[#71717A]">QR Code unik untuk tamu ini. Scan saat check-in.</p>
                   </div>
                 )}
 
@@ -901,9 +926,9 @@ Budi Santoso, 081987654321`}
                       <button
                         onClick={() => handleSingleAutoSend(g)}
                         disabled={sendingId === g.id || isBlasting}
-                        className="text-[10px] py-1.5 px-3 flex items-center gap-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-none shadow-md font-extrabold cursor-pointer hover:from-emerald-500 hover:to-teal-500 rounded-lg transition-all"
+                        className="text-[10.5px] py-1.5 px-3 flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-none shadow-xs font-extrabold cursor-pointer hover:from-emerald-500 hover:to-teal-500 rounded-xl transition-all"
                       >
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
                         </svg>
                         <span>{sendingId === g.id ? "Sending..." : "Kirim Bot"}</span>
@@ -913,9 +938,9 @@ Budi Santoso, 081987654321`}
                     {/* Direct WA Web Launcher Button */}
                     <button
                       onClick={() => handleDirectWaWeb(g)}
-                      className="text-[10px] py-1.5 px-3 flex items-center gap-1 bg-white border border-[#d4af37]/40 text-[#2a2723] hover:bg-[#f7ebbf]/40 rounded-lg cursor-pointer transition-all"
+                      className="text-[10.5px] py-1.5 px-3 flex items-center gap-1.5 bg-[#28292F] border border-[#35373E] text-[#F1F0EC] hover:bg-[#32343B] rounded-xl cursor-pointer transition-all"
                     >
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
                       </svg>
                       <span>Buka WA App</span>
@@ -924,9 +949,9 @@ Budi Santoso, 081987654321`}
                     {/* Copy Link Button */}
                     <button
                       onClick={() => handleCopy(g.name, g.id)}
-                      className="text-[10px] py-1.5 px-3 flex items-center gap-1 bg-white border border-[#d4af37]/40 text-[#2a2723] hover:bg-[#f7ebbf]/40 rounded-lg cursor-pointer transition-all"
+                      className="text-[10.5px] py-1.5 px-3 flex items-center gap-1.5 bg-[#28292F] border border-[#35373E] text-[#F1F0EC] hover:bg-[#32343B] rounded-xl cursor-pointer transition-all"
                     >
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
                         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                       </svg>
@@ -936,10 +961,13 @@ Budi Santoso, 081987654321`}
 
                   <button
                     onClick={() => handleDelete(g.id)}
-                    className="text-[#999] hover:text-red-500 text-xs p-1 cursor-pointer transition-colors"
+                    className="text-[#9E9D98] hover:text-rose-400 p-1.5 cursor-pointer transition-colors"
                     title="Hapus"
                   >
-                    🗑️
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
                   </button>
                 </div>
               </div>

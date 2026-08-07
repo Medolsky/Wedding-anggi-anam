@@ -162,46 +162,52 @@ export function RSVPManager() {
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="bg-white p-3.5 border border-[#d4af37]/40 text-center rounded-xl shadow-sm">
-          <p className="text-[10px] uppercase tracking-wider text-[#66615c] font-semibold">Total Respon</p>
-          <p className="text-2xl font-bold font-serif text-[#2a2723]">{totalResponses}</p>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-[#202125] p-4 border border-[#2D2E34] text-center rounded-2xl shadow-xs">
+          <p className="text-[10.5px] uppercase tracking-wider text-[#9E9D98] font-bold">Total Respon</p>
+          <p className="text-2xl font-bold font-serif text-[#F1F0EC] mt-1">{totalResponses}</p>
         </div>
 
-        <div className="bg-emerald-50 p-3.5 border border-emerald-400/50 text-center rounded-xl shadow-sm">
-          <p className="text-[10px] uppercase tracking-wider text-emerald-700 font-semibold">Tamu Hadir (PAX)</p>
-          <p className="text-2xl font-bold font-serif text-emerald-700">
-            {attendingCount} <span className="text-xs font-normal text-emerald-600">({totalPax} Orang)</span>
+        <div className="bg-[#202125] p-4 border border-emerald-800/60 text-center rounded-2xl shadow-xs">
+          <p className="text-[10.5px] uppercase tracking-wider text-emerald-400 font-bold">Tamu Hadir (PAX)</p>
+          <p className="text-2xl font-bold font-serif text-emerald-400 mt-1">
+            {attendingCount} <span className="text-xs font-semibold text-emerald-300">({totalPax} Orang)</span>
           </p>
         </div>
 
-        <div className="bg-amber-50 p-3.5 border border-amber-400/50 text-center rounded-xl shadow-sm">
-          <p className="text-[10px] uppercase tracking-wider text-amber-700 font-semibold">Ragu-Ragu</p>
-          <p className="text-2xl font-bold font-serif text-amber-700">{uncertainCount}</p>
+        <div className="bg-[#202125] p-4 border border-amber-800/60 text-center rounded-2xl shadow-xs">
+          <p className="text-[10.5px] uppercase tracking-wider text-amber-400 font-bold">Ragu-Ragu</p>
+          <p className="text-2xl font-bold font-serif text-amber-400 mt-1">{uncertainCount}</p>
         </div>
 
-        <div className="bg-rose-50 p-3.5 border border-rose-400/50 text-center rounded-xl shadow-sm">
-          <p className="text-[10px] uppercase tracking-wider text-rose-700 font-semibold">Tidak Hadir</p>
-          <p className="text-2xl font-bold font-serif text-rose-700">{absentCount}</p>
+        <div className="bg-[#202125] p-4 border border-rose-800/60 text-center rounded-2xl shadow-xs">
+          <p className="text-[10.5px] uppercase tracking-wider text-rose-400 font-bold">Tidak Hadir</p>
+          <p className="text-2xl font-bold font-serif text-rose-400 mt-1">{absentCount}</p>
         </div>
       </div>
 
       {/* Filter, Search & Actions Bar */}
-      <div className="bg-white p-4 border border-[#d4af37]/30 rounded-xl shadow-sm space-y-3">
-        <div className="flex flex-col md:flex-row gap-2.5 items-center justify-between">
-          <input
-            type="text"
-            placeholder="🔍 Cari nama tamu..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full md:w-64 text-xs py-2 px-3 rounded-xl border border-[#d4af37]/40 bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
-          />
+      <div className="bg-[#202125] p-5 border border-[#2D2E34] rounded-2xl shadow-xs space-y-3">
+        <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
+          <div className="relative w-full md:w-72">
+            <input
+              type="text"
+              placeholder="Cari nama tamu..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full text-xs py-2.5 pl-9 pr-3 rounded-xl border border-[#35373E] bg-[#28292F] text-[#F1F0EC] placeholder-[#71717A] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
+            />
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9E9D98" strokeWidth="2" className="absolute left-3 top-3">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+          </div>
 
-          <div className="flex gap-2 w-full md:w-auto">
+          <div className="flex gap-2.5 w-full md:w-auto flex-wrap">
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="flex-1 md:w-36 text-xs py-2 px-3 rounded-xl border border-[#d4af37]/40 bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+              className="flex-1 md:w-40 text-xs py-2.5 px-3 rounded-xl border border-[#35373E] bg-[#28292F] text-[#F1F0EC] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
             >
               <option value="all">Semua Status</option>
               <option value="Hadir">Hadir</option>
@@ -211,37 +217,55 @@ export function RSVPManager() {
 
             <button
               onClick={() => setShowAddModal(true)}
-              className="text-xs py-2 px-3 font-bold whitespace-nowrap bg-[#d4af37] text-white hover:bg-[#b8860b] rounded-xl cursor-pointer transition-all"
+              className="text-xs py-2.5 px-4 font-bold whitespace-nowrap bg-gradient-to-r from-[#C8A96B] to-[#B8860B] text-white hover:opacity-95 rounded-xl cursor-pointer transition-all flex items-center gap-1.5 shadow-sm"
             >
-              + Tambah RSVP
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              <span>Tambah RSVP</span>
             </button>
 
             <button
               onClick={exportCSV}
-              className="text-xs py-2 px-3 font-semibold whitespace-nowrap bg-white border border-[#d4af37]/40 text-[#2a2723] hover:bg-[#f7ebbf]/40 rounded-xl cursor-pointer transition-all"
+              className="text-xs py-2.5 px-3.5 font-bold whitespace-nowrap bg-[#28292F] border border-[#35373E] text-[#F1F0EC] hover:bg-[#32343B] rounded-xl cursor-pointer transition-all flex items-center gap-1.5"
             >
-              📥 CSV
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              <span>Export CSV</span>
             </button>
           </div>
         </div>
       </div>
 
       {/* RSVP Table / List */}
-      <div className="bg-white p-4 border border-[#d4af37]/30 rounded-xl shadow-sm">
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="text-xs uppercase tracking-[2px] font-bold text-[#b8860b]">
-            Daftar Konfirmasi Kehadiran ({filteredRSVPs.length})
+      <div className="bg-[#202125] p-5 border border-[#2D2E34] rounded-2xl shadow-xs">
+        <div className="flex items-center justify-between mb-4">
+          <h4 className="text-xs uppercase tracking-[2px] font-bold text-[#E0C98F] flex items-center gap-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+            <span>Daftar Konfirmasi Kehadiran ({filteredRSVPs.length})</span>
           </h4>
           <button
             onClick={loadRSVPs}
-            className="text-[10px] text-[#8a662d] hover:underline cursor-pointer font-bold"
+            className="text-[11px] text-[#E0C98F] hover:underline cursor-pointer font-bold flex items-center gap-1"
           >
-            🔄 Sync Cloud
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+            </svg>
+            <span>Sync Cloud</span>
           </button>
         </div>
 
         {filteredRSVPs.length === 0 ? (
-          <div className="text-center py-6 text-xs text-[#66615c]">
+          <div className="text-center py-8 text-xs text-[#9E9D98] italic">
             Belum ada data konfirmasi RSVP.
           </div>
         ) : (
@@ -249,38 +273,41 @@ export function RSVPManager() {
             {filteredRSVPs.map((r) => (
               <div
                 key={r.id}
-                className="p-3 border border-[#d4af37]/20 rounded-xl bg-[#faf8f5] flex items-center justify-between gap-3 text-xs"
+                className="p-3.5 border border-[#35373E] rounded-xl bg-[#28292F] flex items-center justify-between gap-3 text-xs"
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-[#2a2723] font-serif">{r.name}</span>
+                    <span className="font-bold text-[#F1F0EC] font-serif text-sm">{r.name}</span>
                     <span
-                      className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase ${
+                      className={`text-[9px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
                         r.attendance === "Hadir"
-                          ? "bg-emerald-100 text-emerald-700 border border-emerald-400"
+                          ? "bg-emerald-950 text-emerald-300 border border-emerald-700"
                           : r.attendance === "Ragu-ragu"
-                          ? "bg-amber-100 text-amber-700 border border-amber-400"
-                          : "bg-rose-100 text-rose-700 border border-rose-400"
+                          ? "bg-amber-950 text-amber-300 border border-amber-700"
+                          : "bg-rose-950 text-rose-300 border border-rose-700"
                       }`}
                     >
                       {r.attendance}
                     </span>
                   </div>
 
-                  <div className="text-[11px] text-[#66615c] flex gap-3">
+                  <div className="text-[11px] text-[#9E9D98] flex items-center gap-4">
                     {r.attendance === "Hadir" && (
-                      <span>👥 Jumlah: <strong className="text-[#b8860b]">{r.guestCount} Orang</strong></span>
+                      <span>Jumlah: <strong className="text-[#E0C98F]">{r.guestCount} Orang (PAX)</strong></span>
                     )}
-                    <span>🕒 {r.createdAt}</span>
+                    <span>Waktu: {r.createdAt}</span>
                   </div>
                 </div>
 
                 <button
                   onClick={() => handleDelete(r.id)}
-                  className="text-[#999] hover:text-red-500 text-sm p-1 cursor-pointer transition-colors"
+                  className="text-[#9E9D98] hover:text-rose-400 p-1.5 cursor-pointer transition-colors"
                   title="Hapus"
                 >
-                  🗑️
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
                 </button>
               </div>
             ))}
@@ -290,32 +317,32 @@ export function RSVPManager() {
 
       {/* Manual Add RSVP Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="max-w-sm w-full p-5 border border-[#d4af37]/50 rounded-2xl space-y-4 bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-[#d4af37]/20 pb-2">
-              <h3 className="text-base font-bold font-serif text-[#2a2723]">Tambah RSVP Manual</h3>
-              <button onClick={() => setShowAddModal(false)} className="text-[#999] hover:text-[#2a2723] cursor-pointer">✕</button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
+          <div className="max-w-sm w-full p-6 border border-[#35373E] rounded-2xl space-y-4 bg-[#202125] text-[#F1F0EC] shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#35373E] pb-3">
+              <h3 className="text-base font-bold font-serif text-[#F1F0EC]">Tambah RSVP Manual</h3>
+              <button onClick={() => setShowAddModal(false)} className="text-[#9E9D98] hover:text-white cursor-pointer">✕</button>
             </div>
 
             <form onSubmit={handleAddManual} className="space-y-3">
               <div>
-                <label className="block text-[10px] uppercase text-[#b8860b] font-semibold mb-1">Nama Tamu</label>
+                <label className="block text-[10px] uppercase text-[#E0C98F] font-bold mb-1">Nama Tamu</label>
                 <input
                   type="text"
                   required
                   placeholder="Nama Lengkap"
                   value={manualName}
                   onChange={(e) => setManualName(e.target.value)}
-                  className="w-full text-xs py-2 px-3 border border-[#d4af37]/40 rounded-xl bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+                  className="w-full text-xs py-2.5 px-3 border border-[#35373E] rounded-xl bg-[#28292F] text-[#F1F0EC] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase text-[#b8860b] font-semibold mb-1">Status Kehadiran</label>
+                <label className="block text-[10px] uppercase text-[#E0C98F] font-bold mb-1">Status Kehadiran</label>
                 <select
                   value={manualAttendance}
                   onChange={(e) => setManualAttendance(e.target.value as any)}
-                  className="w-full text-xs py-2 px-3 border border-[#d4af37]/40 rounded-xl bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+                  className="w-full text-xs py-2.5 px-3 border border-[#35373E] rounded-xl bg-[#28292F] text-[#F1F0EC] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
                 >
                   <option value="Hadir">Hadir</option>
                   <option value="Ragu-ragu">Ragu-ragu</option>
@@ -325,27 +352,27 @@ export function RSVPManager() {
 
               {manualAttendance === "Hadir" && (
                 <div>
-                  <label className="block text-[10px] uppercase text-[#b8860b] font-semibold mb-1">Jumlah Tamu (PAX)</label>
+                  <label className="block text-[10px] uppercase text-[#E0C98F] font-bold mb-1">Jumlah Tamu (PAX)</label>
                   <input
                     type="number"
                     min={1}
                     max={10}
                     value={manualPax}
                     onChange={(e) => setManualPax(Number(e.target.value))}
-                    className="w-full text-xs py-2 px-3 border border-[#d4af37]/40 rounded-xl bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
+                    className="w-full text-xs py-2.5 px-3 border border-[#35373E] rounded-xl bg-[#28292F] text-[#F1F0EC] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
                   />
                 </div>
               )}
 
-              <div className="pt-2 flex gap-2">
+              <div className="pt-3 flex gap-2">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="text-xs flex-1 py-2 bg-white border border-[#d4af37]/40 text-[#66615c] hover:bg-[#faf8f5] rounded-xl cursor-pointer transition-all"
+                  className="text-xs flex-1 py-2.5 bg-[#28292F] border border-[#35373E] text-[#9E9D98] hover:bg-[#32343B] rounded-xl cursor-pointer transition-all"
                 >
                   Batal
                 </button>
-                <button type="submit" className="text-xs flex-1 py-2 font-bold bg-[#d4af37] text-white hover:bg-[#b8860b] rounded-xl cursor-pointer transition-all">
+                <button type="submit" className="text-xs flex-1 py-2.5 font-bold bg-gradient-to-r from-[#C8A96B] to-[#B8860B] text-white hover:opacity-95 rounded-xl cursor-pointer transition-all">
                   Simpan RSVP
                 </button>
               </div>

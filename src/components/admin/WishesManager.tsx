@@ -75,35 +75,37 @@ export function WishesManager() {
 
   return (
     <div className="space-y-4">
-      <div className="bg-white p-4 border border-[#d4af37]/30 rounded-xl shadow-sm flex items-center justify-between">
+      <div className="bg-[#202125] p-5 border border-[#2D2E34] rounded-2xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h3
-            className="text-base font-bold font-serif text-[#2a2723] flex items-center gap-2"
+            className="text-base font-bold font-serif text-[#F1F0EC] flex items-center gap-2"
             style={{ fontFamily: "var(--font-heading)" }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B8860B" strokeWidth="2">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-              <polyline points="22,6 12,13 2,6" />
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E0C98F" strokeWidth="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
             <span>Moderasi Ucapan Tamu Undangan ({wishes.length})</span>
           </h3>
-          <p className="text-[11px] text-[#66615c]">
-            Lihat dan kelola ucapan serta doa yang dikirimkan oleh para tamu undangan secara real-time dari semua device.
+          <p className="text-[11px] text-[#9E9D98] mt-0.5">
+            Lihat dan kelola ucapan serta doa yang dikirimkan oleh para tamu undangan secara real-time.
           </p>
         </div>
 
         <div className="flex gap-2">
           <button
             onClick={loadWishes}
-            className="text-[10px] py-1.5 px-3 bg-white border border-[#d4af37]/40 text-[#2a2723] hover:bg-[#f7ebbf]/40 rounded-lg cursor-pointer transition-all"
+            className="text-[11px] py-1.5 px-3 bg-[#28292F] border border-[#35373E] text-[#E0C98F] hover:bg-[#32343B] rounded-xl cursor-pointer transition-all flex items-center gap-1 font-bold"
           >
-            🔄 Sync Cloud
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+            </svg>
+            <span>Sync Cloud</span>
           </button>
 
           {wishes.length > 0 && (
             <button
               onClick={handleClearAll}
-              className="text-[10px] py-1.5 px-3 bg-white border border-rose-300 text-rose-600 hover:bg-rose-50 rounded-lg cursor-pointer transition-all"
+              className="text-[11px] py-1.5 px-3 bg-[#28292F] border border-rose-800/60 text-rose-400 hover:bg-rose-950/40 rounded-xl cursor-pointer transition-all font-bold"
             >
               Hapus Semua
             </button>
@@ -112,7 +114,7 @@ export function WishesManager() {
       </div>
 
       {wishes.length === 0 ? (
-        <div className="bg-white border border-[#d4af37]/20 p-8 text-center text-xs text-[#66615c] rounded-xl">
+        <div className="bg-[#202125] border border-[#2D2E34] p-8 text-center text-xs text-[#9E9D98] italic rounded-2xl">
           Belum ada ucapan yang masuk dari tamu undangan.
         </div>
       ) : (
@@ -120,19 +122,19 @@ export function WishesManager() {
           {wishes.map((w) => (
             <div
               key={w.id}
-              className="bg-white p-4 border border-[#d4af37]/30 rounded-xl shadow-sm space-y-2"
+              className="bg-[#202125] p-5 border border-[#2D2E34] rounded-2xl shadow-xs space-y-2.5"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-[#2a2723] font-serif text-sm">{w.name}</span>
+                  <span className="font-bold text-[#F1F0EC] font-serif text-sm">{w.name}</span>
                   {w.attendance && (
                     <span
-                      className={`text-[9px] px-2 py-0.5 rounded-full font-bold ${
+                      className={`text-[9px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
                         w.attendance === "Hadir"
-                          ? "bg-emerald-100 text-emerald-700 border border-emerald-400"
+                          ? "bg-emerald-950 text-emerald-300 border border-emerald-700"
                           : w.attendance === "Ragu-ragu"
-                          ? "bg-amber-100 text-amber-700 border border-amber-400"
-                          : "bg-rose-100 text-rose-700 border border-rose-400"
+                          ? "bg-amber-950 text-amber-300 border border-amber-700"
+                          : "bg-rose-950 text-rose-300 border border-rose-700"
                       }`}
                     >
                       {w.attendance}
@@ -140,19 +142,22 @@ export function WishesManager() {
                   )}
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-[#999]">{w.createdAt}</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] text-[#9E9D98]">{w.createdAt}</span>
                   <button
                     onClick={() => handleDelete(w.id)}
-                    className="text-[#999] hover:text-red-500 text-xs p-1 cursor-pointer transition-colors"
+                    className="text-[#9E9D98] hover:text-rose-400 p-1 cursor-pointer transition-colors"
                     title="Hapus Ucapan"
                   >
-                    🗑️
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
                   </button>
                 </div>
               </div>
 
-              <p className="text-xs text-[#555] italic leading-relaxed bg-[#faf8f5] p-3 rounded-lg border border-[#d4af37]/20">
+              <p className="text-xs text-[#C5C4C0] italic leading-relaxed bg-[#28292F] p-3.5 rounded-xl border border-[#35373E]">
                 &quot;{w.message}&quot;
               </p>
             </div>

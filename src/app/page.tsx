@@ -93,8 +93,7 @@ function InvitationContent() {
                 ease: [0.76, 0, 0.24, 1],
               }}
             >
-              <WelcomeCover />
-              <WelcomeContent
+              <WelcomeCover
                 guestName={guest.name}
                 onOpen={handleOpen}
               />

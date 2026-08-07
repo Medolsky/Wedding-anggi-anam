@@ -327,14 +327,21 @@ export function BarcodeScannerManager() {
       {/* Live Checked-In Guests Feed */}
       <div className="bg-white p-4 border border-[#d4af37]/30 rounded-xl shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <h4 className="text-xs uppercase tracking-[2px] font-bold text-[#b8860b]">
-            📋 Daftar Riwayat Check-In Tamu ({checkedInCount})
+          <h4 className="text-xs uppercase tracking-[2px] font-bold text-[#b8860b] flex items-center gap-1.5">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+            </svg>
+            <span>Daftar Riwayat Check-In Tamu ({checkedInCount})</span>
           </h4>
           <button
             onClick={loadCloudGuests}
-            className="text-[10px] text-[#8a662d] bg-[#f7ebbf]/40 hover:bg-[#f7ebbf] px-2.5 py-1 rounded-md border border-[#d4af37]/40 cursor-pointer font-bold transition-all"
+            className="text-[10px] text-[#8a662d] bg-[#f7ebbf]/40 hover:bg-[#f7ebbf] px-2.5 py-1 rounded-md border border-[#d4af37]/40 cursor-pointer font-bold transition-all flex items-center gap-1"
           >
-            🔄 Sync Real-Time
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+            </svg>
+            <span>Sync Real-Time</span>
           </button>
         </div>
 

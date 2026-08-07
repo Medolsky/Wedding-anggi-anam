@@ -78,10 +78,14 @@ export function WishesManager() {
       <div className="bg-white p-4 border border-[#d4af37]/30 rounded-xl shadow-sm flex items-center justify-between">
         <div>
           <h3
-            className="text-base font-bold font-serif text-[#2a2723]"
+            className="text-base font-bold font-serif text-[#2a2723] flex items-center gap-2"
             style={{ fontFamily: "var(--font-heading)" }}
           >
-            💌 Moderasi Ucapan Tamu Undangan ({wishes.length})
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B8860B" strokeWidth="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+              <polyline points="22,6 12,13 2,6" />
+            </svg>
+            <span>Moderasi Ucapan Tamu Undangan ({wishes.length})</span>
           </h3>
           <p className="text-[11px] text-[#66615c]">
             Lihat dan kelola ucapan serta doa yang dikirimkan oleh para tamu undangan secara real-time dari semua device.

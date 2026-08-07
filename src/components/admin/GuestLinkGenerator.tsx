@@ -548,7 +548,11 @@ Hormat kami,
           onClick={() => setShowBulkInput(!showBulkInput)}
           className="text-xs py-2.5 px-4 font-bold flex-1 flex items-center justify-center gap-1.5 bg-white border border-[#d4af37]/40 text-[#2a2723] hover:bg-[#f7ebbf]/40 rounded-xl cursor-pointer transition-all"
         >
-          📋 {showBulkInput ? "Tutup Impor" : "Impor Banyak Tamu (Copas List)"}
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+            <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+          </svg>
+          <span>{showBulkInput ? "Tutup Impor" : "Impor Banyak Tamu (Copas List)"}</span>
         </button>
 
         {pendingWithPhoneCount > 0 && (
@@ -557,9 +561,22 @@ Hormat kami,
             disabled={isBlasting}
             className="text-xs py-2.5 px-4 font-extrabold flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-none shadow-lg flex items-center justify-center gap-1.5 cursor-pointer hover:from-emerald-500 hover:to-teal-500 rounded-xl transition-all"
           >
-            {isBlasting
-              ? `⏳ Sending ${blastProgress.current}/${blastProgress.total}`
-              : `🚀 KIRIM MASSAL OTOMATIS (${pendingWithPhoneCount})`}
+            {isBlasting ? (
+              <span className="flex items-center gap-1">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="animate-spin">
+                  <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+                </svg>
+                <span>Sending {blastProgress.current}/{blastProgress.total}</span>
+              </span>
+            ) : (
+              <span className="flex items-center gap-1">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="22" y1="2" x2="11" y2="13" />
+                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                </svg>
+                <span>KIRIM MASSAL OTOMATIS ({pendingWithPhoneCount})</span>
+              </span>
+            )}
           </button>
         )}
       </div>
@@ -567,8 +584,12 @@ Hormat kami,
       {/* Bulk Import Textarea Card */}
       {showBulkInput && (
         <div className="bg-white border border-[#d4af37]/40 rounded-2xl shadow-sm p-5 space-y-3">
-          <h4 className="text-sm font-bold font-serif text-[#2a2723]">
-            📋 Copy-Paste Banyak Nama &amp; No HP Tamu Sekaligus
+          <h4 className="text-sm font-bold font-serif text-[#2a2723] flex items-center gap-1.5">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+            </svg>
+            <span>Copy-Paste Banyak Nama &amp; No HP Tamu Sekaligus</span>
           </h4>
           <p className="text-xs text-[#66615c]">
             Paste daftar nama dan nomor HP tamu dari Excel / WhatsApp / Catatan.
@@ -828,7 +849,11 @@ Budi Santoso, 081987654321`}
 
                 {g.phone && (
                   <div className="text-[11px] text-emerald-700 font-mono flex items-center gap-1.5">
-                    <span>📱 WA Target:</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                      <line x1="12" y1="18" x2="12.01" y2="18" />
+                    </svg>
+                    <span>WA Target:</span>
                     <span className="font-bold">+{g.phone}</span>
                   </div>
                 )}
@@ -844,7 +869,13 @@ Budi Santoso, 081987654321`}
                     onClick={() => setQrPreviewId(qrPreviewId === g.id ? null : g.id)}
                     className="text-[10px] py-1.5 px-3 bg-[#f7ebbf]/60 hover:bg-[#f7ebbf] text-[#8a662d] border border-[#d4af37]/40 rounded-lg cursor-pointer font-bold transition-all flex items-center gap-1"
                   >
-                    {qrPreviewId === g.id ? "🔽 Sembunyikan QR" : "📱 Lihat QR Code"}
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="3" width="7" height="7" />
+                      <rect x="14" y="3" width="7" height="7" />
+                      <rect x="14" y="14" width="7" height="7" />
+                      <rect x="3" y="14" width="7" height="7" />
+                    </svg>
+                    <span>{qrPreviewId === g.id ? "Sembunyikan QR" : "Lihat QR Code"}</span>
                   </button>
                 </div>
 
@@ -872,7 +903,10 @@ Budi Santoso, 081987654321`}
                         disabled={sendingId === g.id || isBlasting}
                         className="text-[10px] py-1.5 px-3 flex items-center gap-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-none shadow-md font-extrabold cursor-pointer hover:from-emerald-500 hover:to-teal-500 rounded-lg transition-all"
                       >
-                        {sendingId === g.id ? "⏳..." : "⚡ Kirim Bot"}
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                        </svg>
+                        <span>{sendingId === g.id ? "Sending..." : "Kirim Bot"}</span>
                       </button>
                     )}
 
@@ -881,7 +915,10 @@ Budi Santoso, 081987654321`}
                       onClick={() => handleDirectWaWeb(g)}
                       className="text-[10px] py-1.5 px-3 flex items-center gap-1 bg-white border border-[#d4af37]/40 text-[#2a2723] hover:bg-[#f7ebbf]/40 rounded-lg cursor-pointer transition-all"
                     >
-                      <span>💬 Buka WA App</span>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                      </svg>
+                      <span>Buka WA App</span>
                     </button>
 
                     {/* Copy Link Button */}
@@ -889,7 +926,11 @@ Budi Santoso, 081987654321`}
                       onClick={() => handleCopy(g.name, g.id)}
                       className="text-[10px] py-1.5 px-3 flex items-center gap-1 bg-white border border-[#d4af37]/40 text-[#2a2723] hover:bg-[#f7ebbf]/40 rounded-lg cursor-pointer transition-all"
                     >
-                      {copiedId === g.id ? "✓ Tersalin!" : "📋 Salin Link"}
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                      </svg>
+                      <span>{copiedId === g.id ? "Tersalin!" : "Salin Link"}</span>
                     </button>
                   </div>
 

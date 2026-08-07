@@ -27,13 +27,13 @@ export function GiftSection() {
       data-section="gift"
       className="section-gift relative py-18 md:py-24 overflow-hidden flex flex-col items-center justify-center text-center bg-[#faf8f5] text-[#2a2723]"
     >
-      {/* Background Image from Unsplash — Clear & Vivid */}
+      {/* Background Image — Clear & Vivid */}
       <div className="absolute inset-0">
         <motion.div
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url('${sectionBgs.gift}')`,
-            filter: "brightness(0.85) contrast(1.05)",
+            filter: "brightness(0.92) contrast(1.02)",
           }}
           initial={{ scale: 1.15 }}
           whileInView={{ scale: 1 }}
@@ -47,16 +47,16 @@ export function GiftSection() {
       <div className="relative z-20 max-w-md mx-auto px-6 w-full text-center flex flex-col items-center justify-center">
         {/* Section header frame card */}
         <AnimatedText delay={0} variant="fadeUp" className="w-full flex justify-center mb-6">
-          <div className="gold-card-pro p-4 md:p-5 border border-[#d4af37]/40 shadow-xl rounded-2xl w-full max-w-xs text-center flex flex-col items-center justify-center">
+          <div className="gold-card-pro p-4 md:p-5 border border-[#d4af37]/60 shadow-xl rounded-2xl w-full max-w-xs text-center flex flex-col items-center justify-center">
             <p
-              className="text-[10px] uppercase tracking-[4px] text-[#b8860b] font-bold mb-1.5 text-center leading-none"
+              className="text-[10px] uppercase tracking-[4px] text-[#b8860b] font-extrabold mb-1.5 text-center leading-none"
               style={{ fontFamily: "var(--font-body)" }}
             >
               Wedding Gift
             </p>
 
             <h2
-              className="text-2xl md:text-3xl text-center mb-2 font-serif text-[#2a2723] drop-shadow-sm leading-snug"
+              className="text-2xl md:text-3xl text-center font-serif text-[#1a1815] font-bold leading-snug"
               style={{ fontFamily: "var(--font-heading)" }}
             >
               Hadiah Pernikahan
@@ -91,67 +91,54 @@ export function GiftSection() {
                 </p>
 
                 {/* Account name */}
-                <p className="text-xs text-[#66615c] font-medium mb-3 text-center leading-none">
+                <p className="text-xs text-[#4a453f] font-semibold mb-2.5 text-center leading-none">
                   a.n. {account.accountName}
                 </p>
 
-                {/* Copy buttons */}
-                <div className="flex gap-2 w-full">
-                  <button
-                    onClick={() =>
-                      handleCopy(account.accountNumber, `num-${account.id}`)
-                    }
-                    className="btn-modern-primary flex-1 py-1.5 px-2 text-[10px] font-bold rounded-full flex items-center justify-center gap-1 shadow-md"
-                  >
-                    <AnimatePresence mode="wait">
-                      {copiedField === `num-${account.id}` ? (
-                        <motion.span
-                          key="copied"
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          exit={{ scale: 0 }}
-                        >
-                          ✓
-                        </motion.span>
-                      ) : (
-                        <motion.span key="copy" initial={{ scale: 0 }} animate={{ scale: 1 }}>
-                          📋
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                    {copiedField === `num-${account.id}`
-                      ? "Tersalin!"
-                      : "Salin Rekening"}
-                  </button>
-
-                  <button
-                    onClick={() =>
-                      handleCopy(account.accountName, `name-${account.id}`)
-                    }
-                    className="btn-modern-secondary flex-1 py-1.5 px-2 text-[10px] font-semibold rounded-full flex items-center justify-center"
-                  >
-                    {copiedField === `name-${account.id}`
-                      ? "✓ Tersalin!"
-                      : "Salin Nama"}
-                  </button>
-                </div>
+                {/* Single compact copy button */}
+                <button
+                  onClick={() =>
+                    handleCopy(account.accountNumber, `num-${account.id}`)
+                  }
+                  className="btn-modern-primary py-1 px-4 text-[10px] font-bold rounded-full flex items-center justify-center gap-1.5 shadow-sm"
+                >
+                  <AnimatePresence mode="wait">
+                    {copiedField === `num-${account.id}` ? (
+                      <motion.span
+                        key="copied"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0 }}
+                      >
+                        ✓
+                      </motion.span>
+                    ) : (
+                      <motion.span key="copy" initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                        📋
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                  {copiedField === `num-${account.id}`
+                    ? "Tersalin!"
+                    : "Salin Rekening"}
+                </button>
               </motion.div>
             </StaggerItem>
           ))}
         </StaggerContainer>
 
-        {/* QRIS & Physical gift buttons */}
+        {/* QRIS & Physical gift buttons — Compact & Sleek */}
         <AnimatedText delay={0.5} variant="fadeUp" className="w-full max-w-xs flex justify-center">
-          <div className="flex gap-2 w-full">
+          <div className="flex gap-2 justify-center w-full">
             <button
               onClick={() => setShowQris(true)}
-              className="btn-modern-primary flex-1 py-2 text-[10px] uppercase tracking-[1.5px] font-bold rounded-full shadow-md flex items-center justify-center"
+              className="btn-modern-primary py-1.5 px-4 text-[9.5px] uppercase tracking-[1px] font-bold rounded-full shadow-sm flex items-center justify-center"
             >
               Lihat QRIS
             </button>
             <button
               onClick={() => setShowAddress(true)}
-              className="btn-modern-secondary flex-1 py-2 text-[10px] uppercase tracking-[1.5px] font-bold rounded-full shadow-md flex items-center justify-center"
+              className="btn-modern-secondary py-1.5 px-4 text-[9.5px] uppercase tracking-[1px] font-bold rounded-full shadow-sm flex items-center justify-center"
             >
               Kado Fisik
             </button>

@@ -11,17 +11,14 @@ export function WelcomeCover() {
         className="absolute inset-0 bg-cover bg-center"
         style={{
           backgroundImage: `url('${weddingData.couple.welcomeCover}')`,
-          filter: "brightness(0.85) contrast(1.05)",
+          filter: "brightness(0.92) contrast(1.02)",
         }}
         initial={{ scale: 1.12 }}
         animate={{ scale: 1 }}
         transition={{ duration: 18, ease: "linear", repeat: Infinity, repeatType: "reverse" }}
       />
 
-      {/* Terracotta Merah Bata Overlay */}
       <div className="absolute inset-0 photo-overlay-cinematic" />
-
-      {/* Film grain */}
       <div className="absolute inset-0 film-grain" />
 
       {/* Floating Gold Particles */}

@@ -14,13 +14,13 @@ export function FooterSection() {
       data-section="footer"
       className="section-footer relative py-18 md:py-24 overflow-hidden flex flex-col items-center justify-center text-center bg-[#faf8f5] text-[#2a2723]"
     >
-      {/* Closing Background Photo from Unsplash — Clear & Vivid */}
+      {/* Closing Background Photo — Clear & Vivid */}
       <div className="absolute inset-0">
         <motion.div
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url('${sectionBgs.footer}')`,
-            filter: "brightness(0.85) contrast(1.05)",
+            filter: "brightness(0.92) contrast(1.02)",
           }}
           initial={{ scale: 1.1 }}
           whileInView={{ scale: 1 }}

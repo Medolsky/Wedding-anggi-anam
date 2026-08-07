@@ -7,8 +7,8 @@ export const weddingData = {
       fullName: "Misbakhul Anam Roziqin",
       nickname: "Anam",
       parents: "Putra dari Bpk. Heru Suwito Sano & Almh Ibu. Eniroh",
-      photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=1000&auto=format&fit=crop",
-      bgPhoto: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop",
+      photo: "/image/mempelai-pria.jpg",
+      bgPhoto: "/image/mempelai-pria.jpg",
       instagram: "@anamroziqin",
       description:
         "Aku Berlutut? awokwaokwao Tidak Akan.",
@@ -17,14 +17,14 @@ export const weddingData = {
       fullName: "Angi Sulistia",
       nickname: "Angi",
       parents: "Putri dari Bpk. Suhendi Widodo & Ibu. Lina",
-      photo: "https://images.unsplash.com/photo-1546804784-896d0dca3800?q=80&w=1000&auto=format&fit=crop",
-      bgPhoto: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1000&auto=format&fit=crop",
+      photo: "/image/mempelai-wanita.jpg",
+      bgPhoto: "/image/mempelai-wanita.jpg",
       instagram: "@angisulistia",
       description:
         "Seorang wanita yang mempercayai bahwa rumah terbaik adalah hati yang saling memilih.",
     },
-    heroCover: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1200&auto=format&fit=crop",
-    welcomeCover: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1200&auto=format&fit=crop",
+    heroCover: "/image/hero.jpg",
+    welcomeCover: "/image/hero.jpg",
   },
 
   // Wedding Date — 10 Oktober 2026 Jam 08:00 WIB
@@ -32,50 +32,37 @@ export const weddingData = {
 
   // Background photos for each section
   sectionBgs: {
-    hero: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1200&auto=format&fit=crop",
-    quote: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=1200&auto=format&fit=crop",
-    groom: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1200&auto=format&fit=crop",
-    bride: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1200&auto=format&fit=crop",
-    event: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1200&auto=format&fit=crop",
-    story: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=1200&auto=format&fit=crop",
-    gallery: "https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=1200&auto=format&fit=crop",
-    rsvp: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=1200&auto=format&fit=crop",
-    gift: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=1200&auto=format&fit=crop",
-    wishes: "https://images.unsplash.com/photo-1529636798458-92182e662485?q=80&w=1200&auto=format&fit=crop",
-    footer: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=1200&auto=format&fit=crop",
+    hero: "/image/hero.jpg",
+    quote: "/image/IMG_5649.jpg",
+    groom: "/image/mempelai-pria.jpg",
+    bride: "/image/mempelai-wanita.jpg",
+    event: "/image/balai1.png",
+    story: "/image/IMG_5652.jpg",
+    gallery: "/image/IMG_5655.jpg",
+    rsvp: "/image/IMG_5657.jpg",
+    gift: "/image/IMG_5658.jpg",
+    wishes: "/image/IMG_5659.jpg",
+    footer: "/image/IMG_5660.jpg",
   },
 
   // Events — BALAI IKABAMA Depok (Sabtu, 10 Oktober 2026)
   events: [
     {
-      id: "akad_nikah",
-      type: "Akad Nikah",
-      title: "Akad Nikah",
+      id: "acara_nikah",
+      type: "Akad & Resepsi",
+      title: "Akad & Resepsi Pernikahan",
       date: "Sabtu, 10 Oktober 2026",
       startTime: "08:00 WIB",
-      endTime: "Selesai",
+      endTime: "17:00 WIB",
+      akadTime: "08:00 - 10:00 WIB",
+      resepsiTime: "13:00 - 17:00 WIB",
       venue: "BALAI IKABAMA",
       address: "Jl. Mawar I, RT.6/RW.4, Depok Jaya, Kec. Pancoran Mas, Kota Depok, Jawa Barat 16432",
       latitude: -6.3934,
       longitude: 106.8188,
       mapsUrl: "https://maps.app.goo.gl/AwFbTxHH9whfMLEU8?g_st=ic",
       dressCode: "Formal / Earth Tone",
-      photo: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=1000&auto=format&fit=crop",
-    },
-    {
-      id: "resepsi_nikah",
-      type: "Resepsi",
-      title: "Resepsi Pernikahan",
-      date: "Sabtu, 10 Oktober 2026",
-      startTime: "08:00 WIB",
-      endTime: "Selesai",
-      venue: "BALAI IKABAMA",
-      address: "Jl. Mawar I, RT.6/RW.4, Depok Jaya, Kec. Pancoran Mas, Kota Depok, Jawa Barat 16432",
-      latitude: -6.3934,
-      longitude: 106.8188,
-      mapsUrl: "https://maps.app.goo.gl/AwFbTxHH9whfMLEU8?g_st=ic",
-      dressCode: "Formal / Earth Tone",
-      photo: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1000&auto=format&fit=crop",
+      photo: "/image/balai1.png",
     },
   ],
 
@@ -85,7 +72,7 @@ export const weddingData = {
     text: "Di balik setiap doa yang dipanjatkan, setiap langkah yang diikhtiarkan, dan setiap waktu yang telah berlalu, kami percaya bahwa takdir selalu menemukan jalannya.\n\nKini, dengan hati yang dipenuhi rasa syukur dan cinta, kami memilih untuk mengikat janji suci dalam sebuah pernikahan. Memulai babak baru sebagai dua jiwa yang akan berjalan berdampingan, saling menguatkan, bertumbuh bersama, dan mencintai tanpa henti.\n\nMerupakan kebahagiaan yang tak terhingga apabila Bapak/Ibu/Saudara/i berkenan hadir untuk menjadi bagian dari hari yang paling berharga dalam hidup kami, serta memberikan doa dan restu bagi perjalanan yang akan kami tempuh bersama.",
     source: "With sincere love, we await your gracious presence.",
     translation: "",
-    bgPhoto: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=1200&auto=format&fit=crop",
+    bgPhoto: "/image/IMG_5649.jpg",
   },
 
   // Love Story / Pertemuan
@@ -95,41 +82,45 @@ export const weddingData = {
       title: "Takdir Pertemuan",
       description:
         "Takdir selalu memiliki caranya sendiri untuk mempertemukan dua jiwa. Di antara perjalanan yang panjang, dalam waktu yang telah ditentukan oleh-Nya, kami dipertemukan pada sebuah kisah yang sederhana, namun penuh makna.",
-      photo: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=800&auto=format&fit=crop",
+      photo: "/image/IMG_5649.jpg",
     },
     {
       year: "Bertumbuh",
       title: "Kepercayaan & Harapan",
       description:
         "Seiring berjalannya waktu, pertemuan itu bertumbuh menjadi kepercayaan, kasih, dan harapan. Hingga pada akhirnya, kami menyadari bahwa rumah terbaik adalah hati yang saling memilih untuk tetap tinggal.",
-      photo: "https://images.unsplash.com/photo-1529636798458-92182e662485?q=80&w=800&auto=format&fit=crop",
+      photo: "/image/IMG_5650.jpg",
     },
     {
       year: "Pepatah Jawa",
       title: "Witing Tresna Jalaran Saka Kulina",
       description:
         "Sebagaimana pepatah Jawa, 'Witing tresna jalaran saka kulina,' cinta bersemi karena kebersamaan. Dengan restu kedua orang tua serta rahmat Tuhan Yang Maha Esa, kami melangkah menuju gerbang kehidupan baru dalam ikatan suci pernikahan.",
-      photo: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=800&auto=format&fit=crop",
+      photo: "/image/IMG_5652.jpg",
     },
     {
       year: "Restu",
       title: "Doa & Sukacita",
       description:
         "Merupakan kebahagiaan yang tak ternilai apabila Bapak/Ibu/Saudara/i berkenan hadir untuk menjadi saksi, berbagi sukacita, dan mengiringi langkah kami dengan doa restu.",
-      photo: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=800&auto=format&fit=crop",
+      photo: "/image/IMG_5655.jpg",
     },
   ],
 
   // Gallery
   gallery: [
-    { id: 1, src: "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?q=80&w=800&auto=format&fit=crop", alt: "Angi & Anam 1", orientation: "portrait" },
-    { id: 2, src: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800&auto=format&fit=crop", alt: "Angi & Anam 2", orientation: "landscape" },
-    { id: 3, src: "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?q=80&w=800&auto=format&fit=crop", alt: "Angi & Anam 3", orientation: "portrait" },
-    { id: 4, src: "https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=800&auto=format&fit=crop", alt: "Angi & Anam 4", orientation: "landscape" },
-    { id: 5, src: "https://images.unsplash.com/photo-1544078751-58fee2d8a03b?q=80&w=800&auto=format&fit=crop", alt: "Angi & Anam 5", orientation: "portrait" },
-    { id: 6, src: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=800&auto=format&fit=crop", alt: "Angi & Anam 6", orientation: "portrait" },
-    { id: 7, src: "https://images.unsplash.com/photo-1523438885200-e635ba2c371e?q=80&w=800&auto=format&fit=crop", alt: "Angi & Anam 7", orientation: "landscape" },
-    { id: 8, src: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=800&auto=format&fit=crop", alt: "Angi & Anam 8", orientation: "portrait" },
+    { id: 1, src: "/image/hero.jpg", alt: "Angi & Anam 1", orientation: "landscape" },
+    { id: 2, src: "/image/IMG_5649.jpg", alt: "Angi & Anam 2", orientation: "portrait" },
+    { id: 3, src: "/image/IMG_5650.jpg", alt: "Angi & Anam 3", orientation: "portrait" },
+    { id: 4, src: "/image/IMG_5652.jpg", alt: "Angi & Anam 4", orientation: "landscape" },
+    { id: 5, src: "/image/IMG_5655.jpg", alt: "Angi & Anam 5", orientation: "portrait" },
+    { id: 6, src: "/image/IMG_5657.jpg", alt: "Angi & Anam 6", orientation: "portrait" },
+    { id: 7, src: "/image/IMG_5658.jpg", alt: "Angi & Anam 7", orientation: "landscape" },
+    { id: 8, src: "/image/IMG_5659.jpg", alt: "Angi & Anam 8", orientation: "portrait" },
+    { id: 9, src: "/image/IMG_5660.jpg", alt: "Angi & Anam 9", orientation: "portrait" },
+    { id: 10, src: "/image/IMG_5661.jpg", alt: "Angi & Anam 10", orientation: "landscape" },
+    { id: 11, src: "/image/IMG_5663.jpg", alt: "Angi & Anam 11", orientation: "portrait" },
+    { id: 12, src: "/image/IMG_5664.jpg", alt: "Angi & Anam 12", orientation: "landscape" },
   ],
 
   // Bank Accounts — Misbakhul Anam Roziqin & Angi Sulistia
@@ -185,7 +176,7 @@ export const weddingData = {
     closing: "Hormat kami yang berbahagia,",
     hashtag: "#AnamAngiForever",
     year: 2026,
-    bgPhoto: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=1200&auto=format&fit=crop",
+    bgPhoto: "/image/IMG_5664.jpg",
   },
 
   // Navigation sections

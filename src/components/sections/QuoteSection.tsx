@@ -14,13 +14,13 @@ export function QuoteSection() {
       data-section="quote"
       className="section-quote relative py-20 md:py-24 overflow-hidden flex flex-col items-center justify-center text-center bg-[#faf8f5] text-[#2a2723] transform-gpu"
     >
-      {/* Unsplash Background Photo — Clear & Vivid */}
+      {/* Background Photo — Clear & Vivid */}
       <div className="absolute inset-0">
         <div
           className="absolute inset-0 bg-cover bg-center transform-gpu"
           style={{
             backgroundImage: `url('${sectionBgs.quote}')`,
-            filter: "brightness(0.85) contrast(1.05)",
+            filter: "brightness(0.92) contrast(1.02)",
           }}
         />
         <div className="absolute inset-0 photo-overlay-cinematic" />
@@ -78,7 +78,7 @@ export function QuoteSection() {
 
         {/* Quote Card Frame */}
         <motion.div
-          className="gold-card-pro p-5 md:p-6 border border-[#d4af37]/40 shadow-2xl w-full my-2 text-center transform-gpu"
+          className="gold-card-pro p-5 md:p-6 border border-[#d4af37]/60 shadow-2xl w-full my-2 text-center transform-gpu"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.1 }}
@@ -88,7 +88,7 @@ export function QuoteSection() {
             {quote.text.split("\n\n").map((para, idx) => (
               <p
                 key={idx}
-                className="text-xs md:text-sm leading-relaxed text-[#2a2723] text-center font-normal"
+                className="text-xs md:text-sm leading-relaxed text-[#1f1d1a] font-medium text-center"
               >
                 {para}
               </p>
@@ -102,7 +102,7 @@ export function QuoteSection() {
           </div>
 
           <p
-            className="text-[10px] tracking-[2.5px] uppercase font-bold text-[#b8860b] text-center leading-relaxed italic font-serif"
+            className="text-[10px] tracking-[2.5px] uppercase font-extrabold text-[#996e00] text-center leading-relaxed italic font-serif"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             {quote.source}

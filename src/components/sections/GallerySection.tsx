@@ -15,13 +15,13 @@ export function GallerySection() {
       data-section="gallery"
       className="section-gallery relative py-20 md:py-28 overflow-hidden flex flex-col items-center justify-center text-center bg-[#faf8f5] text-[#2a2723]"
     >
-      {/* Background Image from Unsplash — Clear & Vivid */}
+      {/* Background Image — Clear & Vivid */}
       <div className="absolute inset-0">
         <motion.div
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url('${sectionBgs.gallery}')`,
-            filter: "brightness(0.85) contrast(1.05)",
+            filter: "brightness(0.92) contrast(1.02)",
           }}
           initial={{ scale: 1.15 }}
           whileInView={{ scale: 1 }}
@@ -35,16 +35,16 @@ export function GallerySection() {
       <div className="relative z-20 max-w-lg mx-auto px-6 w-full text-center flex flex-col items-center justify-center">
         {/* Section header frame card */}
         <AnimatedText delay={0} variant="fadeUp" className="w-full flex justify-center mb-10">
-          <div className="gold-card-pro p-4 md:p-5 border border-[#d4af37]/40 shadow-xl rounded-2xl w-full max-w-xs text-center flex flex-col items-center justify-center">
+          <div className="gold-card-pro p-4 md:p-5 border border-[#d4af37]/60 shadow-xl rounded-2xl w-full max-w-xs text-center flex flex-col items-center justify-center">
             <p
-              className="text-xs uppercase tracking-[5px] text-[#b8860b] font-bold mb-1.5 text-center"
+              className="text-xs uppercase tracking-[5px] text-[#b8860b] font-extrabold mb-1.5 text-center"
               style={{ fontFamily: "var(--font-body)" }}
             >
               Our Moments
             </p>
 
             <h2
-              className="text-3xl md:text-4xl text-center font-serif text-[#2a2723] drop-shadow-sm"
+              className="text-3xl md:text-4xl text-center font-serif text-[#1a1815] font-bold"
               style={{ fontFamily: "var(--font-heading)" }}
             >
               Galeri Foto
@@ -53,11 +53,11 @@ export function GallerySection() {
         </AnimatedText>
 
         {/* Masonry-style grid */}
-        <div className="grid grid-cols-2 gap-3 w-full">
+        <div className="grid grid-cols-2 gap-3.5 w-full">
           {gallery.map((item, index) => (
             <motion.div
               key={item.id}
-              className={`relative rounded-2xl overflow-hidden cursor-pointer group shadow-xl border border-[#d4af37]/40
+              className={`relative rounded-2xl overflow-hidden cursor-pointer group shadow-2xl border-2 border-[#d4af37]/60 bg-white
                 ${item.orientation === "portrait" ? "row-span-2" : ""}`}
               style={{
                 aspectRatio:

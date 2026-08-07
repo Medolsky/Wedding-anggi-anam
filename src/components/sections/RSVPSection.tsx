@@ -94,13 +94,13 @@ export function RSVPSection() {
       data-section="rsvp"
       className="section-rsvp relative py-18 md:py-24 overflow-hidden flex flex-col items-center justify-center text-center bg-[#faf8f5] text-[#2a2723]"
     >
-      {/* Background Image from Unsplash — Clear & Vivid */}
+      {/* Background Image — Clear & Vivid */}
       <div className="absolute inset-0">
         <motion.div
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url('${sectionBgs.rsvp}')`,
-            filter: "brightness(0.85) contrast(1.05)",
+            filter: "brightness(0.92) contrast(1.02)",
           }}
           initial={{ scale: 1.15 }}
           whileInView={{ scale: 1 }}
@@ -114,25 +114,20 @@ export function RSVPSection() {
       <div className="relative z-20 max-w-md mx-auto px-6 w-full text-center flex flex-col items-center justify-center">
         {/* Section header frame card */}
         <AnimatedText delay={0} variant="fadeUp" className="w-full flex justify-center mb-6">
-          <div className="gold-card-pro p-4 md:p-5 border border-[#d4af37]/40 shadow-xl rounded-2xl w-full max-w-xs text-center flex flex-col items-center justify-center">
+          <div className="gold-card-pro p-4 md:p-5 border border-[#d4af37]/60 shadow-xl rounded-2xl w-full max-w-xs text-center flex flex-col items-center justify-center">
             <p
-              className="text-[10px] uppercase tracking-[4px] text-[#b8860b] font-bold mb-1.5 text-center leading-none"
+              className="text-[10px] uppercase tracking-[4px] text-[#b8860b] font-extrabold mb-1.5 text-center leading-none"
               style={{ fontFamily: "var(--font-body)" }}
             >
-              Confirmation
+              RSVP
             </p>
 
             <h2
-              className="text-2xl md:text-3xl text-center mb-2 font-serif text-[#2a2723] drop-shadow-sm leading-snug"
+              className="text-2xl md:text-3xl text-center font-serif text-[#1a1815] font-bold leading-snug"
               style={{ fontFamily: "var(--font-heading)" }}
             >
               Konfirmasi Kehadiran
             </h2>
-
-            <p className="text-center text-xs opacity-90 leading-relaxed text-[#555555]">
-              Mohon konfirmasi kehadiran Anda agar kami dapat mempersiapkan
-              segalanya dengan baik.
-            </p>
           </div>
         </AnimatedText>
 
@@ -212,10 +207,9 @@ export function RSVPSection() {
                   <button
                     type="button"
                     className={`flex-1 py-2 rounded-full text-[10px] uppercase tracking-wider font-extrabold transition-all duration-300
-                      ${
-                        formData.attendance === "hadir"
-                          ? "btn-modern-primary shadow-md scale-[1.02]"
-                          : "btn-modern-secondary text-[#2a2723]"
+                      ${formData.attendance === "hadir"
+                        ? "btn-modern-primary shadow-md scale-[1.02]"
+                        : "btn-modern-secondary text-[#2a2723]"
                       }`}
                     onClick={() =>
                       setFormData({ ...formData, attendance: "hadir" })
@@ -226,10 +220,9 @@ export function RSVPSection() {
                   <button
                     type="button"
                     className={`flex-1 py-2 rounded-full text-[10px] uppercase tracking-wider font-extrabold transition-all duration-300
-                      ${
-                        formData.attendance === "tidak_hadir"
-                          ? "bg-[#2a2723] text-white shadow-md scale-[1.02]"
-                          : "btn-modern-secondary text-[#2a2723]"
+                      ${formData.attendance === "tidak_hadir"
+                        ? "bg-[#2a2723] text-white shadow-md scale-[1.02]"
+                        : "btn-modern-secondary text-[#2a2723]"
                       }`}
                     onClick={() =>
                       setFormData({ ...formData, attendance: "tidak_hadir" })

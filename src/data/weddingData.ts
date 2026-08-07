@@ -11,7 +11,7 @@ export const weddingData = {
       bgPhoto: "/image/mempelai-pria.jpg",
       instagram: "@anamroziqin",
       description:
-        "Aku Berlutut? awokwaokwao Tidak Akan.",
+        "Our journey begins with love and lasts a lifetime",
     },
     bride: {
       fullName: "Angi Sulistia",
@@ -21,7 +21,7 @@ export const weddingData = {
       bgPhoto: "/image/mempelai-wanita.jpg",
       instagram: "@angisulistia",
       description:
-        "Seorang wanita yang mempercayai bahwa rumah terbaik adalah hati yang saling memilih.",
+        "The best chapter of our lives starts today",
     },
     heroCover: "/image/hero.jpg",
     welcomeCover: "/image/hero.jpg",

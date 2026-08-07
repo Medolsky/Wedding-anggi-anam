@@ -13,13 +13,9 @@ export function WelcomeCover() {
         muted
         playsInline
         className="absolute inset-0 w-full h-full object-cover transform-gpu scale-105"
-        style={{ filter: "brightness(0.92) contrast(1.02)" }}
       >
         <source src="/image/welcome1.mp4" type="video/mp4" />
       </video>
-
-      <div className="absolute inset-0 photo-overlay-cinematic" />
-      <div className="absolute inset-0 film-grain" />
 
       {/* Floating Gold Particles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">

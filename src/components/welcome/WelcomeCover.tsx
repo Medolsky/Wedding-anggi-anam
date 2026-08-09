@@ -14,7 +14,7 @@ export function WelcomeCover({
 
   const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
     const time = e.currentTarget.currentTime;
-    if (time >= 8.0) {
+    if (time >= 2.7) {
       if (!isVisible) setIsVisible(true);
     } else {
       if (isVisible) setIsVisible(false);
@@ -61,7 +61,7 @@ export function WelcomeCover({
         ))}
       </div>
 
-      {/* Render content synced with video loop at 8s */}
+      {/* Render content synced with video loop at 2.7s */}
       {guestName && onOpen && (
         <WelcomeContent
           guestName={guestName}

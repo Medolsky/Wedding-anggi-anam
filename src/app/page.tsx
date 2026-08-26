@@ -19,6 +19,7 @@ import { FloatingQRCodeButton } from "@/components/global/FloatingQRCodeButton";
 
 // Main Page Sections
 import { HeroSection } from "@/components/sections/HeroSection";
+import { ETicketSection } from "@/components/sections/ETicketSection";
 import { QuoteSection } from "@/components/sections/QuoteSection";
 import { GroomSection } from "@/components/sections/GroomSection";
 import { BrideSection } from "@/components/sections/BrideSection";
@@ -110,6 +111,7 @@ function InvitationContent() {
           }`}
         >
           <HeroSection />
+          <ETicketSection />
           <QuoteSection />
           <GroomSection />
           <BrideSection />

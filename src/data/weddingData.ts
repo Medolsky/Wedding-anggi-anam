@@ -182,6 +182,7 @@ export const weddingData = {
   // Navigation sections
   sections: [
     { id: "home", label: "Home", icon: "🏠" },
+    { id: "eticket", label: "E-Ticket", icon: "🎟️" },
     { id: "couple", label: "Mempelai", icon: "💑" },
     { id: "event", label: "Acara", icon: "📅" },
     { id: "story", label: "Kisah", icon: "💕" },

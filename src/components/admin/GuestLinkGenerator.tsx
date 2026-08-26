@@ -396,12 +396,40 @@ Hormat kami,
   }
 
   function handleDirectWaWeb(guest: GeneratedGuest) {
-    const text = getWaMessage(guest.name, guest.template);
+    const text = getWaMessage(guest.name, guest.template, guest.code);
     const encodedText = encodeURIComponent(text);
-    let waUrl = guest.phone
-      ? `https://api.whatsapp.com/send?phone=${guest.phone}&text=${encodedText}`
+    const cleanNum = guest.phone ? formatPhoneNumber(guest.phone) : "";
+    const waUrl = cleanNum
+      ? `https://api.whatsapp.com/send?phone=${cleanNum}&text=${encodedText}`
       : `https://api.whatsapp.com/send?text=${encodedText}`;
+    
     window.open(waUrl, "_blank");
+
+    // Automatically mark status as sent
+    const updated = guests.map((g) => (g.id === guest.id ? { ...g, status: "sent" as const } : g));
+    saveGuests(updated);
+  }
+
+  async function handleCopyFullMessage(guest: GeneratedGuest) {
+    const text = getWaMessage(guest.name, guest.template, guest.code);
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedId(`msg-${guest.id}`);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch {
+      alert("Gagal menyalin pesan");
+    }
+  }
+
+  function toggleGuestStatus(id: string) {
+    const updated = guests.map((g) => {
+      if (g.id === id) {
+        const nextStatus = g.status === "sent" ? ("pending" as const) : ("sent" as const);
+        return { ...g, status: nextStatus };
+      }
+      return g;
+    });
+    saveGuests(updated);
   }
 
   const pendingWithPhoneCount = guests.filter((g) => g.phone && g.status !== "sent").length;
@@ -840,8 +868,8 @@ Budi Santoso, 081987654321`}
                 {filteredGuests.map((g) => (
               <div
                 key={g.id}
-                className={`bg-[#202125] p-4.5 border rounded-2xl flex flex-col gap-3 shadow-xs ${
-                  g.status === "sent" ? "border-emerald-800/60" : "border-[#2D2E34]"
+                className={`bg-[#202125] p-4.5 border rounded-2xl flex flex-col gap-3 shadow-xs transition-all ${
+                  g.status === "sent" ? "border-emerald-800/70 bg-[#161F1A]" : "border-[#2D2E34]"
                 }`}
               >
                 <div className="flex items-center justify-between flex-wrap gap-2">
@@ -850,24 +878,28 @@ Budi Santoso, 081987654321`}
                     <span className="text-[9px] bg-[#28292F] border border-[#35373E] text-[#E0C98F] px-2.5 py-0.5 rounded-full font-semibold">
                       {g.category}
                     </span>
-                    <span className="text-[9px] bg-[#28292F] border border-[#35373E] text-[#E0C98F] px-2.5 py-0.5 rounded-full font-mono font-bold">
+                    <span className="text-[9px] bg-[#28292F] border border-[#35373E] text-[#A1A4B2] px-2.5 py-0.5 rounded-full font-mono font-bold">
                       {g.code || g.id}
                     </span>
-                    {g.checkedIn && (
-                      <span className="text-[9px] bg-emerald-950 text-emerald-300 border border-emerald-700 px-2.5 py-0.5 rounded-full font-extrabold">
-                        ✓ HADIR ({g.checkInTime || "Checked-In"})
-                      </span>
-                    )}
-                    {g.status === "sent" && !g.checkedIn && (
-                      <span className="text-[9px] bg-emerald-950/60 text-emerald-300 border border-emerald-800 px-2.5 py-0.5 rounded-full font-bold">
-                        ✓ Terkirim Bot
-                      </span>
-                    )}
-                    {g.status === "failed" && (
-                      <span className="text-[9px] bg-rose-950/60 text-rose-300 border border-rose-800 px-2.5 py-0.5 rounded-full font-bold">
-                        Gagal
-                      </span>
-                    )}
+                    
+                    {/* Status Badge with Click-to-Toggle feature */}
+                    <button
+                      onClick={() => toggleGuestStatus(g.id)}
+                      title="Klik untuk ubah status terkirim/belum"
+                      className={`text-[9px] px-2.5 py-0.5 rounded-full font-extrabold cursor-pointer transition-all ${
+                        g.checkedIn
+                          ? "bg-emerald-950 text-emerald-300 border border-emerald-700"
+                          : g.status === "sent"
+                          ? "bg-emerald-900/80 text-emerald-200 border border-emerald-600 hover:bg-emerald-800"
+                          : "bg-amber-950 text-amber-300 border border-amber-700 hover:bg-amber-900"
+                      }`}
+                    >
+                      {g.checkedIn
+                        ? `✓ HADIR (${g.checkInTime || "Check-In"})`
+                        : g.status === "sent"
+                        ? "✓ Terkirim WA"
+                        : "⏳ Belum Kirim"}
+                    </button>
                   </div>
                   <span className="text-[10px] text-[#9E9D98]">{g.createdAt}</span>
                 </div>
@@ -878,33 +910,16 @@ Budi Santoso, 081987654321`}
                       <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
                       <line x1="12" y1="18" x2="12.01" y2="18" />
                     </svg>
-                    <span>WA Target:</span>
-                    <span className="font-bold">+{g.phone}</span>
+                    <span>Nomor WA:</span>
+                    <span className="font-bold">+{formatPhoneNumber(g.phone)}</span>
                   </div>
                 )}
 
-                <div className="bg-[#28292F] p-2.5 rounded-xl text-[10.5px] font-mono text-[#E0C98F] truncate border border-[#35373E]">
+                <div className="bg-[#1C1D21] p-2.5 rounded-xl text-[10.5px] font-mono text-[#E0C98F] truncate border border-[#2B2C32]">
                   {getGuestUrl(g.name, g.code)}
                 </div>
 
                 {/* QR Code Preview Toggle */}
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setQrPreviewId(qrPreviewId === g.id ? null : g.id)}
-                    className="text-[10.5px] py-1.5 px-3 bg-[#28292F] hover:bg-[#32343B] text-[#E0C98F] border border-[#35373E] rounded-xl cursor-pointer font-bold transition-all flex items-center gap-1.5"
-                  >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="3" y="3" width="7" height="7" />
-                      <rect x="14" y="3" width="7" height="7" />
-                      <rect x="14" y="14" width="7" height="7" />
-                      <rect x="3" y="14" width="7" height="7" />
-                    </svg>
-                    <span>{qrPreviewId === g.id ? "Sembunyikan QR" : "Lihat QR Code"}</span>
-                  </button>
-                </div>
-
-                {/* QR Code for this guest */}
                 {qrPreviewId === g.id && (
                   <div className="flex flex-col items-center gap-2 p-4 bg-white border border-[#35373E] rounded-2xl">
                     <QRCodeCanvas
@@ -915,54 +930,66 @@ Budi Santoso, 081987654321`}
                     <span className="text-[10px] font-mono font-bold text-[#18181B] bg-[#F4F4F6] px-3 py-1 rounded-lg border border-[#E4E4E7]">
                       {g.code || g.id}
                     </span>
-                    <p className="text-[10px] text-[#71717A]">QR Code unik untuk tamu ini. Scan saat check-in.</p>
+                    <p className="text-[10px] text-[#71717A]">QR Code unik tamu untuk scan saat check-in.</p>
                   </div>
                 )}
 
                 <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
-                  <div className="flex gap-2 flex-wrap">
-                    {/* Single Auto Bot Send Button */}
-                    {g.phone && (
-                      <button
-                        onClick={() => handleSingleAutoSend(g)}
-                        disabled={sendingId === g.id || isBlasting}
-                        className="text-[10.5px] py-1.5 px-3 flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-none shadow-xs font-extrabold cursor-pointer hover:from-emerald-500 hover:to-teal-500 rounded-xl transition-all"
-                      >
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-                        </svg>
-                        <span>{sendingId === g.id ? "Sending..." : "Kirim Bot"}</span>
-                      </button>
-                    )}
-
-                    {/* Direct WA Web Launcher Button */}
+                  <div className="flex gap-2 flex-wrap items-center">
+                    {/* Direct 1-Click WhatsApp Button (Prominent Green) */}
                     <button
                       onClick={() => handleDirectWaWeb(g)}
-                      className="text-[10.5px] py-1.5 px-3 flex items-center gap-1.5 bg-[#28292F] border border-[#35373E] text-[#F1F0EC] hover:bg-[#32343B] rounded-xl cursor-pointer transition-all"
+                      className="text-[11px] py-2 px-3.5 flex items-center gap-1.5 bg-[#25D366] hover:bg-[#20ba59] text-[#0A0B0D] font-black rounded-xl cursor-pointer shadow-md shadow-[#25D366]/20 transition-all active:scale-95"
                     >
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.969.587 1.771.889 2.796.889 3.183 0 5.77-2.587 5.77-5.766.001-3.18-2.585-5.776-5.77-5.776zm0 10.455c-.93 0-1.745-.278-2.493-.728l-.178-.107-1.574.413.42-1.534-.117-.186c-.496-.789-.758-1.564-.757-2.547.001-2.584 2.102-4.686 4.689-4.686 2.586 0 4.688 2.102 4.688 4.687 0 2.585-2.102 4.688-4.689 4.688z" />
                       </svg>
-                      <span>Buka WA App</span>
+                      <span>Kirim WA (1-Klik)</span>
                     </button>
 
-                    {/* Copy Link Button */}
+                    {/* Copy Full Message Button */}
+                    <button
+                      onClick={() => handleCopyFullMessage(g)}
+                      className="text-[10.5px] py-2 px-3 flex items-center gap-1.5 bg-[#28292F] border border-[#35373E] text-[#E5E3DF] hover:text-white hover:bg-[#32343B] rounded-xl cursor-pointer transition-all"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                      </svg>
+                      <span>{copiedId === `msg-${g.id}` ? "Pesan Tersalin!" : "Salin Pesan"}</span>
+                    </button>
+
+                    {/* Copy Link Only Button */}
                     <button
                       onClick={() => handleCopy(g.name, g.id)}
-                      className="text-[10.5px] py-1.5 px-3 flex items-center gap-1.5 bg-[#28292F] border border-[#35373E] text-[#F1F0EC] hover:bg-[#32343B] rounded-xl cursor-pointer transition-all"
+                      className="text-[10.5px] py-2 px-3 flex items-center gap-1.5 bg-[#28292F] border border-[#35373E] text-[#C5C4C0] hover:text-white hover:bg-[#32343B] rounded-xl cursor-pointer transition-all"
                     >
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
                         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                       </svg>
-                      <span>{copiedId === g.id ? "Tersalin!" : "Salin Link"}</span>
+                      <span>{copiedId === g.id ? "Link Tersalin!" : "Salin Link"}</span>
+                    </button>
+
+                    {/* QR Code Preview Toggle */}
+                    <button
+                      type="button"
+                      onClick={() => setQrPreviewId(qrPreviewId === g.id ? null : g.id)}
+                      className="text-[10.5px] py-2 px-2.5 bg-[#28292F] hover:bg-[#32343B] text-[#E0C98F] border border-[#35373E] rounded-xl cursor-pointer font-bold transition-all flex items-center gap-1"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="3" width="7" height="7" />
+                        <rect x="14" y="3" width="7" height="7" />
+                        <rect x="14" y="14" width="7" height="7" />
+                        <rect x="3" y="14" width="7" height="7" />
+                      </svg>
+                      <span>{qrPreviewId === g.id ? "Tutup QR" : "QR"}</span>
                     </button>
                   </div>
 
                   <button
                     onClick={() => handleDelete(g.id)}
-                    className="text-[#9E9D98] hover:text-rose-400 p-1.5 cursor-pointer transition-colors"
-                    title="Hapus"
+                    className="text-[#8A8C94] hover:text-rose-400 p-2 cursor-pointer transition-colors"
+                    title="Hapus Tamu"
                   >
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <polyline points="3 6 5 6 21 6" />

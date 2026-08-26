@@ -263,51 +263,66 @@ async function saveToExternalCloud(updatedStore: any) {
       await initPostgresTables();
 
       if (updatedStore.guests) {
-        for (const g of updatedStore.guests) {
-          await sql`
-            INSERT INTO guests (id, code, name, phone, category, template, status, checked_in, check_in_time, pax)
-            VALUES (${g.id || Date.now().toString()}, ${g.code || `GUEST-${g.id}`}, ${g.name}, ${g.phone || null}, ${g.category || "Tamu VIP"}, ${g.template || "Formal"}, ${g.status || "pending"}, ${!!g.checkedIn}, ${g.checkInTime || null}, ${g.pax || 1})
-            ON CONFLICT (id) DO UPDATE SET
-              code = EXCLUDED.code,
-              name = EXCLUDED.name,
-              phone = EXCLUDED.phone,
-              category = EXCLUDED.category,
-              template = EXCLUDED.template,
-              status = EXCLUDED.status,
-              checked_in = EXCLUDED.checked_in,
-              check_in_time = EXCLUDED.check_in_time,
-              pax = EXCLUDED.pax;
-          `;
+        const guestIds = updatedStore.guests.map((g: any) => String(g.id || "")).filter(Boolean);
+        if (guestIds.length > 0) {
+          for (const g of updatedStore.guests) {
+            await sql`
+              INSERT INTO guests (id, code, name, phone, category, template, status, checked_in, check_in_time, pax)
+              VALUES (${g.id || Date.now().toString()}, ${g.code || `GUEST-${g.id}`}, ${g.name}, ${g.phone || null}, ${g.category || "Tamu VIP"}, ${g.template || "Formal"}, ${g.status || "pending"}, ${!!g.checkedIn}, ${g.checkInTime || null}, ${g.pax || 1})
+              ON CONFLICT (id) DO UPDATE SET
+                code = EXCLUDED.code,
+                name = EXCLUDED.name,
+                phone = EXCLUDED.phone,
+                category = EXCLUDED.category,
+                template = EXCLUDED.template,
+                status = EXCLUDED.status,
+                checked_in = EXCLUDED.checked_in,
+                check_in_time = EXCLUDED.check_in_time,
+                pax = EXCLUDED.pax;
+            `;
+          }
+        } else {
+          await sql`TRUNCATE TABLE guests`;
         }
       }
 
       if (updatedStore.rsvps) {
-        for (const r of updatedStore.rsvps) {
-          await sql`
-            INSERT INTO rsvps (id, name, status, pax, notes, checked_in, check_in_time)
-            VALUES (${r.id || Date.now().toString()}, ${r.name}, ${r.status || r.attendance || "Hadir"}, ${r.pax || r.guestCount || 1}, ${r.notes || ""}, ${!!r.checkedIn}, ${r.checkInTime || null})
-            ON CONFLICT (id) DO UPDATE SET
-              name = EXCLUDED.name,
-              status = EXCLUDED.status,
-              pax = EXCLUDED.pax,
-              notes = EXCLUDED.notes,
-              checked_in = EXCLUDED.checked_in,
-              check_in_time = EXCLUDED.check_in_time;
-          `;
+        const rsvpIds = updatedStore.rsvps.map((r: any) => String(r.id || "")).filter(Boolean);
+        if (rsvpIds.length > 0) {
+          for (const r of updatedStore.rsvps) {
+            await sql`
+              INSERT INTO rsvps (id, name, status, pax, notes, checked_in, check_in_time)
+              VALUES (${r.id || Date.now().toString()}, ${r.name}, ${r.status || r.attendance || "Hadir"}, ${r.pax || r.guestCount || 1}, ${r.notes || ""}, ${!!r.checkedIn}, ${r.checkInTime || null})
+              ON CONFLICT (id) DO UPDATE SET
+                name = EXCLUDED.name,
+                status = EXCLUDED.status,
+                pax = EXCLUDED.pax,
+                notes = EXCLUDED.notes,
+                checked_in = EXCLUDED.checked_in,
+                check_in_time = EXCLUDED.check_in_time;
+            `;
+          }
+        } else {
+          await sql`TRUNCATE TABLE rsvps`;
         }
       }
 
       if (updatedStore.wishes) {
-        for (const w of updatedStore.wishes) {
-          await sql`
-            INSERT INTO wishes (id, name, message, relationship, is_approved)
-            VALUES (${w.id || Date.now().toString()}, ${w.name}, ${w.message || ""}, ${w.relationship || "Kerabat"}, ${w.is_approved !== false})
-            ON CONFLICT (id) DO UPDATE SET
-              name = EXCLUDED.name,
-              message = EXCLUDED.message,
-              relationship = EXCLUDED.relationship,
-              is_approved = EXCLUDED.is_approved;
-          `;
+        const wishIds = updatedStore.wishes.map((w: any) => String(w.id || "")).filter(Boolean);
+        if (wishIds.length > 0) {
+          for (const w of updatedStore.wishes) {
+            await sql`
+              INSERT INTO wishes (id, name, message, relationship, is_approved)
+              VALUES (${w.id || Date.now().toString()}, ${w.name}, ${w.message || ""}, ${w.relationship || "Kerabat"}, ${w.is_approved !== false})
+              ON CONFLICT (id) DO UPDATE SET
+                name = EXCLUDED.name,
+                message = EXCLUDED.message,
+                relationship = EXCLUDED.relationship,
+                is_approved = EXCLUDED.is_approved;
+            `;
+          }
+        } else {
+          await sql`TRUNCATE TABLE wishes`;
         }
       }
 
@@ -469,6 +484,22 @@ export async function POST(req: Request) {
       const newStore = { ...currentStore, [type]: updatedList };
       cloudStore = newStore;
       (globalThis as any).__weddingStore = newStore;
+
+      if (sql) {
+        try {
+          if (type === "wishes") await sql`DELETE FROM wishes WHERE id = ${item.id}`;
+          if (type === "guests") await sql`DELETE FROM guests WHERE id = ${item.id}`;
+          if (type === "rsvps") await sql`DELETE FROM rsvps WHERE id = ${item.id}`;
+        } catch (err) {
+          console.error("Postgres delete error:", err);
+        }
+      }
+
+      if (supabase) {
+        try {
+          await supabase.from(type).delete().eq("id", item.id);
+        } catch {}
+      }
 
       await saveToExternalCloud(newStore);
       return NextResponse.json({ success: true, data: newStore[type as "guests" | "rsvps" | "wishes"] });

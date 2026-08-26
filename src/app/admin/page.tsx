@@ -88,14 +88,7 @@ export default function AdminPage() {
       if (json.success && json.data) {
         if (Array.isArray(json.data.guests)) setGuests(json.data.guests);
         if (Array.isArray(json.data.rsvps)) setRsvps(json.data.rsvps);
-        if (Array.isArray(json.data.wishes)) {
-          setWishes((prev) => {
-            const map = new Map<string, any>();
-            prev.forEach((w) => map.set(w.id, w));
-            json.data.wishes.forEach((w: any) => map.set(w.id, w));
-            return Array.from(map.values()).sort((a, b) => (Number(b.id) || 0) - (Number(a.id) || 0));
-          });
-        }
+        if (Array.isArray(json.data.wishes)) setWishes(json.data.wishes);
         setIsCloudSynced(json.persistent !== false);
         if (json.provider) setDbProvider(json.provider);
       }

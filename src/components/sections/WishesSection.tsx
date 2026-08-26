@@ -46,28 +46,16 @@ export function WishesSection() {
       // Ignored
     }
 
-    // 2. Fetch from Cloud Database & Merge safely
+    // 2. Fetch from Cloud Database & Sync directly
     async function loadCloudWishes() {
       try {
-        const res = await fetch("/api/db?type=wishes&t=" + Date.now());
+        const res = await fetch("/api/db?type=wishes&t=" + Date.now(), { cache: "no-store" });
         const json = await res.json();
         if (json.success && Array.isArray(json.data)) {
-          setWishes((prev) => {
-            // Merge cloud wishes with any local wishes without duplicates
-            const map = new Map<string, WishItem>();
-            prev.forEach((w) => map.set(w.id, w));
-            json.data.forEach((w: WishItem) => map.set(w.id, w));
-            const merged = Array.from(map.values()).sort((a, b) => {
-              const idA = Number(a.id) || 0;
-              const idB = Number(b.id) || 0;
-              return idB - idA;
-            });
-
-            try {
-              localStorage.setItem("wedding_wishes_backup", JSON.stringify(merged));
-            } catch {}
-            return merged;
-          });
+          setWishes(json.data);
+          try {
+            localStorage.setItem("wedding_wishes_backup", JSON.stringify(json.data));
+          } catch {}
         }
       } catch {
         // Fallback to local

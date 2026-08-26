@@ -116,11 +116,29 @@ async function fetchFromExternalCloud() {
       }
       if (Array.isArray(rsvps)) {
         cloudStore.rsvps = rsvps.map((r: any) => ({
-          ...r,
+          id: r.id,
+          name: r.name,
+          phone: r.phone || "",
+          guestCount: r.pax || 1,
+          pax: r.pax || 1,
+          status: r.status || "Hadir",
+          attendance: r.status || "Hadir",
+          session: r.notes || "Akad & Resepsi",
+          notes: r.notes || "",
           checkedIn: r.checked_in,
           checkInTime: r.check_in_time,
-          guestCount: r.pax || 1,
-          attendance: r.status || "Hadir",
+          createdAt: r.created_at
+            ? new Date(r.created_at).toLocaleString("id-ID", {
+                timeZone: "Asia/Jakarta",
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+              }) + " WIB"
+            : r.createdAt || new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta" }) + " WIB",
         }));
       }
       if (Array.isArray(wishes)) {

@@ -57,13 +57,16 @@ export function RSVPSection() {
       pax: formData.guestCount,
       status: formData.attendance === "hadir" ? "Hadir" : "Tidak Hadir",
       notes: formData.message || (formData.attendance === "hadir" ? `Hadir Sesi: ${formData.session}` : "Halangan Hadir"),
-      createdAt: new Date().toLocaleDateString("id-ID", {
+      createdAt: new Date().toLocaleString("id-ID", {
+        timeZone: "Asia/Jakarta",
+        weekday: "long",
         day: "numeric",
-        month: "short",
+        month: "long",
         year: "numeric",
         hour: "2-digit",
         minute: "2-digit",
-      }),
+        second: "2-digit",
+      }) + " WIB",
     };
 
     // Save to Cloud DB

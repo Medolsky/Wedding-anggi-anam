@@ -269,17 +269,17 @@ export function RSVPManager() {
             Belum ada data konfirmasi RSVP.
           </div>
         ) : (
-          <div className="space-y-2.5">
+          <div className="space-y-3">
             {filteredRSVPs.map((r) => (
               <div
                 key={r.id}
-                className="p-3.5 border border-[#35373E] rounded-xl bg-[#28292F] flex items-center justify-between gap-3 text-xs"
+                className="p-4 border border-[#2D2E34] hover:border-[#3A3D47] rounded-2xl bg-[#202125] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs transition-all"
               >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-[#F1F0EC] font-serif text-sm">{r.name}</span>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <span className="font-bold text-[#F1F0EC] font-serif text-sm sm:text-base">{r.name}</span>
                     <span
-                      className={`text-[9px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                      className={`text-[9.5px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
                         r.attendance === "Hadir"
                           ? "bg-emerald-950 text-emerald-300 border border-emerald-700"
                           : r.attendance === "Ragu-ragu"
@@ -287,28 +287,46 @@ export function RSVPManager() {
                           : "bg-rose-950 text-rose-300 border border-rose-700"
                       }`}
                     >
-                      {r.attendance}
+                      {r.attendance === "Hadir" ? "✓ HADIR" : "✕ TIDAK HADIR"}
                     </span>
+
+                    {r.attendance === "Hadir" && (
+                      <span className="text-[9.5px] bg-[#17181D] text-[#E0C98F] border border-[#2E313D] px-2 py-0.5 rounded-md font-mono font-bold">
+                        {r.guestCount} PAX
+                      </span>
+                    )}
                   </div>
 
-                  <div className="text-[11px] text-[#9E9D98] flex items-center gap-4">
-                    {r.attendance === "Hadir" && (
-                      <span>Jumlah: <strong className="text-[#E0C98F]">{r.guestCount} Orang (PAX)</strong></span>
+                  {/* Detailed Timestamp & Sesi info */}
+                  <div className="flex items-center gap-3 text-[11px] text-[#A1A4B2] flex-wrap">
+                    <div className="flex items-center gap-1.5 bg-[#17181D] px-2.5 py-1 rounded-lg border border-[#282A33] text-[#E0C98F] font-mono">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                      </svg>
+                      <span>Waktu Reservasi: <strong className="text-white">{r.createdAt}</strong></span>
+                    </div>
+
+                    {r.session && (
+                      <span className="text-[#8A8C94]">
+                        Catatan: <span className="text-[#D5D3CE] italic">&quot;{r.session}&quot;</span>
+                      </span>
                     )}
-                    <span>Waktu: {r.createdAt}</span>
                   </div>
                 </div>
 
-                <button
-                  onClick={() => handleDelete(r.id)}
-                  className="text-[#9E9D98] hover:text-rose-400 p-1.5 cursor-pointer transition-colors"
-                  title="Hapus"
-                >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="3 6 5 6 21 6" />
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                  </svg>
-                </button>
+                <div className="flex items-center gap-2 self-end sm:self-center">
+                  <button
+                    onClick={() => handleDelete(r.id)}
+                    className="text-[#8A8C94] hover:text-rose-400 hover:bg-rose-950/30 p-2 rounded-lg cursor-pointer transition-colors"
+                    title="Hapus Data RSVP"
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             ))}
           </div>

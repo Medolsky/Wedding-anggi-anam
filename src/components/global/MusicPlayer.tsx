@@ -64,9 +64,9 @@ export function MusicPlayer() {
     <AnimatePresence>
       <motion.button
         className="fixed bottom-6 right-6 z-[90] w-12 h-12 rounded-full 
-          bg-[#d4af37] text-white shadow-lg shadow-amber-500/20
+          bg-[#171719] text-[#C8A96B] shadow-xl shadow-black/80
           flex items-center justify-center
-          hover:bg-[#b8860b] transition-colors border border-[#e6ca65]"
+          hover:bg-[#232326] transition-all border-1.5 border-[#806A42] hover:border-[#C8A96B] cursor-pointer"
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 1.5, type: "spring", stiffness: 200 }}
@@ -83,7 +83,7 @@ export function MusicPlayer() {
             {[0, 1, 2, 3].map((i) => (
               <motion.div
                 key={i}
-                className="w-[3px] bg-white rounded-full"
+                className="w-[3px] bg-[#C8A96B] rounded-full"
                 animate={{
                   height: ["6px", "16px", "8px", "14px", "6px"],
                 }}

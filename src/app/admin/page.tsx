@@ -19,6 +19,7 @@ export default function AdminPage() {
   const [rsvps, setRsvps] = useState<RSVPItem[]>([]);
   const [wishes, setWishes] = useState<WishItem[]>([]);
   const [isCloudSynced, setIsCloudSynced] = useState<boolean | null>(null);
+  const [dbProvider, setDbProvider] = useState<string>("memory");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -36,6 +37,7 @@ export default function AdminPage() {
         if (Array.isArray(json.data.rsvps)) setRsvps(json.data.rsvps);
         if (Array.isArray(json.data.wishes)) setWishes(json.data.wishes);
         setIsCloudSynced(json.persistent !== false);
+        if (json.provider) setDbProvider(json.provider);
       }
     } catch {
       setIsCloudSynced(false);
@@ -221,7 +223,13 @@ export default function AdminPage() {
               <div className="flex items-center gap-2">
                 <span className={`w-2 h-2 rounded-full ${isCloudSynced ? "bg-emerald-400 animate-ping" : "bg-amber-400"}`} />
                 <span className="text-[11px] font-semibold text-[#9E9D98]">
-                  {isCloudSynced ? "Supabase Cloud" : "Local Memory"}
+                  {dbProvider === "google_sheets"
+                    ? "Google Sheets DB"
+                    : dbProvider === "supabase"
+                    ? "Supabase SQL"
+                    : isCloudSynced
+                    ? "Cloud DB"
+                    : "Local Memory"}
                 </span>
               </div>
               <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${isCloudSynced ? "bg-emerald-950 text-emerald-300 border border-emerald-800" : "bg-amber-950 text-amber-300 border border-amber-800"}`}>

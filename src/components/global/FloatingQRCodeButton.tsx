@@ -25,9 +25,9 @@ export function FloatingQRCodeButton() {
       {/* Floating Right QR Button */}
       <motion.button
         className="fixed bottom-20 right-6 z-[90] w-12 h-12 rounded-full 
-          bg-[#d4af37] text-white shadow-lg shadow-amber-500/20
+          bg-[#171719] text-[#C8A96B] shadow-xl shadow-black/80
           flex items-center justify-center
-          hover:bg-[#b8860b] transition-colors border border-[#e6ca65] cursor-pointer"
+          hover:bg-[#232326] transition-all border-1.5 border-[#806A42] hover:border-[#C8A96B] cursor-pointer"
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 1.8, type: "spring", stiffness: 200 }}
@@ -51,16 +51,16 @@ export function FloatingQRCodeButton() {
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             {/* Backdrop */}
             <motion.div
-              className="absolute inset-0 bg-black/60 backdrop-blur-md"
+              className="absolute inset-0 bg-black/80 backdrop-blur-md"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
             />
 
-            {/* Modal Body */}
+            {/* Modal Body — Black Gold Theme */}
             <motion.div
-              className="relative w-full max-w-sm bg-white rounded-3xl border-2 border-[#d4af37]/60 shadow-2xl p-6 text-center text-[#2a2723] z-10 overflow-hidden"
+              className="relative w-full max-w-sm bg-[#171719] rounded-3xl border-2 border-[#806A42] shadow-[0_16px_50px_rgba(0,0,0,0.85)] p-6 text-center text-[#F5F1E8] z-10 overflow-hidden"
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -69,40 +69,40 @@ export function FloatingQRCodeButton() {
               {/* Close Button */}
               <button
                 onClick={() => setIsOpen(false)}
-                className="absolute top-4 right-4 text-[#8a662d] hover:text-[#2a2723] bg-[#faf8f5] hover:bg-[#f7ebbf] w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm cursor-pointer transition-colors border border-[#d4af37]/30"
+                className="absolute top-4 right-4 text-[#C8A96B] hover:text-[#E0C98F] bg-[#0E0E0F] hover:bg-[#232326] w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm cursor-pointer transition-colors border border-[#806A42]"
               >
                 ✕
               </button>
 
               {/* Header */}
               <div className="space-y-1 mb-4">
-                <span className="text-[9px] uppercase tracking-[3px] font-extrabold text-[#b8860b] bg-[#f7ebbf]/40 px-3 py-1 rounded-full border border-[#d4af37]/30 inline-block">
+                <span className="text-[9px] uppercase tracking-[3px] font-extrabold text-[#E0C98F] bg-[#C8A96B]/15 px-3 py-1 rounded-full border border-[#806A42] inline-block">
                   🎟️ E-TICKET CHECK-IN MASUK
                 </span>
-                <h3 className="text-xl font-bold font-serif text-[#2a2723] pt-1" style={{ fontFamily: "var(--font-heading)" }}>
+                <h3 className="text-xl font-bold font-serif text-[#F5F1E8] pt-1" style={{ fontFamily: "var(--font-heading)" }}>
                   {weddingData.couple.groom.nickname} &amp; {weddingData.couple.bride.nickname}
                 </h3>
               </div>
 
-              {/* QR Code Frame */}
-              <div className="bg-[#faf8f5] p-4 rounded-2xl border border-[#d4af37]/40 shadow-inner flex flex-col items-center justify-center my-3 space-y-2">
-                <QRCodeCanvas data={guestCode} size={190} className="rounded-xl shadow-sm" />
-                <span className="text-xs font-mono font-extrabold tracking-[2px] text-[#2a2723] bg-white px-3 py-1 rounded-lg border border-[#d4af37]/40 shadow-sm">
+              {/* QR Code Frame — Black & Gold Frame */}
+              <div className="bg-[#0E0E0F] p-4 rounded-2xl border-2 border-[#C8A96B]/60 shadow-[0_0_25px_rgba(200,169,107,0.15)] flex flex-col items-center justify-center my-3 space-y-2">
+                <QRCodeCanvas data={guestCode} size={190} className="rounded-xl shadow-md p-2 bg-white" />
+                <span className="text-xs font-mono font-extrabold tracking-[2px] text-[#E0C98F] bg-[#171719] px-3 py-1 rounded-lg border border-[#806A42] shadow-sm">
                   {guestCode}
                 </span>
               </div>
 
               {/* Guest Details */}
               <div className="space-y-1.5 mb-5">
-                <p className="text-sm font-bold text-[#2a2723] font-serif">{guest.name}</p>
-                <div className="flex items-center justify-center gap-2 text-[10px] text-[#8a662d]">
-                  <span className="bg-[#f7ebbf]/60 border border-[#d4af37]/30 px-2.5 py-0.5 rounded-full font-semibold">
+                <p className="text-sm font-bold text-[#F5F1E8] font-serif">{guest.name}</p>
+                <div className="flex items-center justify-center gap-2 text-[10px] text-[#C8A96B]">
+                  <span className="bg-[#C8A96B]/20 border border-[#806A42] px-2.5 py-0.5 rounded-full font-semibold text-[#E0C98F]">
                     {guest.category || "Tamu VIP"}
                   </span>
                   <span>•</span>
                   <span>10 Oktober 2026</span>
                 </div>
-                <p className="text-[10.5px] text-[#66615c] pt-1 leading-relaxed">
+                <p className="text-[10.5px] text-[#8C8983] pt-1 leading-relaxed">
                   Tunjukkan QR Code ini kepada panitia/admin di lokasi acara saat memasuki gedung.
                 </p>
               </div>
@@ -110,7 +110,7 @@ export function FloatingQRCodeButton() {
               {/* Close Action Button */}
               <button
                 onClick={() => setIsOpen(false)}
-                className="w-full py-2.5 px-4 bg-[#d4af37] text-white hover:bg-[#b8860b] font-bold text-xs rounded-xl shadow-md cursor-pointer transition-all uppercase tracking-wider"
+                className="w-full py-2.5 px-4 bg-gradient-to-r from-[#E0C98F] via-[#C8A96B] to-[#8A6B35] text-[#0E0E0F] font-black text-xs rounded-xl shadow-lg hover:brightness-110 cursor-pointer transition-all uppercase tracking-wider"
               >
                 Tutup E-Ticket
               </button>

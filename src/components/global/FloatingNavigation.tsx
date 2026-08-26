@@ -23,9 +23,9 @@ export function FloatingNavigation() {
       {/* Floating hamburger button */}
       <motion.button
         className="fixed bottom-6 left-6 z-[90] w-12 h-12 rounded-full 
-          bg-[#d4af37] text-white shadow-lg shadow-amber-500/20
+          bg-[#171719] text-[#C8A96B] shadow-xl shadow-black/80
           flex items-center justify-center
-          hover:bg-[#b8860b] transition-colors border border-[#e6ca65]"
+          hover:bg-[#232326] transition-all border-1.5 border-[#806A42] hover:border-[#C8A96B] cursor-pointer"
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 1.8, type: "spring", stiffness: 200 }}
@@ -37,7 +37,7 @@ export function FloatingNavigation() {
           animate={isNavOpen ? "open" : "closed"}
         >
           <motion.span
-            className="block w-5 h-[2px] bg-white rounded-full origin-center"
+            className="block w-5 h-[2px] bg-[#C8A96B] rounded-full origin-center"
             variants={{
               open: { rotate: 45, y: 6 },
               closed: { rotate: 0, y: 0 },
@@ -45,7 +45,7 @@ export function FloatingNavigation() {
             transition={{ duration: 0.3 }}
           />
           <motion.span
-            className="block w-5 h-[2px] bg-white rounded-full"
+            className="block w-5 h-[2px] bg-[#C8A96B] rounded-full"
             variants={{
               open: { opacity: 0 },
               closed: { opacity: 1 },
@@ -53,7 +53,7 @@ export function FloatingNavigation() {
             transition={{ duration: 0.2 }}
           />
           <motion.span
-            className="block w-5 h-[2px] bg-white rounded-full origin-center"
+            className="block w-5 h-[2px] bg-[#C8A96B] rounded-full origin-center"
             variants={{
               open: { rotate: -45, y: -6 },
               closed: { rotate: 0, y: 0 },
@@ -69,7 +69,7 @@ export function FloatingNavigation() {
           <>
             {/* Backdrop */}
             <motion.div
-              className="fixed inset-0 z-[85] bg-black/40 backdrop-blur-sm"
+              className="fixed inset-0 z-[85] bg-black/60 backdrop-blur-sm"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -78,8 +78,8 @@ export function FloatingNavigation() {
 
             {/* Menu */}
             <motion.nav
-              className="fixed bottom-20 left-6 z-[90] bg-white/95 backdrop-blur-md border border-[#d4af37]/40 
-                rounded-[var(--radius-lg)] shadow-2xl overflow-hidden min-w-[200px] text-[#2a2723]"
+              className="fixed bottom-20 left-6 z-[90] bg-[#171719]/95 backdrop-blur-md border border-[#806A42] 
+                rounded-[var(--radius-lg)] shadow-2xl overflow-hidden min-w-[200px] text-[#F5F1E8]"
               initial={{ opacity: 0, scale: 0.8, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -90,7 +90,7 @@ export function FloatingNavigation() {
                   <motion.button
                     key={section.id}
                     className="w-full flex items-center gap-3 px-5 py-3 text-left
-                      hover:bg-[#f7ebbf]/40 hover:text-[#b8860b] transition-colors"
+                      hover:bg-[#C8A96B]/15 hover:text-[#E0C98F] transition-colors"
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.05 }}

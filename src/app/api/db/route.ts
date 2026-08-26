@@ -9,6 +9,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const GOOGLE_SCRIPT_URL = process.env.GOOGLE_SCRIPT_URL || process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL;
 
 const supabase =
   SUPABASE_URL && SUPABASE_KEY && !SUPABASE_URL.includes("your-supabase-project")
@@ -32,12 +33,34 @@ let cloudStore: {
   wishes: [],
 };
 
-// Optional external free Cloud Database Integration (JSONBin.io / Supabase / KV)
+// Optional external free Cloud Database Integration (Google Sheets / JSONBin.io / Supabase / KV)
 const JSONBIN_BIN_ID = process.env.JSONBIN_BIN_ID;
 const JSONBIN_API_KEY = process.env.JSONBIN_API_KEY;
 
 async function fetchFromExternalCloud() {
-  // 1. Try Supabase Cloud SQL first if configured
+  // 1. Try Google Apps Script (Google Sheets / Google Drive) if configured
+  if (GOOGLE_SCRIPT_URL) {
+    try {
+      const res = await fetch(`${GOOGLE_SCRIPT_URL}?type=all&t=${Date.now()}`, {
+        redirect: "follow",
+        cache: "no-store",
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          if (Array.isArray(json.data.guests)) cloudStore.guests = json.data.guests;
+          if (Array.isArray(json.data.rsvps)) cloudStore.rsvps = json.data.rsvps;
+          if (Array.isArray(json.data.wishes)) cloudStore.wishes = json.data.wishes;
+          if (json.data.config) cloudStore.config = json.data.config;
+          return cloudStore;
+        }
+      }
+    } catch (err) {
+      console.error("Google Script fetch exception:", err);
+    }
+  }
+
+  // 2. Try Supabase Cloud SQL if configured
   if (supabase) {
     try {
       const [guestsRes, rsvpsRes, wishesRes, configRes] = await Promise.all([
@@ -78,7 +101,7 @@ async function fetchFromExternalCloud() {
     }
   }
 
-  // 2. Fallback to JSONBin if configured
+  // 3. Fallback to JSONBin if configured
   if (JSONBIN_BIN_ID && JSONBIN_API_KEY) {
     try {
       const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
@@ -101,7 +124,21 @@ async function fetchFromExternalCloud() {
 async function saveToExternalCloud(updatedStore: any) {
   cloudStore = updatedStore;
 
-  // 1. Save to Supabase Cloud SQL if configured
+  // 1. Save to Google Apps Script (Google Sheets / Google Drive) if configured
+  if (GOOGLE_SCRIPT_URL) {
+    try {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "sync", data: updatedStore }),
+        redirect: "follow",
+      });
+    } catch (err) {
+      console.error("Google Script save exception:", err);
+    }
+  }
+
+  // 2. Save to Supabase Cloud SQL if configured
   if (supabase) {
     try {
       if (updatedStore.guests) {
@@ -156,7 +193,7 @@ async function saveToExternalCloud(updatedStore: any) {
     }
   }
 
-  // 2. Save to JSONBin if configured
+  // 3. Save to JSONBin if configured
   if (JSONBIN_BIN_ID && JSONBIN_API_KEY) {
     try {
       await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
@@ -180,14 +217,15 @@ export async function GET(req: Request) {
   const data = await fetchFromExternalCloud();
 
   // Check if using persistent database
-  const isUsingDB = !!supabase || (JSONBIN_BIN_ID && JSONBIN_API_KEY);
+  const isUsingDB = !!GOOGLE_SCRIPT_URL || !!supabase || !!(JSONBIN_BIN_ID && JSONBIN_API_KEY);
+  const provider = GOOGLE_SCRIPT_URL ? "google_sheets" : supabase ? "supabase" : JSONBIN_BIN_ID ? "jsonbin" : "memory";
 
-  if (type === "guests") return NextResponse.json({ success: true, data: data.guests, persistent: isUsingDB });
-  if (type === "rsvps") return NextResponse.json({ success: true, data: data.rsvps, persistent: isUsingDB });
-  if (type === "wishes") return NextResponse.json({ success: true, data: data.wishes, persistent: isUsingDB });
-  if (type === "config") return NextResponse.json({ success: true, data: data.config, persistent: isUsingDB });
+  if (type === "guests") return NextResponse.json({ success: true, data: data.guests, persistent: isUsingDB, provider });
+  if (type === "rsvps") return NextResponse.json({ success: true, data: data.rsvps, persistent: isUsingDB, provider });
+  if (type === "wishes") return NextResponse.json({ success: true, data: data.wishes, persistent: isUsingDB, provider });
+  if (type === "config") return NextResponse.json({ success: true, data: data.config, persistent: isUsingDB, provider });
 
-  return NextResponse.json({ success: true, data, persistent: isUsingDB });
+  return NextResponse.json({ success: true, data, persistent: isUsingDB, provider });
 }
 
 export async function POST(req: Request) {

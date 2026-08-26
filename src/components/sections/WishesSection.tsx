@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { AnimatedText } from "@/components/ui/AnimatedText";
 import { formatRelativeTime } from "@/lib/utils";
 import { weddingData } from "@/data/weddingData";
+import { useInvitationStore } from "@/stores/invitationStore";
 
 interface WishItem {
   id: string;
@@ -14,32 +15,67 @@ interface WishItem {
 }
 
 export function WishesSection() {
+  const guest = useInvitationStore((s) => s.guest);
   const [wishes, setWishes] = useState<WishItem[]>([]);
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const { sectionBgs } = weddingData;
 
-  // Load wishes from Cloud DB — API is the single source of truth
+  // Pre-fill name from invitation URL if available
   useEffect(() => {
-    async function loadWishes() {
+    if (guest.name && guest.name !== "Tamu Undangan") {
+      setName(guest.name);
+    }
+  }, [guest.name]);
+
+  // Load wishes from LocalStorage Cache FIRST, then Cloud DB
+  useEffect(() => {
+    // 1. Initial Load from LocalStorage Cache (Instant offline display)
+    try {
+      const cached = localStorage.getItem("wedding_wishes_backup");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setWishes(parsed);
+        }
+      }
+    } catch {
+      // Ignored
+    }
+
+    // 2. Fetch from Cloud Database & Merge safely
+    async function loadCloudWishes() {
       try {
-        const res = await fetch("/api/db?type=wishes");
+        const res = await fetch("/api/db?type=wishes&t=" + Date.now());
         const json = await res.json();
         if (json.success && Array.isArray(json.data)) {
-          setWishes(json.data);
-          return;
+          setWishes((prev) => {
+            // Merge cloud wishes with any local wishes without duplicates
+            const map = new Map<string, WishItem>();
+            prev.forEach((w) => map.set(w.id, w));
+            json.data.forEach((w: WishItem) => map.set(w.id, w));
+            const merged = Array.from(map.values()).sort((a, b) => {
+              const idA = Number(a.id) || 0;
+              const idB = Number(b.id) || 0;
+              return idB - idA;
+            });
+
+            try {
+              localStorage.setItem("wedding_wishes_backup", JSON.stringify(merged));
+            } catch {}
+            return merged;
+          });
         }
       } catch {
-        // API failed — no fallback, just show empty
+        // Fallback to local
       }
     }
 
-    loadWishes();
-
-    // Re-sync every 15 seconds so admin deletions appear quickly
-    const interval = setInterval(loadWishes, 15000);
+    loadCloudWishes();
+    const interval = setInterval(loadCloudWishes, 15000);
     return () => clearInterval(interval);
   }, []);
 
@@ -62,7 +98,14 @@ export function WishesSection() {
       }) + " WIB",
     };
 
-    // Save to Cloud DB
+    // 1. Instantly update local state and localStorage
+    const updated = [newWish, ...wishes];
+    setWishes(updated);
+    try {
+      localStorage.setItem("wedding_wishes_backup", JSON.stringify(updated));
+    } catch {}
+
+    // 2. Persist to Cloud Database
     try {
       await fetch("/api/db", {
         method: "POST",
@@ -74,15 +117,13 @@ export function WishesSection() {
         }),
       });
     } catch {
-      // Fallback
+      // Offline fallback
     }
 
-    const updated = [newWish, ...wishes];
-    setWishes(updated);
-
-    setName("");
     setMessage("");
     setIsSubmitting(false);
+    setSubmitSuccess(true);
+    setTimeout(() => setSubmitSuccess(false), 4000);
   }
 
   const displayedWishes = showAll ? wishes : wishes.slice(0, 5);
@@ -169,6 +210,17 @@ export function WishesSection() {
           >
             {isSubmitting ? "Mengirim..." : "Kirim Ucapan"}
           </motion.button>
+
+          {submitSuccess && (
+            <motion.div
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="p-2.5 bg-emerald-950/80 border border-emerald-700 rounded-xl text-emerald-200 text-xs font-bold text-center"
+            >
+              ✓ Ucapan dan doa Anda berhasil tersimpan! Terima kasih.
+            </motion.div>
+          )}
         </motion.form>
 
         {/* Wishes list */}

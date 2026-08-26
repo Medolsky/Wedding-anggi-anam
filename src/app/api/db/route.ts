@@ -26,7 +26,7 @@ let cloudStore: {
   rsvps: any[];
   wishes: any[];
   config: any;
-} = {
+} = (globalThis as any).__weddingStore || {
   guests: [],
   config: {
     customServerUrl: "",
@@ -36,6 +36,7 @@ let cloudStore: {
   rsvps: [],
   wishes: [],
 };
+(globalThis as any).__weddingStore = cloudStore;
 
 // Optional external free Cloud Database Integration (Google Sheets / JSONBin.io / Supabase / KV)
 const JSONBIN_BIN_ID = process.env.JSONBIN_BIN_ID;
@@ -124,8 +125,20 @@ async function fetchFromExternalCloud() {
       }
       if (Array.isArray(wishes)) {
         cloudStore.wishes = wishes.map((w: any) => ({
-          ...w,
+          id: w.id,
+          name: w.name,
+          message: w.message,
+          relationship: w.relationship || "Kerabat",
           is_approved: w.is_approved !== false,
+          createdAt: w.created_at
+            ? new Date(w.created_at).toLocaleString("id-ID", {
+                timeZone: "Asia/Jakarta",
+                day: "numeric",
+                month: "short",
+                hour: "2-digit",
+                minute: "2-digit",
+              }) + " WIB"
+            : w.createdAt || new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta" }) + " WIB",
         }));
       }
       if (Array.isArray(configRows) && configRows.length > 0 && configRows[0].value) {
@@ -416,12 +429,18 @@ export async function POST(req: Request) {
       const updatedList = [item, ...list];
       const newStore = { ...currentStore, [type]: updatedList };
 
+      cloudStore = newStore;
+      (globalThis as any).__weddingStore = newStore;
+
       await saveToExternalCloud(newStore);
       return NextResponse.json({ success: true, data: newStore[type as "guests" | "rsvps" | "wishes"] });
     }
 
     if (action === "set" && type) {
       const newStore = { ...currentStore, [type]: item };
+      cloudStore = newStore;
+      (globalThis as any).__weddingStore = newStore;
+
       await saveToExternalCloud(newStore);
       return NextResponse.json({ success: true, data: newStore[type as "guests" | "rsvps" | "wishes"] });
     }
@@ -430,6 +449,8 @@ export async function POST(req: Request) {
       const list = currentStore[type as "guests" | "rsvps" | "wishes"] || [];
       const updatedList = list.filter((i: any) => i.id !== item.id);
       const newStore = { ...currentStore, [type]: updatedList };
+      cloudStore = newStore;
+      (globalThis as any).__weddingStore = newStore;
 
       await saveToExternalCloud(newStore);
       return NextResponse.json({ success: true, data: newStore[type as "guests" | "rsvps" | "wishes"] });

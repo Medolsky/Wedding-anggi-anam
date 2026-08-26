@@ -1,15 +1,19 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { neon } from "@neondatabase/serverless";
 
 /**
  * Universal Cloud Database API Route for Wedding Invitation App
- * Syncs Guests, RSVPs, and Wishes across all devices globally.
- * Uses Supabase Cloud SQL (PostgreSQL) / JSONBin with fallback in-memory & persistent storage.
+ * Supports: Vercel Postgres / Neon, Google Sheets (Apps Script), Supabase SQL, and JSONBin.
  */
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const GOOGLE_SCRIPT_URL = process.env.GOOGLE_SCRIPT_URL || process.env.NEXT_PUBLIC_GOOGLE_SCRIPT_URL;
+const POSTGRES_URL = process.env.POSTGRES_URL || process.env.DATABASE_URL || process.env.POSTGRES_URL_NON_POOLING;
+
+const sql = POSTGRES_URL ? neon(POSTGRES_URL) : null;
+let isPostgresInitialized = false;
 
 const supabase =
   SUPABASE_URL && SUPABASE_KEY && !SUPABASE_URL.includes("your-supabase-project")
@@ -37,8 +41,104 @@ let cloudStore: {
 const JSONBIN_BIN_ID = process.env.JSONBIN_BIN_ID;
 const JSONBIN_API_KEY = process.env.JSONBIN_API_KEY;
 
+async function initPostgresTables() {
+  if (!sql || isPostgresInitialized) return;
+  try {
+    await sql`
+      CREATE TABLE IF NOT EXISTS guests (
+        id TEXT PRIMARY KEY,
+        code TEXT,
+        name TEXT NOT NULL,
+        phone TEXT,
+        category TEXT DEFAULT 'Tamu VIP',
+        template TEXT DEFAULT 'Formal',
+        status TEXT DEFAULT 'pending',
+        checked_in BOOLEAN DEFAULT FALSE,
+        check_in_time TEXT,
+        pax INTEGER DEFAULT 1,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS rsvps (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        status TEXT DEFAULT 'Hadir',
+        pax INTEGER DEFAULT 1,
+        session TEXT DEFAULT 'Sesi 1',
+        notes TEXT,
+        checked_in BOOLEAN DEFAULT FALSE,
+        check_in_time TEXT,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS wishes (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        message TEXT NOT NULL,
+        relationship TEXT DEFAULT 'Kerabat',
+        is_approved BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS config (
+        key TEXT PRIMARY KEY,
+        value JSONB NOT NULL
+      );
+    `;
+    isPostgresInitialized = true;
+  } catch (err) {
+    console.error("Postgres auto-init table error:", err);
+  }
+}
+
 async function fetchFromExternalCloud() {
-  // 1. Try Google Apps Script (Google Sheets / Google Drive) if configured
+  // 1. Try Vercel Postgres / Neon if configured
+  if (sql) {
+    try {
+      await initPostgresTables();
+      const [guests, rsvps, wishes, configRows] = await Promise.all([
+        sql`SELECT * FROM guests ORDER BY created_at DESC`,
+        sql`SELECT * FROM rsvps ORDER BY created_at DESC`,
+        sql`SELECT * FROM wishes ORDER BY created_at DESC`,
+        sql`SELECT * FROM config WHERE key = 'bot_config' LIMIT 1`,
+      ]);
+
+      if (Array.isArray(guests)) {
+        cloudStore.guests = guests.map((g: any) => ({
+          ...g,
+          checkedIn: g.checked_in,
+          checkInTime: g.check_in_time,
+        }));
+      }
+      if (Array.isArray(rsvps)) {
+        cloudStore.rsvps = rsvps.map((r: any) => ({
+          ...r,
+          checkedIn: r.checked_in,
+          checkInTime: r.check_in_time,
+          guestCount: r.pax || 1,
+          attendance: r.status || "Hadir",
+        }));
+      }
+      if (Array.isArray(wishes)) {
+        cloudStore.wishes = wishes.map((w: any) => ({
+          ...w,
+          is_approved: w.is_approved !== false,
+        }));
+      }
+      if (Array.isArray(configRows) && configRows.length > 0 && configRows[0].value) {
+        cloudStore.config = configRows[0].value;
+      }
+
+      return cloudStore;
+    } catch (err) {
+      console.error("Vercel Postgres fetch exception:", err);
+    }
+  }
+
+  // 2. Try Google Apps Script (Google Sheets / Google Drive) if configured
   if (GOOGLE_SCRIPT_URL) {
     try {
       const res = await fetch(`${GOOGLE_SCRIPT_URL}?type=all&t=${Date.now()}`, {
@@ -60,7 +160,7 @@ async function fetchFromExternalCloud() {
     }
   }
 
-  // 2. Try Supabase Cloud SQL if configured
+  // 3. Try Supabase Cloud SQL if configured
   if (supabase) {
     try {
       const [guestsRes, rsvpsRes, wishesRes, configRes] = await Promise.all([
@@ -86,6 +186,8 @@ async function fetchFromExternalCloud() {
           ...r,
           checkedIn: r.checked_in,
           checkInTime: r.check_in_time,
+          guestCount: r.pax || 1,
+          attendance: r.status || "Hadir",
         }));
       }
       if (!wishesRes.error && Array.isArray(wishesRes.data)) {
@@ -101,7 +203,7 @@ async function fetchFromExternalCloud() {
     }
   }
 
-  // 3. Fallback to JSONBin if configured
+  // 4. Fallback to JSONBin if configured
   if (JSONBIN_BIN_ID && JSONBIN_API_KEY) {
     try {
       const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
@@ -124,7 +226,73 @@ async function fetchFromExternalCloud() {
 async function saveToExternalCloud(updatedStore: any) {
   cloudStore = updatedStore;
 
-  // 1. Save to Google Apps Script (Google Sheets / Google Drive) if configured
+  // 1. Save to Vercel Postgres / Neon if configured
+  if (sql) {
+    try {
+      await initPostgresTables();
+
+      if (updatedStore.guests) {
+        for (const g of updatedStore.guests) {
+          await sql`
+            INSERT INTO guests (id, code, name, phone, category, template, status, checked_in, check_in_time, pax)
+            VALUES (${g.id || Date.now().toString()}, ${g.code || `GUEST-${g.id}`}, ${g.name}, ${g.phone || null}, ${g.category || "Tamu VIP"}, ${g.template || "Formal"}, ${g.status || "pending"}, ${!!g.checkedIn}, ${g.checkInTime || null}, ${g.pax || 1})
+            ON CONFLICT (id) DO UPDATE SET
+              code = EXCLUDED.code,
+              name = EXCLUDED.name,
+              phone = EXCLUDED.phone,
+              category = EXCLUDED.category,
+              template = EXCLUDED.template,
+              status = EXCLUDED.status,
+              checked_in = EXCLUDED.checked_in,
+              check_in_time = EXCLUDED.check_in_time,
+              pax = EXCLUDED.pax;
+          `;
+        }
+      }
+
+      if (updatedStore.rsvps) {
+        for (const r of updatedStore.rsvps) {
+          await sql`
+            INSERT INTO rsvps (id, name, status, pax, notes, checked_in, check_in_time)
+            VALUES (${r.id || Date.now().toString()}, ${r.name}, ${r.status || r.attendance || "Hadir"}, ${r.pax || r.guestCount || 1}, ${r.notes || ""}, ${!!r.checkedIn}, ${r.checkInTime || null})
+            ON CONFLICT (id) DO UPDATE SET
+              name = EXCLUDED.name,
+              status = EXCLUDED.status,
+              pax = EXCLUDED.pax,
+              notes = EXCLUDED.notes,
+              checked_in = EXCLUDED.checked_in,
+              check_in_time = EXCLUDED.check_in_time;
+          `;
+        }
+      }
+
+      if (updatedStore.wishes) {
+        for (const w of updatedStore.wishes) {
+          await sql`
+            INSERT INTO wishes (id, name, message, relationship, is_approved)
+            VALUES (${w.id || Date.now().toString()}, ${w.name}, ${w.message || ""}, ${w.relationship || "Kerabat"}, ${w.is_approved !== false})
+            ON CONFLICT (id) DO UPDATE SET
+              name = EXCLUDED.name,
+              message = EXCLUDED.message,
+              relationship = EXCLUDED.relationship,
+              is_approved = EXCLUDED.is_approved;
+          `;
+        }
+      }
+
+      if (updatedStore.config) {
+        await sql`
+          INSERT INTO config (key, value)
+          VALUES ('bot_config', ${JSON.stringify(updatedStore.config)})
+          ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+        `;
+      }
+    } catch (err) {
+      console.error("Vercel Postgres save exception:", err);
+    }
+  }
+
+  // 2. Save to Google Apps Script (Google Sheets / Google Drive) if configured
   if (GOOGLE_SCRIPT_URL) {
     try {
       await fetch(GOOGLE_SCRIPT_URL, {
@@ -138,7 +306,7 @@ async function saveToExternalCloud(updatedStore: any) {
     }
   }
 
-  // 2. Save to Supabase Cloud SQL if configured
+  // 3. Save to Supabase Cloud SQL if configured
   if (supabase) {
     try {
       if (updatedStore.guests) {
@@ -193,7 +361,7 @@ async function saveToExternalCloud(updatedStore: any) {
     }
   }
 
-  // 3. Save to JSONBin if configured
+  // 4. Save to JSONBin if configured
   if (JSONBIN_BIN_ID && JSONBIN_API_KEY) {
     try {
       await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
@@ -217,8 +385,16 @@ export async function GET(req: Request) {
   const data = await fetchFromExternalCloud();
 
   // Check if using persistent database
-  const isUsingDB = !!GOOGLE_SCRIPT_URL || !!supabase || !!(JSONBIN_BIN_ID && JSONBIN_API_KEY);
-  const provider = GOOGLE_SCRIPT_URL ? "google_sheets" : supabase ? "supabase" : JSONBIN_BIN_ID ? "jsonbin" : "memory";
+  const isUsingDB = !!POSTGRES_URL || !!GOOGLE_SCRIPT_URL || !!supabase || !!(JSONBIN_BIN_ID && JSONBIN_API_KEY);
+  const provider = POSTGRES_URL
+    ? "vercel_postgres"
+    : GOOGLE_SCRIPT_URL
+    ? "google_sheets"
+    : supabase
+    ? "supabase"
+    : JSONBIN_BIN_ID
+    ? "jsonbin"
+    : "memory";
 
   if (type === "guests") return NextResponse.json({ success: true, data: data.guests, persistent: isUsingDB, provider });
   if (type === "rsvps") return NextResponse.json({ success: true, data: data.rsvps, persistent: isUsingDB, provider });

@@ -223,7 +223,9 @@ export default function AdminPage() {
               <div className="flex items-center gap-2">
                 <span className={`w-2 h-2 rounded-full ${isCloudSynced ? "bg-emerald-400 animate-ping" : "bg-amber-400"}`} />
                 <span className="text-[11px] font-semibold text-[#9E9D98]">
-                  {dbProvider === "google_sheets"
+                  {dbProvider === "vercel_postgres"
+                    ? "Vercel Postgres"
+                    : dbProvider === "google_sheets"
                     ? "Google Sheets DB"
                     : dbProvider === "supabase"
                     ? "Supabase SQL"

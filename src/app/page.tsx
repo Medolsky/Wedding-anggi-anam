@@ -50,6 +50,62 @@ function InvitationContent() {
     setGuest(guestData);
   }, [searchParams, setGuest]);
 
+  // Real-time Visitor Telemetry Heartbeat Beacon
+  useEffect(() => {
+    let sessionId = "";
+    try {
+      sessionId = sessionStorage.getItem("visitor_session_id") || "";
+      if (!sessionId) {
+        sessionId = "sess_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 7);
+        sessionStorage.setItem("visitor_session_id", sessionId);
+      }
+    } catch {
+      sessionId = "sess_" + Date.now();
+    }
+
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+    const deviceType = isMobile ? "Mobile" : "Desktop";
+    const ref = typeof document !== "undefined" ? document.referrer || "WhatsApp Direct" : "WhatsApp Direct";
+
+    const pingHeartbeat = () => {
+      try {
+        fetch("/api/heartbeat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sessionId,
+            device: deviceType,
+            browser: typeof navigator !== "undefined" ? navigator.userAgent : "Browser",
+            referrer: ref,
+            path: "/",
+            action: "ping",
+          }),
+        }).catch(() => {});
+      } catch {}
+    };
+
+    pingHeartbeat();
+    const interval = setInterval(pingHeartbeat, 10000);
+
+    const handleLeave = () => {
+      try {
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon(
+            "/api/heartbeat",
+            JSON.stringify({ sessionId, action: "leave" })
+          );
+        }
+      } catch {}
+    };
+
+    window.addEventListener("beforeunload", handleLeave);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("beforeunload", handleLeave);
+    };
+  }, []);
+
   // Direct open transition from Welcome Page to Main Page
   const handleOpen = useCallback(() => {
     setState("OPENING");

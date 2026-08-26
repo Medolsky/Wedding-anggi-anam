@@ -11,6 +11,7 @@ export interface CheckedInGuest {
   checkInTime?: string;
   pax?: number;
   phone?: string;
+  _alreadyCheckedIn?: boolean;
 }
 
 // Audio & Haptic Feedback Helpers
@@ -100,6 +101,10 @@ export function BarcodeScannerManager() {
   const [activeSuccessGuest, setActiveSuccessGuest] = useState<CheckedInGuest | null>(null);
   const [countdown, setCountdown] = useState(4);
 
+  // Anti-Spam Scanner Refs (Debounce multiple camera frames)
+  const lastScannedRef = useRef<{ code: string; time: number }>({ code: "", time: 0 });
+  const isProcessingRef = useRef<boolean>(false);
+
   // Camera Scanner States
   const [cameraActive, setCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState("");
@@ -153,8 +158,20 @@ export function BarcodeScannerManager() {
   }
 
   const handleCheckInCode = useCallback(async (codeToSubmit: string) => {
-    if (!codeToSubmit.trim()) return;
+    const cleanCode = codeToSubmit.trim();
+    if (!cleanCode) return;
 
+    // Anti-Spam Protection: Ignore duplicate scans within 3.5 seconds or during active processing
+    const now = Date.now();
+    if (
+      isProcessingRef.current ||
+      (lastScannedRef.current.code.toLowerCase() === cleanCode.toLowerCase() && now - lastScannedRef.current.time < 3500)
+    ) {
+      return;
+    }
+
+    lastScannedRef.current = { code: cleanCode, time: now };
+    isProcessingRef.current = true;
     setIsScanning(true);
     setScanResult({ status: null, message: "" });
 
@@ -164,22 +181,40 @@ export function BarcodeScannerManager() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "checkin",
-          item: { code: codeToSubmit.trim() },
+          item: { code: cleanCode },
         }),
       });
 
       const json = await res.json();
 
       if (json.success && json.guest) {
-        // TRIGGER MULTI-SENSORY SUCCESS FEEDBACK (SOUND + VIBRATE + POPUP)
-        playSuccessBeep();
-        setActiveSuccessGuest(json.guest);
+        if (json.alreadyCheckedIn) {
+          // Play notification chime and show already checked-in info
+          playSuccessBeep();
+          setActiveSuccessGuest({
+            ...json.guest,
+            _alreadyCheckedIn: true,
+          });
 
-        setScanResult({
-          status: "success",
-          message: `✓ Check-In Berhasil! Selamat Datang ${json.guest.name}`,
-          guest: json.guest,
-        });
+          setScanResult({
+            status: "success",
+            message: `⚠️ Tamu "${json.guest.name}" sudah pernah check-in pada pukul ${json.guest.checkInTime || "sebelumnya"}.`,
+            guest: json.guest,
+          });
+        } else {
+          // First time check-in celebration!
+          playSuccessBeep();
+          setActiveSuccessGuest({
+            ...json.guest,
+            _alreadyCheckedIn: false,
+          });
+
+          setScanResult({
+            status: "success",
+            message: `✓ Check-In Berhasil! Selamat Datang ${json.guest.name}`,
+            guest: json.guest,
+          });
+        }
 
         if (Array.isArray(json.guests)) {
           setGuests(json.guests);
@@ -192,7 +227,7 @@ export function BarcodeScannerManager() {
         playErrorBeep();
         setScanResult({
           status: "error",
-          message: `⚠️ Tamu / Kode "${codeToSubmit}" tidak ditemukan atau gagal diverifikasi.`,
+          message: `⚠️ Tamu / Kode "${cleanCode}" tidak ditemukan atau gagal diverifikasi.`,
         });
       }
     } catch {
@@ -203,6 +238,9 @@ export function BarcodeScannerManager() {
       });
     } finally {
       setIsScanning(false);
+      setTimeout(() => {
+        isProcessingRef.current = false;
+      }, 1200);
       if (inputRef.current) inputRef.current.focus();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -302,39 +340,77 @@ export function BarcodeScannerManager() {
           ================================================================= */}
       {activeSuccessGuest && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
-          <div className="relative w-full max-w-md bg-gradient-to-b from-[#142A1D] via-[#101F17] to-[#0A120E] border-2 border-emerald-500 rounded-3xl shadow-[0_0_60px_rgba(16,185,129,0.35)] p-6 sm:p-8 text-center space-y-5 animate-scaleUp">
-            {/* Animated Pulsing Checkmark Ring */}
+          <div
+            className={`relative w-full max-w-md bg-gradient-to-b ${
+              activeSuccessGuest._alreadyCheckedIn
+                ? "from-[#2A2314] via-[#1F190F] to-[#120E0A] border-2 border-amber-500 shadow-[0_0_60px_rgba(245,158,11,0.35)]"
+                : "from-[#142A1D] via-[#101F17] to-[#0A120E] border-2 border-emerald-500 shadow-[0_0_60px_rgba(16,185,129,0.35)]"
+            } rounded-3xl p-6 sm:p-8 text-center space-y-5 animate-scaleUp`}
+          >
+            {/* Animated Ring */}
             <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
-              <div className="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping" />
-              <div className="relative w-20 h-20 rounded-full bg-emerald-500 text-[#0A120E] flex items-center justify-center shadow-lg shadow-emerald-500/50">
-                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+              <div
+                className={`absolute inset-0 rounded-full ${
+                  activeSuccessGuest._alreadyCheckedIn ? "bg-amber-500/20" : "bg-emerald-500/20"
+                } animate-ping`}
+              />
+              <div
+                className={`relative w-20 h-20 rounded-full ${
+                  activeSuccessGuest._alreadyCheckedIn ? "bg-amber-500 text-[#120E0A]" : "bg-emerald-500 text-[#0A120E]"
+                } flex items-center justify-center shadow-lg`}
+              >
+                {activeSuccessGuest._alreadyCheckedIn ? (
+                  <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                ) : (
+                  <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                )}
               </div>
             </div>
 
             {/* Title & Status */}
             <div className="space-y-1">
-              <span className="inline-block px-3 py-1 bg-emerald-950 text-emerald-300 border border-emerald-700 text-[11px] font-extrabold uppercase tracking-[3px] rounded-full">
-                ✓ CHECK-IN BERHASIL
+              <span
+                className={`inline-block px-3 py-1 ${
+                  activeSuccessGuest._alreadyCheckedIn
+                    ? "bg-amber-950 text-amber-300 border border-amber-700"
+                    : "bg-emerald-950 text-emerald-300 border border-emerald-700"
+                } text-[11px] font-extrabold uppercase tracking-[3px] rounded-full`}
+              >
+                {activeSuccessGuest._alreadyCheckedIn ? "⚠️ SUDAH CHECK-IN SEBELUMNYA" : "✓ CHECK-IN BERHASIL"}
               </span>
               <h3 className="text-2xl sm:text-3xl font-black font-serif text-white tracking-wide pt-2" style={{ fontFamily: "var(--font-heading)" }}>
                 {activeSuccessGuest.name}
               </h3>
-              <p className="text-xs text-emerald-300 font-medium">
-                Selamat Datang di Acara Pernikahan Anam &amp; Angi!
+              <p className={`text-xs ${activeSuccessGuest._alreadyCheckedIn ? "text-amber-300" : "text-emerald-300"} font-medium`}>
+                {activeSuccessGuest._alreadyCheckedIn
+                  ? `Tamu ini sudah tercatat masuk pada ${activeSuccessGuest.checkInTime || "sebelumnya"}.`
+                  : "Selamat Datang di Acara Pernikahan Anam & Angi!"}
               </p>
             </div>
 
             {/* Guest Details Pill Box */}
-            <div className="bg-[#0A1610]/80 p-4 rounded-2xl border border-emerald-800/80 grid grid-cols-3 gap-2 text-center text-xs">
+            <div
+              className={`p-4 rounded-2xl border ${
+                activeSuccessGuest._alreadyCheckedIn
+                  ? "bg-[#16120A]/80 border-amber-800/80"
+                  : "bg-[#0A1610]/80 border-emerald-800/80"
+              } grid grid-cols-3 gap-2 text-center text-xs`}
+            >
               <div className="space-y-0.5">
                 <p className="text-[10px] uppercase text-[#8A8C94] font-bold">Kategori</p>
                 <p className="font-bold text-white truncate">{activeSuccessGuest.category || "Tamu VIP"}</p>
               </div>
-              <div className="space-y-0.5 border-x border-emerald-900/60">
+              <div className={`space-y-0.5 border-x ${activeSuccessGuest._alreadyCheckedIn ? "border-amber-900/60" : "border-emerald-900/60"}`}>
                 <p className="text-[10px] uppercase text-[#8A8C94] font-bold">Pax</p>
-                <p className="font-bold text-emerald-400">{activeSuccessGuest.pax || 1} Orang</p>
+                <p className={`font-bold ${activeSuccessGuest._alreadyCheckedIn ? "text-amber-400" : "text-emerald-400"}`}>
+                  {activeSuccessGuest.pax || 1} Orang
+                </p>
               </div>
               <div className="space-y-0.5">
                 <p className="text-[10px] uppercase text-[#8A8C94] font-bold">Waktu Masuk</p>
@@ -347,7 +423,11 @@ export function BarcodeScannerManager() {
               <button
                 type="button"
                 onClick={() => setActiveSuccessGuest(null)}
-                className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-[#0A120E] font-black text-xs uppercase tracking-wider rounded-xl shadow-md cursor-pointer transition-all active:scale-95"
+                className={`w-full py-3 ${
+                  activeSuccessGuest._alreadyCheckedIn
+                    ? "bg-amber-500 hover:bg-amber-400 text-[#120E0A]"
+                    : "bg-emerald-500 hover:bg-emerald-400 text-[#0A120E]"
+                } font-black text-xs uppercase tracking-wider rounded-xl shadow-md cursor-pointer transition-all active:scale-95`}
               >
                 Scan Tamu Berikutnya ({countdown}s)
               </button>

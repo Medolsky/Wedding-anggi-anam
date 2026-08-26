@@ -98,8 +98,10 @@ export function RSVPManager() {
     setManualName("");
   }
 
-  async function handleDelete(id: string) {
-    const itemToDelete = rsvps.find((r) => r.id === id);
+  async function handleDelete(rsvp: RSVPItem) {
+    const updated = rsvps.filter((r) => r.id !== rsvp.id);
+    setRsvps(updated);
+
     try {
       await fetch("/api/db", {
         method: "POST",
@@ -107,15 +109,16 @@ export function RSVPManager() {
         body: JSON.stringify({
           action: "delete",
           type: "rsvps",
-          item: itemToDelete,
+          item: {
+            id: rsvp.id,
+            name: rsvp.name,
+            message: rsvp.session,
+          },
         }),
       });
     } catch {
       // Fallback
     }
-
-    const updated = rsvps.filter((r) => r.id !== id);
-    saveRSVPs(updated);
   }
 
   function exportCSV() {
@@ -317,7 +320,7 @@ export function RSVPManager() {
 
                 <div className="flex items-center gap-2 self-end sm:self-center">
                   <button
-                    onClick={() => handleDelete(r.id)}
+                    onClick={() => handleDelete(r)}
                     className="text-[#8A8C94] hover:text-rose-400 hover:bg-rose-950/30 p-2 rounded-lg cursor-pointer transition-colors"
                     title="Hapus Data RSVP"
                   >

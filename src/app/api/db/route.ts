@@ -548,13 +548,19 @@ export async function POST(req: Request) {
 
     if (action === "checkin") {
       const codeToMatch = (item?.code || item?.id || item?.name || "").toString().trim().toLowerCase();
+      let wasAlreadyCheckedIn = false;
       let matchedGuest: any = null;
 
       const guests = currentStore.guests || [];
       const updatedGuests = guests.map((g: any) => {
         const guestCode = (g.code || g.id || "").toString().trim().toLowerCase();
         const guestName = (g.name || "").toString().trim().toLowerCase();
-        if (guestCode === codeToMatch || guestName === codeToMatch || (codeToMatch && guestCode.includes(codeToMatch))) {
+        if (guestCode === codeToMatch || guestName === codeToMatch || (codeToMatch && (guestCode.includes(codeToMatch) || codeToMatch.includes(guestCode)))) {
+          if (g.checkedIn) {
+            wasAlreadyCheckedIn = true;
+            matchedGuest = g;
+            return g;
+          }
           matchedGuest = {
             ...g,
             checkedIn: true,
@@ -562,6 +568,7 @@ export async function POST(req: Request) {
               timeZone: "Asia/Jakarta",
               hour: "2-digit",
               minute: "2-digit",
+              second: "2-digit",
             }) + " WIB",
             pax: item?.pax || g.pax || 1,
           };
@@ -570,8 +577,27 @@ export async function POST(req: Request) {
         return g;
       });
 
+      // If guest is already checked in, return immediately without duplicate writes
+      if (wasAlreadyCheckedIn && matchedGuest) {
+        return NextResponse.json({
+          success: true,
+          alreadyCheckedIn: true,
+          message: `⚠️ Tamu "${matchedGuest.name}" sudah check-in sebelumnya pada ${matchedGuest.checkInTime || "jam yang tercatat"}.`,
+          guest: matchedGuest,
+          guests: currentStore.guests,
+          rsvps: currentStore.rsvps,
+        });
+      }
+
       if (!matchedGuest) {
         // Create new guest entry if scanned code wasn't pre-added
+        const newCheckInTime = new Date().toLocaleTimeString("id-ID", {
+          timeZone: "Asia/Jakarta",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        }) + " WIB";
+
         matchedGuest = {
           id: Date.now().toString(),
           code: item?.code || `GUEST-${Date.now()}`,
@@ -579,52 +605,58 @@ export async function POST(req: Request) {
           category: "Tamu General",
           template: "Formal",
           checkedIn: true,
-          checkInTime: new Date().toLocaleTimeString("id-ID", {
-            timeZone: "Asia/Jakarta",
-            hour: "2-digit",
-            minute: "2-digit",
-          }) + " WIB",
+          checkInTime: newCheckInTime,
           pax: item?.pax || 1,
-          createdAt: new Date().toLocaleTimeString("id-ID", {
+          createdAt: new Date().toLocaleString("id-ID", {
             timeZone: "Asia/Jakarta",
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
             hour: "2-digit",
             minute: "2-digit",
+            second: "2-digit",
           }) + " WIB",
         };
         updatedGuests.unshift(matchedGuest);
       }
 
-      // Also sync to RSVPs
+      // Sync and deduplicate RSVPs
       const rsvps = currentStore.rsvps || [];
-      const existingRsvpIndex = rsvps.findIndex((r: any) => r.name?.toLowerCase() === matchedGuest.name?.toLowerCase());
-      let updatedRsvps = [...rsvps];
-      if (existingRsvpIndex >= 0) {
-        updatedRsvps[existingRsvpIndex] = {
-          ...updatedRsvps[existingRsvpIndex],
-          status: "Hadir",
-          checkedIn: true,
-          checkInTime: matchedGuest.checkInTime,
-          pax: matchedGuest.pax,
-        };
-      } else {
-        updatedRsvps.unshift({
-          id: Date.now().toString(),
+      const cleanRsvps = rsvps.filter((r: any) => r.name?.trim().toLowerCase() !== matchedGuest.name?.trim().toLowerCase());
+      const updatedRsvps = [
+        {
+          id: String(matchedGuest.id || Date.now()),
           name: matchedGuest.name,
           status: "Hadir",
           checkedIn: true,
           checkInTime: matchedGuest.checkInTime,
-          pax: matchedGuest.pax,
+          pax: matchedGuest.pax || 1,
           notes: "Checked-In via Scanner Barcode",
-          createdAt: new Date().toLocaleDateString("id-ID", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }),
-        });
-      }
+          createdAt: new Date().toLocaleString("id-ID", {
+            timeZone: "Asia/Jakarta",
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          }) + " WIB",
+        },
+        ...cleanRsvps,
+      ];
 
       const newStore = { ...currentStore, guests: updatedGuests, rsvps: updatedRsvps };
+      cloudStore = newStore;
+      (globalThis as any).__weddingStore = newStore;
+
       await saveToExternalCloud(newStore);
 
       return NextResponse.json({
         success: true,
-        message: `✓ Check-in Berhasil! ${matchedGuest.name}`,
+        alreadyCheckedIn: false,
+        message: `✓ Check-in Berhasil! Selamat Datang ${matchedGuest.name}`,
         guest: matchedGuest,
         guests: updatedGuests,
         rsvps: updatedRsvps,

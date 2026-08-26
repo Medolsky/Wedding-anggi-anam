@@ -7,10 +7,15 @@ import { GuestLinkGenerator, GeneratedGuest } from "@/components/admin/GuestLink
 import { RSVPManager, RSVPItem } from "@/components/admin/RSVPManager";
 import { WishesManager, WishItem } from "@/components/admin/WishesManager";
 import { BarcodeScannerManager } from "@/components/admin/BarcodeScannerManager";
+import { AdminLogin, AdminUser } from "@/components/admin/AdminLogin";
 
 type AdminTab = "dashboard" | "scanner" | "links" | "rsvp" | "wishes" | "database" | "info";
 
 export default function AdminPage() {
+  // Authentication State
+  const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
+
   const [activeTab, setActiveTab] = useState<AdminTab>("dashboard");
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
@@ -25,11 +30,34 @@ export default function AdminPage() {
   const [latencyMs, setLatencyMs] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState<string>("");
 
+  // Check login session on mount
   useEffect(() => {
+    try {
+      const savedAuth = localStorage.getItem("wedding_admin_auth");
+      if (savedAuth) {
+        const parsed = JSON.parse(savedAuth);
+        if (parsed && parsed.username) {
+          setCurrentUser(parsed);
+        }
+      }
+    } catch {
+      // LocalStorage error
+    } finally {
+      setIsAuthChecked(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!currentUser) return;
     fetchDashboardMetrics();
     const interval = setInterval(fetchDashboardMetrics, 12000);
     return () => clearInterval(interval);
-  }, []);
+  }, [currentUser]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("wedding_admin_auth");
+    setCurrentUser(null);
+  };
 
   useEffect(() => {
     const updateClock = () => {
@@ -239,6 +267,25 @@ export default function AdminPage() {
     },
   ];
 
+  // Auth Protection Gate
+  if (!isAuthChecked) {
+    return (
+      <div className="min-h-screen bg-[#0E0F12] flex items-center justify-center text-[#C8A96B]">
+        <div className="flex flex-col items-center gap-3">
+          <svg className="animate-spin h-8 w-8 text-[#C8A96B]" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          </svg>
+          <span className="text-xs font-mono tracking-widest uppercase text-[#8A8C94]">Memverifikasi Akun Admin...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return <AdminLogin onLoginSuccess={(u) => setCurrentUser(u)} />;
+  }
+
   return (
     <div className="min-h-screen bg-[#0E0F12] text-[#F1F0EC] font-sans flex flex-col md:flex-row antialiased selection:bg-[#C8A96B] selection:text-black">
       {/* ==========================================
@@ -365,7 +412,29 @@ export default function AdminPage() {
         </div>
 
         {/* Sidebar Footer Quick Links */}
-        <div className="p-4 border-t border-[#24262E] space-y-2 bg-[#111216]">
+        <div className="p-4 border-t border-[#24262E] space-y-2.5 bg-[#111216]">
+          {/* Active Admin User Card */}
+          <div className="p-2.5 bg-[#17181D] rounded-xl border border-[#262832] flex items-center justify-between">
+            <div className="flex items-center gap-2 truncate">
+              <div className="w-7 h-7 rounded-lg bg-[#C8A96B]/20 border border-[#806A42] flex items-center justify-center text-[#E0C98F] text-xs font-bold font-serif">
+                {currentUser.name.charAt(0)}
+              </div>
+              <div className="truncate">
+                <p className="text-[11px] font-bold text-white truncate">{currentUser.name}</p>
+                <p className="text-[9.5px] text-[#C8A96B] font-mono">{currentUser.role}</p>
+              </div>
+            </div>
+            <button
+              onClick={handleLogout}
+              title="Logout / Keluar"
+              className="p-1.5 text-[#8A8C94] hover:text-rose-400 hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+              </svg>
+            </button>
+          </div>
+
           <button
             onClick={exportFullDataCSV}
             className="w-full py-2 px-3 bg-[#1C1E25] hover:bg-[#252833] border border-[#2E313D] text-[#E5E3DF] rounded-xl text-[11.5px] font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-98"
@@ -378,18 +447,29 @@ export default function AdminPage() {
             <span>Export CSV Report</span>
           </button>
 
-          <Link
-            href="/"
-            target="_blank"
-            className="w-full py-2 px-3 bg-[#C8A96B]/15 hover:bg-[#C8A96B]/25 border border-[#C8A96B]/40 text-[#E0C98F] rounded-xl text-[11.5px] font-bold transition-all flex items-center justify-center gap-2 shadow-sm"
-          >
-            <span>Buka Web Live</span>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-              <polyline points="15 3 21 3 21 9" />
-              <line x1="10" y1="14" x2="21" y2="3" />
-            </svg>
-          </Link>
+          <div className="grid grid-cols-2 gap-2">
+            <Link
+              href="/"
+              target="_blank"
+              className="w-full py-2 px-2.5 bg-[#C8A96B]/15 hover:bg-[#C8A96B]/25 border border-[#C8A96B]/40 text-[#E0C98F] rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm text-center"
+            >
+              <span>Web Live</span>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+              </svg>
+            </Link>
+
+            <button
+              onClick={handleLogout}
+              className="w-full py-2 px-2.5 bg-[#231416] hover:bg-rose-950 border border-rose-900/60 text-rose-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-98"
+            >
+              <span>Logout</span>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+              </svg>
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -433,7 +513,16 @@ export default function AdminPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
+            {/* Active User Badge */}
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-[#1C1E25] border border-[#2B2E38] rounded-xl text-xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span className="font-bold text-white font-serif">{currentUser.name}</span>
+              <span className="text-[10px] text-[#C8A96B] font-mono font-bold bg-[#141519] px-2 py-0.5 rounded-md border border-[#2E313D]">
+                {currentUser.role}
+              </span>
+            </div>
+
             {/* Live Clock Badge */}
             {currentTime && (
               <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 bg-[#1C1E25] border border-[#2B2E38] rounded-xl text-xs font-mono text-[#A1A4B2]">
@@ -467,15 +556,26 @@ export default function AdminPage() {
             <Link
               href="/"
               target="_blank"
-              className="py-1.5 px-3 bg-gradient-to-r from-[#C8A96B] via-[#B8860B] to-[#966F17] text-[#0E0F12] font-black hover:brightness-110 rounded-xl text-xs transition-all shadow-md shadow-[#C8A96B]/20 flex items-center gap-1.5"
+              className="hidden sm:flex py-1.5 px-3 bg-gradient-to-r from-[#C8A96B] via-[#B8860B] to-[#966F17] text-[#0E0F12] font-black hover:brightness-110 rounded-xl text-xs transition-all shadow-md shadow-[#C8A96B]/20 items-center gap-1.5"
             >
               <span>Lihat Web</span>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
                 <polyline points="15 3 21 3 21 9" />
-                <line x1="10" y1="14" x2="21" y2="3" />
               </svg>
             </Link>
+
+            {/* Logout Button */}
+            <button
+              onClick={handleLogout}
+              title="Logout Akun Admin"
+              className="py-1.5 px-3 bg-[#231416] hover:bg-rose-950 border border-rose-900/60 text-rose-300 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+              </svg>
+              <span className="hidden sm:inline">Logout</span>
+            </button>
           </div>
         </header>
 

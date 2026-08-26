@@ -15,7 +15,6 @@ import { WelcomeCover, WelcomeContent } from "@/components/welcome/WelcomeCover"
 // Global Controls
 import { MusicPlayer } from "@/components/global/MusicPlayer";
 import { FloatingNavigation } from "@/components/global/FloatingNavigation";
-import { FloatingQRCodeButton } from "@/components/global/FloatingQRCodeButton";
 
 // Main Page Sections
 import { HeroSection } from "@/components/sections/HeroSection";
@@ -128,7 +127,6 @@ function InvitationContent() {
             GLOBAL OVERLAYS
             ========================================== */}
         <MusicPlayer />
-        <FloatingQRCodeButton />
         <FloatingNavigation />
         <ImageLightbox />
       </div>

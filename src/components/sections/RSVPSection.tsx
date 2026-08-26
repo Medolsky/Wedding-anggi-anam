@@ -138,55 +138,46 @@ export function RSVPSection() {
           {!showForm ? (
             /* Digital E-Ticket Barcode Card (Primary View) */
             <motion.div
-              key="eticket"
-              className="gold-card-pro p-5 md:p-6 border-2 border-[#806A42] shadow-2xl text-center w-full max-w-xs rounded-2xl"
+              key="confirmed"
+              className="gold-card-pro p-5 md:p-6 border border-[#806A42] shadow-2xl text-center w-full max-w-xs rounded-2xl space-y-3"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.5 }}
             >
-              <div className="flex items-center justify-between border-b border-[#806A42]/40 pb-2.5 mb-3">
-                <span className="text-[10px] uppercase tracking-[2px] font-extrabold text-[#C8A96B]">
-                  🎫 DIGITAL E-TICKET
-                </span>
-                <span className="text-[9px] bg-[#C8A96B]/20 text-[#E0C98F] px-2 py-0.5 rounded-full font-bold border border-[#806A42]">
-                  {guest.category || "TAMU VIP"}
-                </span>
+              <div className="w-12 h-12 rounded-full bg-emerald-950/80 border border-emerald-600 flex items-center justify-center mx-auto text-emerald-300 text-xl font-bold">
+                ✓
               </div>
 
               <h3
-                className="text-xl font-serif font-bold text-[#F5F1E8] leading-snug mb-1"
+                className="text-lg font-serif font-bold text-[#F5F1E8] leading-snug"
                 style={{ fontFamily: "var(--font-heading)" }}
               >
-                {guest.name || "Tamu Undangan"}
+                Konfirmasi Tersimpan
               </h3>
-              <p className="text-[11px] text-[#C8C5BE] mb-3">
-                Acara: <strong className="text-[#E0C98F]">Akad &amp; Resepsi</strong>
+
+              <p className="text-xs text-[#C8C5BE] leading-relaxed">
+                Terima kasih, <strong className="text-[#E0C98F]">{formData.name || guest.name}</strong>. Konfirmasi kehadiran Anda telah berhasil dicatat.
               </p>
 
-              {/* QR / Barcode Card Frame */}
-              <div className="bg-[#171719] p-3.5 rounded-2xl border-2 border-[#806A42] shadow-inner flex flex-col items-center justify-center my-3">
-                <QRCodeCanvas
-                  data={guest.code || guest.name || "GUEST-VIP"}
-                  size={180}
-                  className="rounded-lg drop-shadow-sm p-1 bg-white"
-                />
-                <div className="mt-2.5 text-[11px] font-mono font-extrabold tracking-[3px] text-[#F5F1E8] bg-[#0E0E0F] px-3.5 py-1 rounded-lg border border-[#806A42] shadow-sm">
-                  {guest.code || "GUEST-" + (guest.name || "VIP").replace(/[^a-zA-Z0-9]/g, "").substring(0, 6).toUpperCase()}
-                </div>
-              </div>
+              <div className="pt-2 border-t border-[#806A42]/40 flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const el = document.getElementById("eticket");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="btn-modern-primary text-[11px] w-full py-2.5 font-bold flex items-center justify-center gap-1.5 cursor-pointer rounded-full shadow-md"
+                >
+                  <span>🎟️ Lihat Barcode / E-Ticket di Atas</span>
+                </button>
 
-              <p className="text-[10.5px] text-[#C8C5BE] leading-relaxed mb-4">
-                Tunjukkan QR/Barcode ini kepada panitia / admin di pintu masuk acara untuk konfirmasi kedatangan Anda.
-              </p>
-
-              <div className="pt-2 border-t border-[#806A42]/40">
                 <button
                   type="button"
                   onClick={() => setShowForm(true)}
-                  className="btn-modern-secondary text-[11px] w-full py-2 font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="btn-modern-secondary text-[10.5px] w-full py-2 font-bold flex items-center justify-center gap-1 cursor-pointer rounded-full"
                 >
-                  <span>✏️ Isi / Ubah Form Kehadiran</span>
+                  <span>✏️ Ubah Konfirmasi Kehadiran</span>
                 </button>
               </div>
             </motion.div>

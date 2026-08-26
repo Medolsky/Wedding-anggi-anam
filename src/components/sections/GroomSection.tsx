@@ -69,10 +69,10 @@ export function GroomSection() {
           </motion.div>
 
           {/* Name */}
-          <div className="text-center w-full mb-2">
+          <div className="text-center w-full mb-2 px-1 flex justify-center overflow-hidden">
             <CharReveal
               text={groom.fullName}
-              className="text-2xl md:text-3xl text-gold-gradient font-serif text-center font-bold leading-tight"
+              className="text-[17px] sm:text-xl md:text-2xl text-gold-gradient font-serif text-center font-bold leading-tight whitespace-nowrap tracking-wide"
               delay={0.3}
             />
           </div>

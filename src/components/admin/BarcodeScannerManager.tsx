@@ -13,6 +13,79 @@ export interface CheckedInGuest {
   phone?: string;
 }
 
+// Audio & Haptic Feedback Helpers
+function playSuccessBeep() {
+  try {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (AudioContextClass) {
+      const audioCtx = new AudioContextClass();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = "sine";
+      // 3-tone cheerful ascending chime
+      osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+      osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.08); // E5
+      osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.16); // G5
+      osc.frequency.setValueAtTime(1046.50, audioCtx.currentTime + 0.24); // C6
+
+      gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.65);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.65);
+    }
+  } catch {
+    // Audio context not available or blocked
+  }
+
+  // Haptic Vibration for Mobile Devices
+  try {
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      navigator.vibrate([100, 50, 150]);
+    }
+  } catch {
+    // Vibration not supported
+  }
+}
+
+function playErrorBeep() {
+  try {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (AudioContextClass) {
+      const audioCtx = new AudioContextClass();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(280, audioCtx.currentTime);
+      osc.frequency.linearRampToValueAtTime(140, audioCtx.currentTime + 0.25);
+
+      gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.35);
+    }
+  } catch {
+    //
+  }
+
+  try {
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      navigator.vibrate([200, 100, 200]);
+    }
+  } catch {
+    //
+  }
+}
+
 export function BarcodeScannerManager() {
   const [scannedCode, setScannedCode] = useState("");
   const [guests, setGuests] = useState<CheckedInGuest[]>([]);
@@ -22,6 +95,10 @@ export function BarcodeScannerManager() {
     message: string;
     guest?: CheckedInGuest;
   }>({ status: null, message: "" });
+
+  // Big Celebration Popup Modal State
+  const [activeSuccessGuest, setActiveSuccessGuest] = useState<CheckedInGuest | null>(null);
+  const [countdown, setCountdown] = useState(4);
 
   // Camera Scanner States
   const [cameraActive, setCameraActive] = useState(false);
@@ -44,6 +121,24 @@ export function BarcodeScannerManager() {
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Auto-dismiss celebration modal with progress timer
+  useEffect(() => {
+    if (!activeSuccessGuest) return;
+
+    setCountdown(4);
+    const interval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          setActiveSuccessGuest(null);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [activeSuccessGuest]);
 
   async function loadCloudGuests() {
     try {
@@ -76,6 +171,10 @@ export function BarcodeScannerManager() {
       const json = await res.json();
 
       if (json.success && json.guest) {
+        // TRIGGER MULTI-SENSORY SUCCESS FEEDBACK (SOUND + VIBRATE + POPUP)
+        playSuccessBeep();
+        setActiveSuccessGuest(json.guest);
+
         setScanResult({
           status: "success",
           message: `✓ Check-In Berhasil! Selamat Datang ${json.guest.name}`,
@@ -90,12 +189,14 @@ export function BarcodeScannerManager() {
 
         setScannedCode("");
       } else {
+        playErrorBeep();
         setScanResult({
           status: "error",
-          message: `⚠️ Tamu/Kode "${codeToSubmit}" tidak ditemukan atau gagal diautentikasi.`,
+          message: `⚠️ Tamu / Kode "${codeToSubmit}" tidak ditemukan atau gagal diverifikasi.`,
         });
       }
     } catch {
+      playErrorBeep();
       setScanResult({
         status: "error",
         message: "❌ Terjadi kesalahan koneksi saat memproses check-in.",
@@ -117,10 +218,8 @@ export function BarcodeScannerManager() {
 
   async function startCameraScanner() {
     setCameraError("");
-    // Show container FIRST so the DOM element is visible
     setShowCamera(true);
 
-    // Wait for DOM to render the container
     await new Promise((resolve) => setTimeout(resolve, 300));
 
     try {
@@ -142,7 +241,6 @@ export function BarcodeScannerManager() {
         setCameraError("❌ Container kamera tidak ditemukan. Coba reload halaman.");
         return;
       }
-      // Clear any previous content
       el.innerHTML = "";
 
       const html5QrCode = new Html5Qrcode(scannerId);
@@ -151,15 +249,14 @@ export function BarcodeScannerManager() {
       await html5QrCode.start(
         { facingMode: "environment" },
         {
-          fps: 10,
+          fps: 12,
           qrbox: { width: 220, height: 220 },
         },
         (decodedText: string) => {
-          // On successful scan
           handleCheckInCode(decodedText);
         },
         () => {
-          // QR code not found in frame — ignore silently
+          // Ignored
         }
       );
 
@@ -167,9 +264,9 @@ export function BarcodeScannerManager() {
     } catch (err: any) {
       const msg = err?.message || String(err) || "";
       if (msg.includes("NotAllowedError") || msg.includes("Permission") || msg.includes("denied")) {
-        setCameraError("❌ Izin kamera ditolak. Mohon izinkan akses kamera di pengaturan browser Anda.");
+        setCameraError("❌ Izin kamera ditolak. Mohon izinkan akses kamera di browser Anda.");
       } else if (msg.includes("NotFoundError") || msg.includes("Requested device not found")) {
-        setCameraError("❌ Kamera tidak ditemukan. Pastikan perangkat Anda memiliki kamera.");
+        setCameraError("❌ Kamera tidak ditemukan pada perangkat Anda.");
       } else {
         setCameraError(`❌ Gagal memulai kamera: ${msg}`);
       }
@@ -183,7 +280,7 @@ export function BarcodeScannerManager() {
         await scannerRef.current.stop();
         scannerRef.current.clear();
       } catch {
-        // Already stopped
+        //
       }
       scannerRef.current = null;
     }
@@ -199,7 +296,66 @@ export function BarcodeScannerManager() {
   const pendingCount = totalGuests - checkedInCount;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* =================================================================
+          PROMINENT SUCCESS CELEBRATION MODAL (TANDA SUKSES SCAN)
+          ================================================================= */}
+      {activeSuccessGuest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
+          <div className="relative w-full max-w-md bg-gradient-to-b from-[#142A1D] via-[#101F17] to-[#0A120E] border-2 border-emerald-500 rounded-3xl shadow-[0_0_60px_rgba(16,185,129,0.35)] p-6 sm:p-8 text-center space-y-5 animate-scaleUp">
+            {/* Animated Pulsing Checkmark Ring */}
+            <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
+              <div className="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping" />
+              <div className="relative w-20 h-20 rounded-full bg-emerald-500 text-[#0A120E] flex items-center justify-center shadow-lg shadow-emerald-500/50">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Title & Status */}
+            <div className="space-y-1">
+              <span className="inline-block px-3 py-1 bg-emerald-950 text-emerald-300 border border-emerald-700 text-[11px] font-extrabold uppercase tracking-[3px] rounded-full">
+                ✓ CHECK-IN BERHASIL
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-black font-serif text-white tracking-wide pt-2" style={{ fontFamily: "var(--font-heading)" }}>
+                {activeSuccessGuest.name}
+              </h3>
+              <p className="text-xs text-emerald-300 font-medium">
+                Selamat Datang di Acara Pernikahan Anam &amp; Angi!
+              </p>
+            </div>
+
+            {/* Guest Details Pill Box */}
+            <div className="bg-[#0A1610]/80 p-4 rounded-2xl border border-emerald-800/80 grid grid-cols-3 gap-2 text-center text-xs">
+              <div className="space-y-0.5">
+                <p className="text-[10px] uppercase text-[#8A8C94] font-bold">Kategori</p>
+                <p className="font-bold text-white truncate">{activeSuccessGuest.category || "Tamu VIP"}</p>
+              </div>
+              <div className="space-y-0.5 border-x border-emerald-900/60">
+                <p className="text-[10px] uppercase text-[#8A8C94] font-bold">Pax</p>
+                <p className="font-bold text-emerald-400">{activeSuccessGuest.pax || 1} Orang</p>
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-[10px] uppercase text-[#8A8C94] font-bold">Waktu Masuk</p>
+                <p className="font-bold text-[#E0C98F] font-mono">{activeSuccessGuest.checkInTime || "Sekarang"}</p>
+              </div>
+            </div>
+
+            {/* Dismiss Button with Timer */}
+            <div className="space-y-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setActiveSuccessGuest(null)}
+                className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-[#0A120E] font-black text-xs uppercase tracking-wider rounded-xl shadow-md cursor-pointer transition-all active:scale-95"
+              >
+                Scan Tamu Berikutnya ({countdown}s)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Real-time Attendance Metrics Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-[#202125] p-4 border border-[#2D2E34] text-center rounded-2xl shadow-xs">
@@ -274,7 +430,9 @@ export function BarcodeScannerManager() {
           <div
             ref={scannerContainerRef}
             style={{ display: showCamera ? "block" : "none" }}
-            className="rounded-xl border-2 border-[#C8A96B]/40 overflow-hidden"
+            className={`rounded-2xl border-2 overflow-hidden transition-all ${
+              activeSuccessGuest ? "border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.5)]" : "border-[#C8A96B]/50"
+            }`}
           >
             <div id="qr-reader-container" style={{ width: "100%" }} />
           </div>
@@ -313,17 +471,20 @@ export function BarcodeScannerManager() {
           </div>
 
           {/* Real-time Scan Result Banner */}
-          {scanResult.status && (
+          {scanResult.status && !activeSuccessGuest && (
             <div
-              className={`p-4 rounded-xl border text-center transition-all ${
+              className={`p-4 rounded-2xl border text-center transition-all ${
                 scanResult.status === "success"
-                  ? "bg-emerald-950/60 border-emerald-700 text-emerald-200"
-                  : "bg-rose-950/60 border-rose-700 text-rose-200"
+                  ? "bg-emerald-950/70 border-emerald-600 text-emerald-200"
+                  : "bg-rose-950/70 border-rose-600 text-rose-200"
               }`}
             >
-              <p className="text-sm font-extrabold">{scanResult.message}</p>
+              <p className="text-sm font-extrabold flex items-center justify-center gap-2">
+                <span>{scanResult.status === "success" ? "✓" : "⚠️"}</span>
+                <span>{scanResult.message}</span>
+              </p>
               {scanResult.guest && (
-                <div className="mt-2 text-xs pt-2 border-t border-emerald-800/60 flex items-center justify-center gap-4">
+                <div className="mt-2 text-xs pt-2 border-t border-emerald-800/60 flex items-center justify-center gap-4 flex-wrap">
                   <span>Kategori: <strong>{scanResult.guest.category || "Tamu VIP"}</strong></span>
                   <span>Jumlah: <strong>{scanResult.guest.pax || 1} PAX</strong></span>
                   <span>Jam: <strong>{scanResult.guest.checkInTime}</strong></span>
@@ -364,7 +525,7 @@ export function BarcodeScannerManager() {
             {checkedInGuests.map((g) => (
               <div
                 key={g.id}
-                className="p-3.5 border border-emerald-800/60 rounded-xl bg-emerald-950/30 flex items-center justify-between gap-3 text-xs"
+                className="p-3.5 border border-emerald-800/60 rounded-xl bg-emerald-950/30 flex items-center justify-between gap-3 text-xs transition-all hover:bg-emerald-950/50"
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -377,9 +538,9 @@ export function BarcodeScannerManager() {
                     </span>
                   </div>
 
-                  <div className="text-[11px] text-[#9E9D98] flex gap-4">
+                  <div className="text-[11px] text-[#9E9D98] flex gap-4 flex-wrap">
                     <span>Jumlah: <strong className="text-[#E0C98F]">{g.pax || 1} PAX</strong></span>
-                    <span>Jam Masuk: <strong>{g.checkInTime || "Baru saja"}</strong></span>
+                    <span>Jam Masuk: <strong className="text-white">{g.checkInTime || "Baru saja"}</strong></span>
                     {g.category && <span>Kategori: <strong>{g.category}</strong></span>}
                   </div>
                 </div>

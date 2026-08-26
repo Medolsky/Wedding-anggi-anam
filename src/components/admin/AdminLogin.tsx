@@ -9,30 +9,41 @@ export interface AdminUser {
   name: string;
 }
 
-// 5 Akun Admin Resmi
-export const ADMIN_ACCOUNTS: Record<string, { pass: string; role: string; name: string }> = {
+// Akun Admin Resmi
+export const ADMIN_ACCOUNTS: Record<string, { pass: string | string[]; displayPass: string; role: string; name: string }> = {
+  itzmerapz: {
+    pass: ["rapz2026", "anamangi2026", "admin123"],
+    displayPass: "rapz2026",
+    role: "Super Admin",
+    name: "ItzMeRapz",
+  },
   admin: {
-    pass: "anamangi2026",
+    pass: ["anamangi2026", "rapz2026", "admin123"],
+    displayPass: "anamangi2026",
     role: "Super Admin",
     name: "Master Admin",
   },
   anam: {
     pass: "anam123",
+    displayPass: "anam123",
     role: "Mempelai Pria",
     name: "Misbakhul Anam",
   },
   angi: {
     pass: "angi123",
+    displayPass: "angi123",
     role: "Mempelai Wanita",
     name: "Angi Sulistia",
   },
   panitia1: {
     pass: "nikah2026",
+    displayPass: "nikah2026",
     role: "Penerima Tamu 1",
     name: "Panitia Registrasi A",
   },
   panitia2: {
     pass: "nikah2026",
+    displayPass: "nikah2026",
     role: "Penerima Tamu 2",
     name: "Panitia Registrasi B",
   },
@@ -59,20 +70,28 @@ export function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
     const passInput = password.trim();
 
     setTimeout(() => {
-      if (ADMIN_ACCOUNTS[userKey] && ADMIN_ACCOUNTS[userKey].pass === passInput) {
-        const loggedUser: AdminUser = {
-          username: userKey,
-          role: ADMIN_ACCOUNTS[userKey].role,
-          name: ADMIN_ACCOUNTS[userKey].name,
-        };
+      const account = ADMIN_ACCOUNTS[userKey];
+      if (account) {
+        const isMatch = Array.isArray(account.pass)
+          ? account.pass.includes(passInput)
+          : account.pass === passInput;
 
-        // Save session locally
-        localStorage.setItem("wedding_admin_auth", JSON.stringify(loggedUser));
-        onLoginSuccess(loggedUser);
-      } else {
-        setError("Username atau password salah! Silakan coba lagi.");
-        setIsLoading(false);
+        if (isMatch) {
+          const loggedUser: AdminUser = {
+            username: userKey,
+            role: account.role,
+            name: account.name,
+          };
+
+          // Save session locally
+          localStorage.setItem("wedding_admin_auth", JSON.stringify(loggedUser));
+          onLoginSuccess(loggedUser);
+          return;
+        }
       }
+
+      setError("Username atau password salah! Silakan coba lagi.");
+      setIsLoading(false);
     }, 400);
   };
 
@@ -230,7 +249,7 @@ export function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
                 <button
                   key={u}
                   type="button"
-                  onClick={() => handleQuickSelect(u, acc.pass)}
+                  onClick={() => handleQuickSelect(u, acc.displayPass)}
                   className="w-full p-2 bg-[#1F2128] hover:bg-[#2A2D37] border border-[#303340] rounded-xl flex items-center justify-between text-left transition-all cursor-pointer group"
                 >
                   <div>
@@ -238,7 +257,7 @@ export function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
                     <span className="text-[10px] text-[#8A8C94] ml-2">({acc.role})</span>
                   </div>
                   <span className="text-[10px] font-mono text-[#C8A96B] bg-[#141519] px-2 py-0.5 rounded-md border border-[#2E313D]">
-                    pass: {acc.pass}
+                    pass: {acc.displayPass}
                   </span>
                 </button>
               ))}

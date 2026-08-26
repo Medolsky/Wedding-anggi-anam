@@ -24,12 +24,34 @@
  * ==============================================================================
  */
 
+// ID SPREADSHEET GOOGLE DRIVE ANDA
+var SPREADSHEET_ID = "1rEuceSMYaarwmnG97U9DtaI2i197Dd4XsBV666H06mw";
+
+function getSpreadsheet() {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (ss && ss.getId()) return ss;
+  } catch (e) {}
+  return SpreadsheetApp.openById(SPREADSHEET_ID);
+}
+
+// Fungsi manual untuk inisialisasi tabel pertama kali (Bisa diklik 'Run' / 'Jalankan' di Apps Script)
+function initDatabase() {
+  var ss = getSpreadsheet();
+  getGuestsSheet(ss);
+  getRsvpsSheet(ss);
+  getWishesSheet(ss);
+  getConfigSheet(ss);
+  Logger.log("Database initialized successfully!");
+}
+
 // Menangani permintaan GET (Membaca Data)
 function doGet(e) {
   try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var ss = getSpreadsheet();
     var type = (e && e.parameter && e.parameter.type) ? e.parameter.type : "all";
 
+    // Auto initialize sheets if not present
     var data = {
       guests: getGuests(ss),
       rsvps: getRsvps(ss),
@@ -55,7 +77,7 @@ function doGet(e) {
 // Menangani permintaan POST (Menyimpan / Menulis Data)
 function doPost(e) {
   try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var ss = getSpreadsheet();
     var contents = e.postData ? e.postData.contents : "{}";
     var payload = JSON.parse(contents);
 

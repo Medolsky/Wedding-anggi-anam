@@ -474,22 +474,60 @@ export async function POST(req: Request) {
       cloudStore = newStore;
       (globalThis as any).__weddingStore = newStore;
 
+      if (Array.isArray(item) && item.length === 0) {
+        if (sql) {
+          try {
+            if (type === "wishes") await sql`TRUNCATE TABLE wishes`;
+            if (type === "guests") await sql`TRUNCATE TABLE guests`;
+            if (type === "rsvps") await sql`TRUNCATE TABLE rsvps`;
+          } catch (err) {
+            console.error("Postgres truncate error:", err);
+          }
+        }
+        if (supabase) {
+          try {
+            await supabase.from(type).delete().neq("id", "___dummy___");
+          } catch {}
+        }
+      }
+
       await saveToExternalCloud(newStore);
       return NextResponse.json({ success: true, data: newStore[type as "guests" | "rsvps" | "wishes"] });
     }
 
-    if (action === "delete" && type && item?.id) {
+    if (action === "delete" && type && item) {
+      const targetId = String(item.id || "").trim();
+      const targetName = String(item.name || "").trim();
+      const targetMessage = String(item.message || "").trim();
+
       const list = currentStore[type as "guests" | "rsvps" | "wishes"] || [];
-      const updatedList = list.filter((i: any) => i.id !== item.id);
+      const updatedList = list.filter((i: any) => {
+        const rowId = String(i.id || "").trim();
+        const rowName = String(i.name || "").trim();
+        const rowMsg = String(i.message || i.notes || "").trim();
+        if (targetId && rowId === targetId) return false;
+        if (targetName && targetMessage && rowName === targetName && rowMsg === targetMessage) return false;
+        return true;
+      });
+
       const newStore = { ...currentStore, [type]: updatedList };
       cloudStore = newStore;
       (globalThis as any).__weddingStore = newStore;
 
       if (sql) {
         try {
-          if (type === "wishes") await sql`DELETE FROM wishes WHERE id = ${item.id}`;
-          if (type === "guests") await sql`DELETE FROM guests WHERE id = ${item.id}`;
-          if (type === "rsvps") await sql`DELETE FROM rsvps WHERE id = ${item.id}`;
+          if (type === "wishes") {
+            if (targetId) await sql`DELETE FROM wishes WHERE id = ${targetId}`;
+            if (targetName && targetMessage) await sql`DELETE FROM wishes WHERE name = ${targetName} AND message = ${targetMessage}`;
+          }
+          if (type === "guests") {
+            if (targetId) await sql`DELETE FROM guests WHERE id = ${targetId}`;
+            if (targetName) await sql`DELETE FROM guests WHERE name = ${targetName}`;
+          }
+          if (type === "rsvps") {
+            if (targetId) await sql`DELETE FROM rsvps WHERE id = ${targetId}`;
+            if (targetName) await sql`DELETE FROM rsvps WHERE name = ${targetName}`;
+          }
         } catch (err) {
           console.error("Postgres delete error:", err);
         }
@@ -497,12 +535,15 @@ export async function POST(req: Request) {
 
       if (supabase) {
         try {
-          await supabase.from(type).delete().eq("id", item.id);
+          if (targetId) await supabase.from(type).delete().eq("id", targetId);
+          if (targetName && targetMessage && type === "wishes") {
+            await supabase.from(type).delete().eq("name", targetName).eq("message", targetMessage);
+          }
         } catch {}
       }
 
       await saveToExternalCloud(newStore);
-      return NextResponse.json({ success: true, data: newStore[type as "guests" | "rsvps" | "wishes"] });
+      return NextResponse.json({ success: true, data: updatedList });
     }
 
     if (action === "checkin") {

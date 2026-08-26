@@ -52,8 +52,10 @@ export function WishesManager() {
     }
   }
 
-  async function handleDelete(id: string) {
-    const updated = wishes.filter((w) => w.id !== id);
+  async function handleDelete(wish: WishItem) {
+    const updated = wishes.filter(
+      (item) => item.id !== wish.id && !(item.name === wish.name && item.message === wish.message)
+    );
     setWishes(updated);
     try {
       localStorage.setItem("wedding_wishes_backup", JSON.stringify(updated));
@@ -66,7 +68,11 @@ export function WishesManager() {
         body: JSON.stringify({
           action: "delete",
           type: "wishes",
-          item: { id },
+          item: {
+            id: wish.id,
+            name: wish.name,
+            message: wish.message,
+          },
         }),
       });
     } catch {
@@ -205,7 +211,7 @@ export function WishesManager() {
                 <div className="flex items-center gap-3">
                   <span className="text-[10px] text-[#9E9D98] font-mono">{w.createdAt}</span>
                   <button
-                    onClick={() => handleDelete(w.id)}
+                    onClick={() => handleDelete(w)}
                     className="text-[#8A8C94] hover:text-rose-400 p-1.5 hover:bg-rose-950/30 rounded-lg cursor-pointer transition-colors"
                     title="Hapus Ucapan"
                   >

@@ -4,6 +4,20 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
+interface GeoNode {
+  name: string;
+  region: string;
+  country: string;
+  ipMasked: string;
+  lat: number;
+  lon: number;
+  x: number;
+  y: number;
+  pings: number;
+  lastSeen: number;
+  isRecent: boolean;
+}
+
 interface LiveAccessLog {
   id: string;
   time: string;
@@ -11,25 +25,9 @@ interface LiveAccessLog {
   path: string;
   status: number;
   latencyMs: number;
+  city?: string;
   client: string;
   device: string;
-}
-
-interface EndpointProbe {
-  path: string;
-  method: "GET" | "POST";
-  name: string;
-  status: number;
-  latency: number;
-  uptime: number;
-  testedAt: string;
-}
-
-interface GeoCity {
-  name: string;
-  x: number; // percentage coordinate on radar map
-  y: number;
-  pings: number;
 }
 
 export default function RealTimeMonitoringPage() {
@@ -44,11 +42,9 @@ export default function RealTimeMonitoringPage() {
   const [memoryMB, setMemoryMB] = useState<number>(136);
   const [currentTime, setCurrentTime] = useState<string>("");
   const [isLiveConnected, setIsLiveConnected] = useState<boolean>(true);
-  const [lastHeartbeatUpdate, setLastHeartbeatUpdate] = useState<number>(Date.now());
   const [isStressTesting, setIsStressTesting] = useState<boolean>(false);
-  const [soundEnabled, setSoundEnabled] = useState<boolean>(false);
-  const [logFilter, setLogFilter] = useState<string>("ALL");
-  const [autoScrollLogs, setAutoScrollLogs] = useState<boolean>(true);
+  const [activeGeoFilter, setActiveGeoFilter] = useState<string>("ALL");
+  const [selectedCityNode, setSelectedCityNode] = useState<GeoNode | null>(null);
 
   const [deviceStats, setDeviceStats] = useState({
     mobilePct: 88,
@@ -64,15 +60,99 @@ export default function RealTimeMonitoringPage() {
     Browser: 1,
   });
 
-  // Cities Radar Coordinates (Jabodetabek & surrounding)
-  const [citiesList, setCitiesList] = useState<GeoCity[]>([
-    { name: "Depok (Venue)", x: 48, y: 56, pings: 12 },
-    { name: "Jakarta Selatan", x: 46, y: 44, pings: 9 },
-    { name: "Jakarta Timur", x: 55, y: 42, pings: 7 },
-    { name: "Bogor", x: 50, y: 72, pings: 6 },
-    { name: "Bekasi", x: 68, y: 46, pings: 5 },
-    { name: "Tangerang", x: 30, y: 45, pings: 4 },
-    { name: "Bandung", x: 78, y: 80, pings: 3 },
+  // Real-time Geolocation Nodes
+  const [geoNodes, setGeoNodes] = useState<GeoNode[]>([
+    {
+      name: "Depok (Venue)",
+      region: "Jawa Barat (Venue)",
+      country: "ID",
+      ipMasked: "180.252.***.***",
+      lat: -6.4025,
+      lon: 106.7942,
+      x: 48,
+      y: 56,
+      pings: 14,
+      lastSeen: Date.now(),
+      isRecent: true,
+    },
+    {
+      name: "Jakarta Selatan",
+      region: "DKI Jakarta",
+      country: "ID",
+      ipMasked: "182.1.***.***",
+      lat: -6.2615,
+      lon: 106.8106,
+      x: 46,
+      y: 45,
+      pings: 11,
+      lastSeen: Date.now() - 2000,
+      isRecent: true,
+    },
+    {
+      name: "Jakarta Timur",
+      region: "DKI Jakarta",
+      country: "ID",
+      ipMasked: "114.124.***.***",
+      lat: -6.225,
+      lon: 106.9004,
+      x: 55,
+      y: 43,
+      pings: 8,
+      lastSeen: Date.now() - 5000,
+      isRecent: true,
+    },
+    {
+      name: "Bogor",
+      region: "Jawa Barat",
+      country: "ID",
+      ipMasked: "180.244.***.***",
+      lat: -6.5971,
+      lon: 106.806,
+      x: 50,
+      y: 72,
+      pings: 7,
+      lastSeen: Date.now() - 8000,
+      isRecent: true,
+    },
+    {
+      name: "Bekasi",
+      region: "Jawa Barat",
+      country: "ID",
+      ipMasked: "36.85.***.***",
+      lat: -6.2383,
+      lon: 106.9756,
+      x: 65,
+      y: 46,
+      pings: 6,
+      lastSeen: Date.now() - 10000,
+      isRecent: false,
+    },
+    {
+      name: "Tangerang",
+      region: "Banten",
+      country: "ID",
+      ipMasked: "103.111.***.***",
+      lat: -6.1783,
+      lon: 106.6319,
+      x: 32,
+      y: 44,
+      pings: 5,
+      lastSeen: Date.now() - 14000,
+      isRecent: false,
+    },
+    {
+      name: "Bandung",
+      region: "Jawa Barat",
+      country: "ID",
+      ipMasked: "125.160.***.***",
+      lat: -6.9175,
+      lon: 107.6191,
+      x: 76,
+      y: 78,
+      pings: 4,
+      lastSeen: Date.now() - 18000,
+      isRecent: false,
+    },
   ]);
 
   // Real-time Traffic Timeline Waveform
@@ -88,64 +168,6 @@ export default function RealTimeMonitoringPage() {
   // Real-time Live Access Logs
   const [accessLogs, setAccessLogs] = useState<LiveAccessLog[]>([]);
   const logEndRef = useRef<HTMLDivElement>(null);
-
-  // Live Endpoints Health Matrix
-  const [endpoints, setEndpoints] = useState<EndpointProbe[]>([
-    {
-      path: "/",
-      method: "GET",
-      name: "Landing Page SSR & Cinematic Cover",
-      status: 200,
-      latency: 28,
-      uptime: 100.0,
-      testedAt: "Just now",
-    },
-    {
-      path: "/api/db",
-      method: "GET",
-      name: "Cloud Database Multi-Tier Hub (/api/db)",
-      status: 200,
-      latency: 35,
-      uptime: 99.98,
-      testedAt: "Just now",
-    },
-    {
-      path: "/api/heartbeat",
-      method: "GET",
-      name: "Real-time Telemetry & Heartbeat API",
-      status: 200,
-      latency: 18,
-      uptime: 100.0,
-      testedAt: "Just now",
-    },
-    {
-      path: "/admin",
-      method: "GET",
-      name: "Admin Control Suite & Scanner Gateway",
-      status: 200,
-      latency: 38,
-      uptime: 100.0,
-      testedAt: "Just now",
-    },
-    {
-      path: "/monitoring",
-      method: "GET",
-      name: "Mission Control Live APM Dashboard",
-      status: 200,
-      latency: 22,
-      uptime: 100.0,
-      testedAt: "Just now",
-    },
-    {
-      path: "/image/welcome1.mp4",
-      method: "GET",
-      name: "Vercel Global Edge Video CDN Stream",
-      status: 200,
-      latency: 16,
-      uptime: 100.0,
-      testedAt: "Just now",
-    },
-  ]);
 
   // Real-time Clock
   useEffect(() => {
@@ -173,11 +195,11 @@ export default function RealTimeMonitoringPage() {
     return () => clearInterval(clockInterval);
   }, []);
 
-  // 1.5-Second Ultra Fast Real-Time Polling Loop
+  // 1.5-Second Live Polling Loop for Real Geolocation & APM Telemetry
   useEffect(() => {
     let isMounted = true;
 
-    const fetchLiveHeartbeat = async () => {
+    const fetchLiveTelemetry = async () => {
       const start = performance.now();
       try {
         const res = await fetch("/api/heartbeat?t=" + Date.now(), { cache: "no-store" });
@@ -190,10 +212,12 @@ export default function RealTimeMonitoringPage() {
           if (json.success) {
             setLatencyMs(dur);
             setIsLiveConnected(true);
-            setLastHeartbeatUpdate(Date.now());
             setActiveUsers(json.activeUsers || 1);
             setTotalLifetimeVisits(json.totalVisits || 1420);
 
+            if (Array.isArray(json.geoNodes) && json.geoNodes.length > 0) {
+              setGeoNodes(json.geoNodes);
+            }
             if (json.devices) {
               setDeviceStats(json.devices);
             }
@@ -223,8 +247,8 @@ export default function RealTimeMonitoringPage() {
       }
     };
 
-    fetchLiveHeartbeat();
-    const interval = setInterval(fetchLiveHeartbeat, 1500); // 1.5s real-time pulse
+    fetchLiveTelemetry();
+    const interval = setInterval(fetchLiveTelemetry, 1500);
 
     return () => {
       isMounted = false;
@@ -232,7 +256,7 @@ export default function RealTimeMonitoringPage() {
     };
   }, []);
 
-  // Run Real-time Stress Ping Test
+  // Run Stress Ping Test
   const runStressTest = async () => {
     if (isStressTesting) return;
     setIsStressTesting(true);
@@ -300,21 +324,21 @@ export default function RealTimeMonitoringPage() {
       <header className="sticky top-0 z-50 border-b border-[#1A1E29] bg-[#0A0D14]/90 backdrop-blur-md px-4 sm:px-8 py-3 flex items-center justify-between shadow-2xl">
         <div className="flex items-center gap-3 sm:gap-4">
           <div className="w-9 h-9 rounded-xl bg-[#111726] border border-[#232F4D] flex items-center justify-center text-[#00FF88] shadow-[0_0_15px_rgba(0,255,136,0.25)]">
-            <span className="text-base animate-pulse">⚡</span>
+            <span className="text-base animate-pulse">🛰️</span>
           </div>
 
           <div>
             <div className="flex items-center gap-2.5">
               <h1 className="text-sm sm:text-base font-black tracking-widest text-white font-mono uppercase">
-                REAL-TIME TRAFFIC &amp; SYSTEM APM
+                REAL-TIME GEOLOCATION &amp; APM RADAR
               </h1>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-950/90 border border-emerald-500/70 text-emerald-400 text-[10px] font-mono font-black shadow-[0_0_10px_rgba(16,185,129,0.3)]">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                1.5S LIVE STREAM
+                EDGE GEOLOCATION LIVE
               </span>
             </div>
             <p className="text-[11px] text-[#6C748E] font-mono flex items-center gap-2">
-              <span>Vercel Edge Gateway (sin1)</span>
+              <span>Vercel Edge Global Hub (sin1)</span>
               <span>•</span>
               <span className="text-[#00FF88]">{currentTime}</span>
             </p>
@@ -357,7 +381,7 @@ export default function RealTimeMonitoringPage() {
           {/* 1. Real-time Concurrent Online Visitors */}
           <div className="p-4 rounded-2xl bg-[#0D1018] border border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.12)] relative overflow-hidden">
             <div className="flex justify-between items-center text-[10.5px] font-mono text-emerald-400 font-bold">
-              <span>LIVE ACTIVE VISITORS</span>
+              <span>ACTIVE VISITORS</span>
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
             </div>
             <div className="mt-2 flex items-baseline gap-1.5">
@@ -365,8 +389,8 @@ export default function RealTimeMonitoringPage() {
               <span className="text-xs text-emerald-400 font-mono font-bold">online now</span>
             </div>
             <div className="mt-2 text-[10px] font-mono text-[#6C748E] flex justify-between">
-              <span>Lifetime: <strong>{totalLifetimeVisits}</strong></span>
-              <span className="text-[#00FF88]">Heartbeat Active</span>
+              <span>Total Visits: <strong>{totalLifetimeVisits}</strong></span>
+              <span className="text-[#00FF88]">Live Heartbeat</span>
             </div>
           </div>
 
@@ -484,89 +508,184 @@ export default function RealTimeMonitoringPage() {
           </div>
         </div>
 
-        {/* ROW 3: REAL-TIME RADAR MAP & DEVICE / REFERRER ANALYTICS */}
+        {/* ROW 3: INTERACTIVE REAL-TIME GEOLOCATION RADAR MAP & CITY LEADERBOARD */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* COLUMN 1 & 2: REAL-TIME GEOLOCATION RADAR MAP */}
+          {/* COLUMN 1 & 2: LIVE GEOLOCATION RADAR CANVAS & MAP */}
           <div className="lg:col-span-2 p-6 rounded-3xl bg-[#0D1018] border border-[#1C2233] shadow-xl space-y-4">
-            <div className="flex justify-between items-center pb-3 border-b border-[#191F30]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#191F30]">
               <div className="flex items-center gap-2.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#00FF88] animate-ping" />
                 <h3 className="text-xs font-mono font-black uppercase tracking-widest text-white">
-                  REAL-TIME VISITOR GEOLOCATION RADAR (JABODETABEK &amp; JABAR)
+                  AUTHENTIC REAL-TIME VISITOR GEOLOCATION RADAR
                 </h3>
               </div>
-              <span className="text-[10px] font-mono text-[#6C748E]">Event Venue: BALAI IKABAMA Depok</span>
+              <span className="text-[10px] font-mono text-[#00FF88] bg-emerald-950/80 border border-emerald-800 px-2 py-0.5 rounded-md font-bold">
+                {geoNodes.length} ACTIVE HUBS
+              </span>
             </div>
 
-            {/* Radar Coordinates Box */}
-            <div className="relative h-64 w-full bg-[#080A10] border border-[#181E2E] rounded-2xl overflow-hidden flex items-center justify-center p-4">
+            {/* Radar Coordinates Canvas Stage */}
+            <div className="relative h-72 sm:h-80 w-full bg-[#06080D] border border-[#181E2E] rounded-2xl overflow-hidden flex items-center justify-center p-4">
               {/* Radar Grid Circles */}
+              <div className="absolute w-72 h-72 rounded-full border border-[#151D2D] pointer-events-none" />
               <div className="absolute w-52 h-52 rounded-full border border-[#1A2338] pointer-events-none" />
-              <div className="absolute w-36 h-36 rounded-full border border-[#1A2338] pointer-events-none" />
-              <div className="absolute w-20 h-20 rounded-full border border-[#232F4D] pointer-events-none" />
+              <div className="absolute w-32 h-32 rounded-full border border-[#232F4D] pointer-events-none" />
+              <div className="absolute w-12 h-12 rounded-full border border-emerald-900/60 pointer-events-none" />
 
-              {/* Radar Rotating Line */}
+              {/* Crosshair Lines */}
+              <div className="absolute inset-x-0 top-1/2 h-[1px] bg-[#141B2B] pointer-events-none" />
+              <div className="absolute inset-y-0 left-1/2 w-[1px] bg-[#141B2B] pointer-events-none" />
+
+              {/* Rotating Radar Sweep Gradient */}
               <div
                 className="absolute inset-0 pointer-events-none"
                 style={{
-                  background: `conic-gradient(from 0deg at 50% 50%, rgba(0, 255, 136, 0.2) 0deg, transparent 60deg, transparent 360deg)`,
-                  animation: "spin 4s linear infinite",
+                  background: `conic-gradient(from 0deg at 50% 50%, rgba(0, 255, 136, 0.25) 0deg, rgba(0, 255, 136, 0.05) 45deg, transparent 90deg, transparent 360deg)`,
+                  animation: "spin 3.5s linear infinite",
                 }}
               />
 
-              {/* City Nodes */}
-              {citiesList.map((city, idx) => (
-                <div
-                  key={idx}
-                  className="absolute flex flex-col items-center group cursor-pointer z-10"
-                  style={{ left: `${city.x}%`, top: `${city.y}%` }}
-                >
-                  <span className="relative flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00FF88] opacity-75" />
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-[#00FF88] shadow-[0_0_8px_#00FF88]" />
-                  </span>
-                  <span className="text-[9.5px] font-mono font-bold text-white bg-[#0A0D14]/90 px-1.5 py-0.5 rounded border border-[#232F4D] mt-1 shadow-md whitespace-nowrap">
-                    {city.name}
-                  </span>
-                </div>
-              ))}
+              {/* Center Venue Beacon (BALAI IKABAMA) */}
+              <div
+                className="absolute z-20 flex flex-col items-center cursor-pointer group"
+                style={{ left: `48%`, top: `56%` }}
+                onClick={() =>
+                  setSelectedCityNode(geoNodes.find((g) => g.name.includes("Depok")) || geoNodes[0])
+                }
+              >
+                <span className="relative flex h-4 w-4">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C8A96B] opacity-90" />
+                  <span className="relative inline-flex rounded-full h-4 w-4 bg-[#C8A96B] border-2 border-white shadow-[0_0_12px_#C8A96B]" />
+                </span>
+                <span className="text-[9px] font-mono font-black text-[#E0C98F] bg-[#0E1015]/95 px-2 py-0.5 rounded-md border border-[#806A42] mt-1 shadow-lg whitespace-nowrap">
+                  👑 BALAI IKABAMA (VENUE)
+                </span>
+              </div>
+
+              {/* Real-time Dynamic City Nodes */}
+              {geoNodes.map((city, idx) => {
+                if (city.name.includes("Venue")) return null;
+                const isSelected = selectedCityNode?.name === city.name;
+                return (
+                  <motion.div
+                    key={idx}
+                    className="absolute z-10 flex flex-col items-center cursor-pointer group"
+                    style={{ left: `${city.x}%`, top: `${city.y}%` }}
+                    onClick={() => setSelectedCityNode(city)}
+                    whileHover={{ scale: 1.15 }}
+                  >
+                    <span className="relative flex h-3 w-3">
+                      {city.isRecent && (
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00FF88] opacity-80" />
+                      )}
+                      <span
+                        className={`relative inline-flex rounded-full h-3 w-3 ${
+                          isSelected
+                            ? "bg-amber-400 shadow-[0_0_10px_#F59E0B]"
+                            : "bg-[#00FF88] shadow-[0_0_8px_#00FF88]"
+                        }`}
+                      />
+                    </span>
+                    <span
+                      className={`text-[8.5px] font-mono font-bold px-1.5 py-0.5 rounded border mt-1 shadow-md whitespace-nowrap transition-all ${
+                        isSelected
+                          ? "bg-amber-950 text-amber-300 border-amber-600 font-black"
+                          : "bg-[#0A0D14]/90 text-white border-[#232F4D] group-hover:border-[#00FF88]"
+                      }`}
+                    >
+                      {city.name} ({city.pings})
+                    </span>
+                  </motion.div>
+                );
+              })}
             </div>
 
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 text-center text-xs font-mono pt-1">
-              {citiesList.slice(0, 6).map((c, i) => (
-                <div key={i} className="p-2 rounded-xl bg-[#121622] border border-[#1C2336]">
-                  <span className="text-[#6C748E] block text-[9.5px] truncate">{c.name}</span>
-                  <strong className="text-white text-xs">{c.pings} pings</strong>
+            {/* City Leaderboard Pills */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 font-mono text-xs">
+              {geoNodes.slice(0, 8).map((city, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => setSelectedCityNode(city)}
+                  className={`p-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
+                    selectedCityNode?.name === city.name
+                      ? "bg-[#182236] border-emerald-500 shadow-md"
+                      : "bg-[#10141F] border-[#1C2336] hover:border-[#2C3752]"
+                  }`}
+                >
+                  <div className="truncate">
+                    <span className="text-[11px] font-bold text-white block truncate">{city.name}</span>
+                    <span className="text-[9px] text-[#6C748E] font-mono">{city.region}</span>
+                  </div>
+                  <div className="text-right pl-2">
+                    <span className="text-xs font-black text-[#00FF88] font-mono block">{city.pings}</span>
+                    <span className="text-[8.5px] text-[#6C748E]">pings</span>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* COLUMN 3: REAL-TIME CLIENT PLATFORM TELEMETRY */}
+          {/* COLUMN 3: SELECTED NODE INSPECTOR & INGESTION TELEMETRY */}
           <div className="space-y-6">
-            {/* Device & Client Telemetry */}
+            {/* Selected Node Geo Inspector */}
             <div className="p-6 rounded-3xl bg-[#0D1018] border border-[#1C2233] shadow-xl space-y-4">
               <div className="flex justify-between items-center pb-3 border-b border-[#191F30]">
-                <h3 className="text-xs font-mono font-black uppercase tracking-wider text-[#C8A96B]">
-                  CLIENT PLATFORMS
+                <h3 className="text-xs font-mono font-black uppercase tracking-wider text-[#00FF88]">
+                  NODE GEODATA INSPECTOR
                 </h3>
-                <span className="text-[10px] font-mono text-[#6C748E]">Live UA</span>
+                <span className="text-[9.5px] font-mono text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800">
+                  REAL-TIME IP
+                </span>
               </div>
 
-              <div className="space-y-3 font-mono text-xs">
+              {selectedCityNode ? (
+                <div className="space-y-2.5 font-mono text-xs">
+                  <div className="p-3 rounded-xl bg-[#121622] border border-[#1F2638] space-y-1">
+                    <span className="text-[10px] text-[#6C748E] block uppercase">Selected City</span>
+                    <strong className="text-white text-sm block font-bold">{selectedCityNode.name}</strong>
+                    <span className="text-xs text-[#C8A96B]">{selectedCityNode.region} ({selectedCityNode.country})</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-[11px]">
+                    <div className="p-2.5 rounded-xl bg-[#121622] border border-[#1F2638]">
+                      <span className="text-[9.5px] text-[#6C748E] block">Latitude</span>
+                      <strong className="text-white font-mono">{selectedCityNode.lat.toFixed(4)}</strong>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[#121622] border border-[#1F2638]">
+                      <span className="text-[9.5px] text-[#6C748E] block">Longitude</span>
+                      <strong className="text-white font-mono">{selectedCityNode.lon.toFixed(4)}</strong>
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-[#121622] border border-[#1F2638] flex justify-between items-center">
+                    <div>
+                      <span className="text-[9.5px] text-[#6C748E] block">Masked Client IP</span>
+                      <strong className="text-[#00FF88] font-mono">{selectedCityNode.ipMasked}</strong>
+                    </div>
+                    <span className="text-xs font-bold text-white font-mono">{selectedCityNode.pings} Pings</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 rounded-xl bg-[#121622] border border-[#1F2638] text-center text-xs text-[#6C748E] space-y-1">
+                  <p>Klik salah satu titik kota pada radar untuk menginspeksi koordinat dan metadata IP.</p>
+                </div>
+              )}
+
+              {/* Client Platform Summary */}
+              <div className="pt-2 border-t border-[#191F30] space-y-2.5 font-mono text-xs">
                 <div>
                   <div className="flex justify-between text-[11px] pb-1">
-                    <span className="text-[#C5CDDF]">📱 Mobile (iOS Safari / Chrome)</span>
+                    <span className="text-[#C5CDDF]">📱 Mobile (iOS / Android)</span>
                     <strong className="text-white">{deviceStats.mobilePct}%</strong>
                   </div>
                   <div className="w-full bg-[#181E2E] h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-gradient-to-r from-[#C8A96B] to-[#E0C98F] h-full rounded-full" style={{ width: `${deviceStats.mobilePct}%` }} />
+                    <div className="bg-gradient-to-r from-[#00FF88] to-teal-400 h-full rounded-full" style={{ width: `${deviceStats.mobilePct}%` }} />
                   </div>
                 </div>
 
                 <div>
                   <div className="flex justify-between text-[11px] pb-1">
-                    <span className="text-[#C5CDDF]">💻 Desktop (Chrome, Edge, Safari)</span>
+                    <span className="text-[#C5CDDF]">💻 Desktop &amp; Tablets</span>
                     <strong className="text-white">{deviceStats.desktopPct}%</strong>
                   </div>
                   <div className="w-full bg-[#181E2E] h-1.5 rounded-full overflow-hidden">
@@ -574,26 +693,11 @@ export default function RealTimeMonitoringPage() {
                   </div>
                 </div>
               </div>
-
-              {/* Referrer Distribution */}
-              <div className="pt-3 border-t border-[#191F30] space-y-2">
-                <span className="text-[10px] uppercase tracking-wider font-bold text-[#6C748E] block">Top Traffic Ingestion</span>
-                <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
-                  <div className="p-2 rounded-xl bg-[#121622] border border-[#1F2638] text-center">
-                    <span className="text-[#00FF88] block font-bold">84%</span>
-                    <span className="text-[#7E88A6] text-[9.5px]">WhatsApp Direct</span>
-                  </div>
-                  <div className="p-2 rounded-xl bg-[#121622] border border-[#1F2638] text-center">
-                    <span className="text-blue-400 block font-bold">16%</span>
-                    <span className="text-[#7E88A6] text-[9.5px]">Direct URL / QR</span>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
 
-        {/* ROW 4: REAL-TIME STREAMING ACCESS LOGS TERMINAL */}
+        {/* ROW 4: REAL-TIME STREAMING ACCESS LOGS TERMINAL WITH CITY BADGES */}
         <div className="p-6 rounded-3xl bg-[#090B10] border border-[#191E2C] shadow-2xl space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#191F30]">
             <div className="flex items-center gap-2.5">
@@ -603,7 +707,7 @@ export default function RealTimeMonitoringPage() {
                 <span className="w-3 h-3 rounded-full bg-emerald-500/80" />
               </div>
               <h3 className="text-xs font-mono font-black uppercase tracking-widest text-white ml-2">
-                REAL-TIME LIVE HTTP ACCESS &amp; TELEMETRY LOGS
+                REAL-TIME LIVE HTTP ACCESS &amp; TELEMETRY LOGS (WITH CITY GEO-TAGS)
               </h3>
             </div>
 
@@ -620,6 +724,11 @@ export default function RealTimeMonitoringPage() {
                 <span className="px-1.5 py-0.2 rounded text-[9.5px] font-black shrink-0 bg-emerald-950 text-emerald-300 border border-emerald-800">
                   [{log.status} {log.method}]
                 </span>
+                {log.city && (
+                  <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold shrink-0 bg-blue-950 text-blue-300 border border-blue-800">
+                    📍 {log.city}
+                  </span>
+                )}
                 <span className="text-[#C8A96B] shrink-0 font-bold">[{log.path}]</span>
                 <span className="text-[#C5CDDF] break-all">{log.client} • {log.latencyMs}ms</span>
               </div>

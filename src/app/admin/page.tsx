@@ -460,15 +460,17 @@ export default function AdminPage() {
               </svg>
             </Link>
 
-            <button
-              onClick={handleLogout}
-              className="w-full py-2 px-2.5 bg-[#231416] hover:bg-rose-950 border border-rose-900/60 text-rose-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-98"
+            <Link
+              href="/monitoring"
+              target="_blank"
+              className="w-full py-2 px-2.5 bg-emerald-950/70 hover:bg-emerald-900/70 border border-emerald-700/70 text-emerald-300 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm text-center"
             >
-              <span>Logout</span>
+              <span>🛰️ Monitor</span>
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <polyline points="15 3 21 3 21 9" />
               </svg>
-            </button>
+            </Link>
           </div>
         </div>
       </aside>
@@ -551,6 +553,16 @@ export default function AdminPage() {
               </svg>
               <span className="hidden sm:inline">Refresh</span>
             </button>
+
+            {/* Live Monitoring Button */}
+            <Link
+              href="/monitoring"
+              target="_blank"
+              className="py-1.5 px-3 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-700/80 text-emerald-300 font-extrabold rounded-xl text-xs transition-all shadow-md items-center gap-1.5 flex"
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+              <span>🛰️ Live Monitor</span>
+            </Link>
 
             {/* View Live Web Button */}
             <Link

@@ -99,7 +99,8 @@ export function BarcodeScannerManager() {
 
   // Big Celebration Popup Modal State
   const [activeSuccessGuest, setActiveSuccessGuest] = useState<CheckedInGuest | null>(null);
-  const [countdown, setCountdown] = useState(4);
+  const [countdown, setCountdown] = useState(2);
+  const [isExpressMode, setIsExpressMode] = useState<boolean>(true); // Mode Antrian Cepat (Express Scan)
 
   // Anti-Spam Scanner Refs (Debounce multiple camera frames)
   const lastScannedRef = useRef<{ code: string; time: number }>({ code: "", time: 0 });
@@ -131,7 +132,9 @@ export function BarcodeScannerManager() {
   useEffect(() => {
     if (!activeSuccessGuest) return;
 
-    setCountdown(4);
+    const initialTime = isExpressMode ? 1 : 2;
+    setCountdown(initialTime);
+
     const interval = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
@@ -143,7 +146,7 @@ export function BarcodeScannerManager() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [activeSuccessGuest]);
+  }, [activeSuccessGuest, isExpressMode]);
 
   async function loadCloudGuests() {
     try {
@@ -161,11 +164,12 @@ export function BarcodeScannerManager() {
     const cleanCode = codeToSubmit.trim();
     if (!cleanCode) return;
 
-    // Anti-Spam Protection: Ignore duplicate scans within 3.5 seconds or during active processing
+    // Anti-Spam Protection: Ultra-fast debounce (1.0s in Express Mode, 1.8s in Normal Mode)
     const now = Date.now();
+    const minCooldown = isExpressMode ? 1000 : 1800;
     if (
       isProcessingRef.current ||
-      (lastScannedRef.current.code.toLowerCase() === cleanCode.toLowerCase() && now - lastScannedRef.current.time < 3500)
+      (lastScannedRef.current.code.toLowerCase() === cleanCode.toLowerCase() && now - lastScannedRef.current.time < minCooldown)
     ) {
       return;
     }
@@ -240,11 +244,11 @@ export function BarcodeScannerManager() {
       setIsScanning(false);
       setTimeout(() => {
         isProcessingRef.current = false;
-      }, 1200);
+      }, 300);
       if (inputRef.current) inputRef.current.focus();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isExpressMode]);
 
   function handleFormSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -258,7 +262,7 @@ export function BarcodeScannerManager() {
     setCameraError("");
     setShowCamera(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise((resolve) => setTimeout(resolve, 200));
 
     try {
       const { Html5Qrcode } = await import("html5-qrcode");
@@ -281,20 +285,34 @@ export function BarcodeScannerManager() {
       }
       el.innerHTML = "";
 
-      const html5QrCode = new Html5Qrcode(scannerId);
+      // Enable native BarcodeDetector hardware acceleration for 10ms frame detection
+      const html5QrCode = new Html5Qrcode(scannerId, {
+        verbose: false,
+        experimentalFeatures: {
+          useBarCodeDetectorIfSupported: true,
+        },
+      });
       scannerRef.current = html5QrCode;
 
       await html5QrCode.start(
         { facingMode: "environment" },
         {
-          fps: 12,
-          qrbox: { width: 220, height: 220 },
+          fps: 25, // High frame rate for rapid scanning
+          qrbox: (viewfinderWidth: number, viewfinderHeight: number) => {
+            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+            const size = Math.floor(minEdge * 0.85);
+            return {
+              width: Math.max(size, 200),
+              height: Math.max(size, 200),
+            };
+          },
+          aspectRatio: 1.0,
         },
         (decodedText: string) => {
           handleCheckInCode(decodedText);
         },
         () => {
-          // Ignored
+          // Ignored per-frame scan attempt
         }
       );
 
@@ -336,104 +354,146 @@ export function BarcodeScannerManager() {
   return (
     <div className="space-y-6 relative">
       {/* =================================================================
-          PROMINENT SUCCESS CELEBRATION MODAL (TANDA SUKSES SCAN)
+          PROMINENT SUCCESS CELEBRATION MODAL OR EXPRESS FLOATING TOAST
           ================================================================= */}
       {activeSuccessGuest && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
-          <div
-            className={`relative w-full max-w-md bg-gradient-to-b ${
-              activeSuccessGuest._alreadyCheckedIn
-                ? "from-[#2A2314] via-[#1F190F] to-[#120E0A] border-2 border-amber-500 shadow-[0_0_60px_rgba(245,158,11,0.35)]"
-                : "from-[#142A1D] via-[#101F17] to-[#0A120E] border-2 border-emerald-500 shadow-[0_0_60px_rgba(16,185,129,0.35)]"
-            } rounded-3xl p-6 sm:p-8 text-center space-y-5 animate-scaleUp`}
-          >
-            {/* Animated Ring */}
-            <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
-              <div
-                className={`absolute inset-0 rounded-full ${
-                  activeSuccessGuest._alreadyCheckedIn ? "bg-amber-500/20" : "bg-emerald-500/20"
-                } animate-ping`}
-              />
-              <div
-                className={`relative w-20 h-20 rounded-full ${
-                  activeSuccessGuest._alreadyCheckedIn ? "bg-amber-500 text-[#120E0A]" : "bg-emerald-500 text-[#0A120E]"
-                } flex items-center justify-center shadow-lg`}
-              >
-                {activeSuccessGuest._alreadyCheckedIn ? (
-                  <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="8" x2="12" y2="12" />
-                    <line x1="12" y1="16" x2="12.01" y2="16" />
-                  </svg>
-                ) : (
-                  <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                )}
-              </div>
-            </div>
-
-            {/* Title & Status */}
-            <div className="space-y-1">
-              <span
-                className={`inline-block px-3 py-1 ${
-                  activeSuccessGuest._alreadyCheckedIn
-                    ? "bg-amber-950 text-amber-300 border border-amber-700"
-                    : "bg-emerald-950 text-emerald-300 border border-emerald-700"
-                } text-[11px] font-extrabold uppercase tracking-[3px] rounded-full`}
-              >
-                {activeSuccessGuest._alreadyCheckedIn ? "⚠️ SUDAH CHECK-IN SEBELUMNYA" : "✓ CHECK-IN BERHASIL"}
-              </span>
-              <h3 className="text-2xl sm:text-3xl font-black font-serif text-white tracking-wide pt-2" style={{ fontFamily: "var(--font-heading)" }}>
-                {activeSuccessGuest.name}
-              </h3>
-              <p className={`text-xs ${activeSuccessGuest._alreadyCheckedIn ? "text-amber-300" : "text-emerald-300"} font-medium`}>
-                {activeSuccessGuest._alreadyCheckedIn
-                  ? `Tamu ini sudah tercatat masuk pada ${activeSuccessGuest.checkInTime || "sebelumnya"}.`
-                  : "Selamat Datang di Acara Pernikahan Anam & Angi!"}
-              </p>
-            </div>
-
-            {/* Guest Details Pill Box */}
+        isExpressMode ? (
+          // Non-blocking floating toast for Express Mode (Continuous camera scan)
+          <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-full max-w-lg px-4 animate-bounceIn">
             <div
-              className={`p-4 rounded-2xl border ${
+              className={`p-4 rounded-2xl border-2 shadow-[0_10px_40px_rgba(0,0,0,0.8)] backdrop-blur-xl flex items-center justify-between gap-4 ${
                 activeSuccessGuest._alreadyCheckedIn
-                  ? "bg-[#16120A]/80 border-amber-800/80"
-                  : "bg-[#0A1610]/80 border-emerald-800/80"
-              } grid grid-cols-3 gap-2 text-center text-xs`}
+                  ? "bg-amber-950/95 border-amber-500 text-amber-100"
+                  : "bg-emerald-950/95 border-emerald-500 text-emerald-100"
+              }`}
             >
-              <div className="space-y-0.5">
-                <p className="text-[10px] uppercase text-[#8A8C94] font-bold">Kategori</p>
-                <p className="font-bold text-white truncate">{activeSuccessGuest.category || "Tamu VIP"}</p>
+              <div className="flex items-center gap-3 min-w-0">
+                <div
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 font-bold ${
+                    activeSuccessGuest._alreadyCheckedIn
+                      ? "bg-amber-500 text-black"
+                      : "bg-emerald-500 text-black"
+                  }`}
+                >
+                  {activeSuccessGuest._alreadyCheckedIn ? "⚠️" : "✓"}
+                </div>
+                <div className="truncate">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider opacity-80 block">
+                    {activeSuccessGuest._alreadyCheckedIn ? "Sudah Check-In Sebelum" : "⚡ CHECK-IN SUKSES"}
+                  </span>
+                  <h4 className="text-base font-black truncate font-serif text-white">{activeSuccessGuest.name}</h4>
+                  <p className="text-xs opacity-90">
+                    {activeSuccessGuest.category || "Tamu VIP"} • {activeSuccessGuest.pax || 1} PAX • <span className="font-mono font-bold">{activeSuccessGuest.checkInTime || "Sekarang"}</span>
+                  </p>
+                </div>
               </div>
-              <div className={`space-y-0.5 border-x ${activeSuccessGuest._alreadyCheckedIn ? "border-amber-900/60" : "border-emerald-900/60"}`}>
-                <p className="text-[10px] uppercase text-[#8A8C94] font-bold">Pax</p>
-                <p className={`font-bold ${activeSuccessGuest._alreadyCheckedIn ? "text-amber-400" : "text-emerald-400"}`}>
-                  {activeSuccessGuest.pax || 1} Orang
-                </p>
-              </div>
-              <div className="space-y-0.5">
-                <p className="text-[10px] uppercase text-[#8A8C94] font-bold">Waktu Masuk</p>
-                <p className="font-bold text-[#E0C98F] font-mono">{activeSuccessGuest.checkInTime || "Sekarang"}</p>
-              </div>
-            </div>
-
-            {/* Dismiss Button with Timer */}
-            <div className="space-y-2 pt-2">
               <button
                 type="button"
                 onClick={() => setActiveSuccessGuest(null)}
-                className={`w-full py-3 ${
-                  activeSuccessGuest._alreadyCheckedIn
-                    ? "bg-amber-500 hover:bg-amber-400 text-[#120E0A]"
-                    : "bg-emerald-500 hover:bg-emerald-400 text-[#0A120E]"
-                } font-black text-xs uppercase tracking-wider rounded-xl shadow-md cursor-pointer transition-all active:scale-95`}
+                className="px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white rounded-xl text-xs font-extrabold shrink-0"
               >
-                Scan Tamu Berikutnya ({countdown}s)
+                Tutup ({countdown}s)
               </button>
             </div>
           </div>
-        </div>
+        ) : (
+          // Full-screen backdrop modal for Normal Celebration Mode
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
+            <div
+              className={`relative w-full max-w-md bg-gradient-to-b ${
+                activeSuccessGuest._alreadyCheckedIn
+                  ? "from-[#2A2314] via-[#1F190F] to-[#120E0A] border-2 border-amber-500 shadow-[0_0_60px_rgba(245,158,11,0.35)]"
+                  : "from-[#142A1D] via-[#101F17] to-[#0A120E] border-2 border-emerald-500 shadow-[0_0_60px_rgba(16,185,129,0.35)]"
+              } rounded-3xl p-6 sm:p-8 text-center space-y-5 animate-scaleUp`}
+            >
+              {/* Animated Ring */}
+              <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
+                <div
+                  className={`absolute inset-0 rounded-full ${
+                    activeSuccessGuest._alreadyCheckedIn ? "bg-amber-500/20" : "bg-emerald-500/20"
+                  } animate-ping`}
+                />
+                <div
+                  className={`relative w-20 h-20 rounded-full ${
+                    activeSuccessGuest._alreadyCheckedIn ? "bg-amber-500 text-[#120E0A]" : "bg-emerald-500 text-[#0A120E]"
+                  } flex items-center justify-center shadow-lg`}
+                >
+                  {activeSuccessGuest._alreadyCheckedIn ? (
+                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="12" y1="8" x2="12" y2="12" />
+                      <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                  ) : (
+                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  )}
+                </div>
+              </div>
+
+              {/* Title & Status */}
+              <div className="space-y-1">
+                <span
+                  className={`inline-block px-3 py-1 ${
+                    activeSuccessGuest._alreadyCheckedIn
+                      ? "bg-amber-950 text-amber-300 border border-amber-700"
+                      : "bg-emerald-950 text-emerald-300 border border-emerald-700"
+                  } text-[11px] font-extrabold uppercase tracking-[3px] rounded-full`}
+                >
+                  {activeSuccessGuest._alreadyCheckedIn ? "⚠️ SUDAH CHECK-IN SEBELUMNYA" : "✓ CHECK-IN BERHASIL"}
+                </span>
+                <h3 className="text-2xl sm:text-3xl font-black font-serif text-white tracking-wide pt-2" style={{ fontFamily: "var(--font-heading)" }}>
+                  {activeSuccessGuest.name}
+                </h3>
+                <p className={`text-xs ${activeSuccessGuest._alreadyCheckedIn ? "text-amber-300" : "text-emerald-300"} font-medium`}>
+                  {activeSuccessGuest._alreadyCheckedIn
+                    ? `Tamu ini sudah tercatat masuk pada ${activeSuccessGuest.checkInTime || "sebelumnya"}.`
+                    : "Selamat Datang di Acara Pernikahan Anam & Angi!"}
+                </p>
+              </div>
+
+              {/* Guest Details Pill Box */}
+              <div
+                className={`p-4 rounded-2xl border ${
+                  activeSuccessGuest._alreadyCheckedIn
+                    ? "bg-[#16120A]/80 border-amber-800/80"
+                    : "bg-[#0A1610]/80 border-emerald-800/80"
+                } grid grid-cols-3 gap-2 text-center text-xs`}
+              >
+                <div className="space-y-0.5">
+                  <p className="text-[10px] uppercase text-[#8A8C94] font-bold">Kategori</p>
+                  <p className="font-bold text-white truncate">{activeSuccessGuest.category || "Tamu VIP"}</p>
+                </div>
+                <div className={`space-y-0.5 border-x ${activeSuccessGuest._alreadyCheckedIn ? "border-amber-900/60" : "border-emerald-900/60"}`}>
+                  <p className="text-[10px] uppercase text-[#8A8C94] font-bold">Pax</p>
+                  <p className={`font-bold ${activeSuccessGuest._alreadyCheckedIn ? "text-amber-400" : "text-emerald-400"}`}>
+                    {activeSuccessGuest.pax || 1} Orang
+                  </p>
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-[10px] uppercase text-[#8A8C94] font-bold">Waktu Masuk</p>
+                  <p className="font-bold text-[#E0C98F] font-mono">{activeSuccessGuest.checkInTime || "Sekarang"}</p>
+                </div>
+              </div>
+
+              {/* Dismiss Button with Timer */}
+              <div className="space-y-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveSuccessGuest(null)}
+                  className={`w-full py-3 ${
+                    activeSuccessGuest._alreadyCheckedIn
+                      ? "bg-amber-500 hover:bg-amber-400 text-[#120E0A]"
+                      : "bg-emerald-500 hover:bg-emerald-400 text-[#0A120E]"
+                  } font-black text-xs uppercase tracking-wider rounded-xl shadow-md cursor-pointer transition-all active:scale-95`}
+                >
+                  Scan Tamu Berikutnya ({countdown}s)
+                </button>
+              </div>
+            </div>
+          </div>
+        )
       )}
 
       {/* Real-time Attendance Metrics Cards */}
@@ -479,6 +539,32 @@ export function BarcodeScannerManager() {
           <p className="text-xs text-[#9E9D98] leading-relaxed">
             Scan QR code tamu via kamera atau ketik kode E-Ticket manual untuk konfirmasi kehadiran real-time.
           </p>
+
+          {/* Scanner Mode Switcher Pill */}
+          <div className="p-1.5 bg-[#17181D] border border-[#2B2E38] rounded-2xl max-w-md mx-auto flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setIsExpressMode(true)}
+              className={`flex-1 py-2 px-3 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                isExpressMode
+                  ? "bg-emerald-500 text-black shadow-md"
+                  : "text-[#8A8C94] hover:text-white"
+              }`}
+            >
+              <span>⚡ Mode Express (Tanpa Delay)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsExpressMode(false)}
+              className={`flex-1 py-2 px-3 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                !isExpressMode
+                  ? "bg-[#C8A96B] text-black shadow-md"
+                  : "text-[#8A8C94] hover:text-white"
+              }`}
+            >
+              <span>🎉 Mode Popup Selebrasi</span>
+            </button>
+          </div>
 
           {/* Camera Scanner Toggle */}
           <div className="flex gap-2 justify-center">

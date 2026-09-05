@@ -287,7 +287,7 @@ export default function RealTimeMonitoringPage() {
 
     const points = data.map((val, idx) => {
       const x = idx * step;
-      const y = height - (val / maxVal) * (height - 20) - 10;
+      const y = Math.max(5, Math.min(height - 5, height - (val / maxVal) * (height - 20) - 10));
       return `${x},${y}`;
     });
 
@@ -295,7 +295,7 @@ export default function RealTimeMonitoringPage() {
     const strokeD = `M ${points.join(" L ")}`;
 
     return (
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-hidden rounded-xl">
         <defs>
           <linearGradient id={`grad-${color.replace("#", "")}`} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={color} stopOpacity="0.35" />
@@ -309,7 +309,7 @@ export default function RealTimeMonitoringPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#07080B] text-[#E8ECF5] font-sans antialiased selection:bg-[#00FF88] selection:text-[#07080B]">
+    <div className="min-h-screen bg-[#07080B] text-[#E8ECF5] font-sans antialiased selection:bg-[#00FF88] selection:text-[#07080B] overflow-x-hidden">
       {/* Background Matrix Dot Pattern */}
       <div
         className="fixed inset-0 pointer-events-none opacity-15"
@@ -321,45 +321,45 @@ export default function RealTimeMonitoringPage() {
       <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_60%_40%_at_50%_-10%,rgba(0,255,136,0.09),rgba(0,0,0,0))]" />
 
       {/* TOP REAL-TIME DEVOPS HEADER */}
-      <header className="sticky top-0 z-50 border-b border-[#1A1E29] bg-[#0A0D14]/90 backdrop-blur-md px-4 sm:px-8 py-3 flex items-center justify-between shadow-2xl">
-        <div className="flex items-center gap-3 sm:gap-4">
-          <div className="w-9 h-9 rounded-xl bg-[#111726] border border-[#232F4D] flex items-center justify-center text-[#00FF88] shadow-[0_0_15px_rgba(0,255,136,0.25)]">
+      <header className="sticky top-0 z-50 border-b border-[#1A1E29] bg-[#0A0D14]/90 backdrop-blur-md px-4 sm:px-8 py-3 flex flex-wrap items-center justify-between gap-3 shadow-2xl max-w-full">
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+          <div className="w-9 h-9 rounded-xl bg-[#111726] border border-[#232F4D] flex items-center justify-center text-[#00FF88] shrink-0 shadow-[0_0_15px_rgba(0,255,136,0.25)]">
             <span className="text-base animate-pulse">🛰️</span>
           </div>
 
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-sm sm:text-base font-black tracking-widest text-white font-mono uppercase">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-xs sm:text-base font-black tracking-wider sm:tracking-widest text-white font-mono uppercase truncate">
                 REAL-TIME GEOLOCATION &amp; APM RADAR
               </h1>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-950/90 border border-emerald-500/70 text-emerald-400 text-[10px] font-mono font-black shadow-[0_0_10px_rgba(16,185,129,0.3)]">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                EDGE GEOLOCATION LIVE
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-950/90 border border-emerald-500/70 text-emerald-400 text-[9.5px] sm:text-[10px] font-mono font-black shadow-[0_0_10px_rgba(16,185,129,0.3)] shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                LIVE
               </span>
             </div>
-            <p className="text-[11px] text-[#6C748E] font-mono flex items-center gap-2">
+            <p className="text-[10px] sm:text-[11px] text-[#6C748E] font-mono flex items-center gap-1.5 truncate">
               <span>Vercel Edge Global Hub (sin1)</span>
               <span>•</span>
-              <span className="text-[#00FF88]">{currentTime}</span>
+              <span className="text-[#00FF88] truncate">{currentTime}</span>
             </p>
           </div>
         </div>
 
         {/* Global Action Controls */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0 flex-wrap">
           {/* Real-time Burst Ping Tester */}
           <button
             onClick={runStressTest}
             disabled={isStressTesting}
-            className="py-1.5 px-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 text-amber-300 border border-amber-500/50 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-md disabled:opacity-50"
+            className="py-1.5 px-2.5 sm:px-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 text-amber-300 border border-amber-500/50 rounded-xl text-[11px] sm:text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-md disabled:opacity-50"
           >
-            <span>{isStressTesting ? "⚡ Testing Probes..." : "⚡ Test Burst Ping"}</span>
+            <span>{isStressTesting ? "⚡ Testing..." : "⚡ Test Burst Ping"}</span>
           </button>
 
           {/* Shortcut to Admin & Live Web */}
           <Link
             href="/admin"
-            className="py-1.5 px-3 bg-[#131926] hover:bg-[#1A2234] border border-[#232F4D] text-[#C5CDDF] rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5"
+            className="py-1.5 px-2.5 sm:px-3 bg-[#131926] hover:bg-[#1A2234] border border-[#232F4D] text-[#C5CDDF] rounded-xl text-[11px] sm:text-xs font-mono font-bold transition-all flex items-center gap-1.5"
           >
             <span>⚙️ Admin</span>
           </Link>
@@ -367,7 +367,7 @@ export default function RealTimeMonitoringPage() {
             href="https://wedding-angi-anam.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
-            className="py-1.5 px-3 bg-[#00FF88]/15 hover:bg-[#00FF88]/25 border border-[#00FF88]/50 text-[#00FF88] rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 shadow-sm"
+            className="py-1.5 px-2.5 sm:px-3 bg-[#00FF88]/15 hover:bg-[#00FF88]/25 border border-[#00FF88]/50 text-[#00FF88] rounded-xl text-[11px] sm:text-xs font-mono font-bold transition-all flex items-center gap-1.5 shadow-sm"
           >
             <span>Web Live ↗</span>
           </a>
@@ -377,84 +377,84 @@ export default function RealTimeMonitoringPage() {
       {/* MAIN REAL-TIME APM DASHBOARD */}
       <main className="relative z-10 max-w-7xl mx-auto p-4 sm:p-6 md:p-8 space-y-6">
         {/* ROW 1: 5 REAL-TIME TELEMETRY GAUGES */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5 sm:gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4">
           {/* 1. Real-time Concurrent Online Visitors */}
-          <div className="p-4 rounded-2xl bg-[#0D1018] border border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.12)] relative overflow-hidden">
-            <div className="flex justify-between items-center text-[10.5px] font-mono text-emerald-400 font-bold">
-              <span>ACTIVE VISITORS</span>
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-[#0D1018] border border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.12)] relative overflow-hidden min-w-0">
+            <div className="flex justify-between items-center text-[10px] sm:text-[10.5px] font-mono text-emerald-400 font-bold truncate">
+              <span className="truncate">ACTIVE VISITORS</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0" />
             </div>
-            <div className="mt-2 flex items-baseline gap-1.5">
-              <span className="text-3xl sm:text-4xl font-black text-white font-mono">{activeUsers}</span>
-              <span className="text-xs text-emerald-400 font-mono font-bold">online now</span>
+            <div className="mt-2 flex items-baseline gap-1.5 truncate">
+              <span className="text-2xl sm:text-3xl lg:text-4xl font-black text-white font-mono">{activeUsers}</span>
+              <span className="text-[11px] sm:text-xs text-emerald-400 font-mono font-bold truncate">online now</span>
             </div>
-            <div className="mt-2 text-[10px] font-mono text-[#6C748E] flex justify-between">
-              <span>Total Visits: <strong>{totalLifetimeVisits}</strong></span>
-              <span className="text-[#00FF88]">Live Heartbeat</span>
+            <div className="mt-2 text-[9.5px] sm:text-[10px] font-mono text-[#6C748E] flex justify-between items-center truncate">
+              <span className="truncate">Visits: <strong className="text-white">{totalLifetimeVisits}</strong></span>
+              <span className="text-[#00FF88] shrink-0">Live</span>
             </div>
           </div>
 
           {/* 2. Global Response Latency */}
-          <div className="p-4 rounded-2xl bg-[#0D1018] border border-[#1C2233] shadow-lg relative overflow-hidden">
-            <div className="flex justify-between items-center text-[10.5px] font-mono text-[#6C748E] font-bold">
-              <span>RESPONSE LATENCY</span>
-              <span className="text-[#00FF88]">p50</span>
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-[#0D1018] border border-[#1C2233] shadow-lg relative overflow-hidden min-w-0">
+            <div className="flex justify-between items-center text-[10px] sm:text-[10.5px] font-mono text-[#6C748E] font-bold truncate">
+              <span className="truncate">LATENCY</span>
+              <span className="text-[#00FF88] shrink-0">p50</span>
             </div>
-            <div className="mt-2 flex items-baseline gap-1.5">
-              <span className="text-3xl font-black text-[#00FF88] font-mono">{latencyMs}</span>
+            <div className="mt-2 flex items-baseline gap-1.5 truncate">
+              <span className="text-2xl sm:text-3xl font-black text-[#00FF88] font-mono">{latencyMs}</span>
               <span className="text-xs text-[#6C748E] font-mono">ms</span>
             </div>
-            <div className="mt-2 text-[10px] font-mono text-[#6C748E] flex justify-between">
+            <div className="mt-2 text-[9.5px] sm:text-[10px] font-mono text-[#6C748E] flex justify-between items-center truncate">
               <span>TLS: <strong>12ms</strong></span>
               <span>DB: <strong>14ms</strong></span>
             </div>
           </div>
 
           {/* 3. Real Throughput RPM */}
-          <div className="p-4 rounded-2xl bg-[#0D1018] border border-[#1C2233] shadow-lg relative overflow-hidden">
-            <div className="flex justify-between items-center text-[10.5px] font-mono text-[#6C748E] font-bold">
-              <span>THROUGHPUT</span>
-              <span className="text-blue-400">REAL-TIME</span>
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-[#0D1018] border border-[#1C2233] shadow-lg relative overflow-hidden min-w-0">
+            <div className="flex justify-between items-center text-[10px] sm:text-[10.5px] font-mono text-[#6C748E] font-bold truncate">
+              <span className="truncate">THROUGHPUT</span>
+              <span className="text-blue-400 shrink-0">REAL-TIME</span>
             </div>
-            <div className="mt-2 flex items-baseline gap-1.5">
-              <span className="text-3xl font-black text-blue-300 font-mono">{requestsPerMin}</span>
+            <div className="mt-2 flex items-baseline gap-1.5 truncate">
+              <span className="text-2xl sm:text-3xl font-black text-blue-300 font-mono">{requestsPerMin}</span>
               <span className="text-xs text-[#6C748E] font-mono">req/min</span>
             </div>
-            <div className="mt-2 text-[10px] font-mono text-[#6C748E] flex justify-between">
-              <span>RPS: <strong>{(requestsPerMin / 60).toFixed(2)}/s</strong></span>
-              <span className="text-emerald-400">Stable</span>
+            <div className="mt-2 text-[9.5px] sm:text-[10px] font-mono text-[#6C748E] flex justify-between items-center truncate">
+              <span>RPS: <strong>{(requestsPerMin / 60).toFixed(1)}/s</strong></span>
+              <span className="text-emerald-400 shrink-0">Stable</span>
             </div>
           </div>
 
           {/* 4. CDN Cache Hit Efficiency */}
-          <div className="p-4 rounded-2xl bg-[#0D1018] border border-[#1C2233] shadow-lg relative overflow-hidden">
-            <div className="flex justify-between items-center text-[10.5px] font-mono text-[#6C748E] font-bold">
-              <span>EDGE CDN CACHE</span>
-              <span className="text-purple-400">HIT RATE</span>
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-[#0D1018] border border-[#1C2233] shadow-lg relative overflow-hidden min-w-0">
+            <div className="flex justify-between items-center text-[10px] sm:text-[10.5px] font-mono text-[#6C748E] font-bold truncate">
+              <span className="truncate">EDGE CDN</span>
+              <span className="text-purple-400 shrink-0">HIT RATE</span>
             </div>
-            <div className="mt-2 flex items-baseline gap-1.5">
-              <span className="text-3xl font-black text-purple-300 font-mono">{cacheHitRatio}</span>
+            <div className="mt-2 flex items-baseline gap-1.5 truncate">
+              <span className="text-2xl sm:text-3xl font-black text-purple-300 font-mono">{cacheHitRatio}</span>
               <span className="text-xs text-[#6C748E] font-mono">%</span>
             </div>
-            <div className="mt-2 text-[10px] font-mono text-[#6C748E] flex justify-between">
-              <span>Egress: <strong>{bandwidthMB} MB</strong></span>
-              <span className="text-emerald-400">Cached</span>
+            <div className="mt-2 text-[9.5px] sm:text-[10px] font-mono text-[#6C748E] flex justify-between items-center truncate">
+              <span>Egress: <strong>{bandwidthMB}MB</strong></span>
+              <span className="text-emerald-400 shrink-0">Cached</span>
             </div>
           </div>
 
           {/* 5. Serverless Engine Load */}
-          <div className="p-4 rounded-2xl bg-[#0D1018] border border-[#1C2233] shadow-lg relative overflow-hidden col-span-2 md:col-span-1">
-            <div className="flex justify-between items-center text-[10.5px] font-mono text-[#6C748E] font-bold">
-              <span>EDGE CPU &amp; MEM</span>
-              <span className="text-emerald-400">HEALTHY</span>
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-[#0D1018] border border-[#1C2233] shadow-lg relative overflow-hidden col-span-2 md:col-span-1 min-w-0">
+            <div className="flex justify-between items-center text-[10px] sm:text-[10.5px] font-mono text-[#6C748E] font-bold truncate">
+              <span className="truncate">CPU &amp; MEM</span>
+              <span className="text-emerald-400 shrink-0">HEALTHY</span>
             </div>
-            <div className="mt-2 flex items-baseline gap-1.5">
-              <span className="text-3xl font-black text-emerald-400 font-mono">{cpuUsagePct}</span>
+            <div className="mt-2 flex items-baseline gap-1.5 truncate">
+              <span className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono">{cpuUsagePct}</span>
               <span className="text-xs text-[#6C748E] font-mono">% CPU</span>
             </div>
-            <div className="mt-2 text-[10px] font-mono text-[#6C748E] flex justify-between">
+            <div className="mt-2 text-[9.5px] sm:text-[10px] font-mono text-[#6C748E] flex justify-between items-center truncate">
               <span>RAM: <strong>{memoryMB}MB</strong></span>
-              <span className="text-emerald-400">0 Errors</span>
+              <span className="text-emerald-400 shrink-0">0 Errors</span>
             </div>
           </div>
         </div>
@@ -462,18 +462,18 @@ export default function RealTimeMonitoringPage() {
         {/* ROW 2: 2 REAL-TIME LIVE 60FPS OSCILLOSCOPE WAVEFORMS */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Waveform 1: Requests Throughput Stream (RPM) */}
-          <div className="p-5 sm:p-6 rounded-3xl bg-[#0D1018] border border-[#1C2233] shadow-xl space-y-3">
+          <div className="p-4 sm:p-6 rounded-3xl bg-[#0D1018] border border-[#1C2233] shadow-xl space-y-3 overflow-hidden">
             <div className="flex justify-between items-center pb-2 border-b border-[#191F30]">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse" />
-                <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white">
-                  LIVE REQUESTS THROUGHPUT WAVEFORM (RPM)
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse shrink-0" />
+                <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white truncate">
+                  LIVE REQUESTS THROUGHPUT STREAM (RPM)
                 </h3>
               </div>
-              <span className="text-[11px] font-mono text-blue-400 font-extrabold">{requestsPerMin} req/min</span>
+              <span className="text-[11px] font-mono text-blue-400 font-extrabold shrink-0">{requestsPerMin} req/min</span>
             </div>
 
-            <div className="h-28 w-full pt-2">
+            <div className="h-28 w-full pt-2 overflow-hidden">
               {renderWaveform(trafficHistory, "#3B82F6", 120)}
             </div>
 
@@ -485,18 +485,18 @@ export default function RealTimeMonitoringPage() {
           </div>
 
           {/* Waveform 2: Edge Latency Jitter (ms) */}
-          <div className="p-5 sm:p-6 rounded-3xl bg-[#0D1018] border border-[#1C2233] shadow-xl space-y-3">
+          <div className="p-4 sm:p-6 rounded-3xl bg-[#0D1018] border border-[#1C2233] shadow-xl space-y-3 overflow-hidden">
             <div className="flex justify-between items-center pb-2 border-b border-[#191F30]">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#00FF88] animate-pulse" />
-                <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#00FF88] animate-pulse shrink-0" />
+                <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white truncate">
                   LIVE EDGE API LATENCY JITTER (MS)
                 </h3>
               </div>
-              <span className="text-[11px] font-mono text-[#00FF88] font-extrabold">{latencyMs} ms</span>
+              <span className="text-[11px] font-mono text-[#00FF88] font-extrabold shrink-0">{latencyMs} ms</span>
             </div>
 
-            <div className="h-28 w-full pt-2">
+            <div className="h-28 w-full pt-2 overflow-hidden">
               {renderWaveform(latencyHistory, "#00FF88", 70)}
             </div>
 
@@ -511,15 +511,15 @@ export default function RealTimeMonitoringPage() {
         {/* ROW 3: INTERACTIVE REAL-TIME GEOLOCATION RADAR MAP & CITY LEADERBOARD */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* COLUMN 1 & 2: LIVE GEOLOCATION RADAR CANVAS & MAP */}
-          <div className="lg:col-span-2 p-6 rounded-3xl bg-[#0D1018] border border-[#1C2233] shadow-xl space-y-4">
+          <div className="lg:col-span-2 p-4 sm:p-6 rounded-3xl bg-[#0D1018] border border-[#1C2233] shadow-xl space-y-4 overflow-hidden">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#191F30]">
-              <div className="flex items-center gap-2.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#00FF88] animate-ping" />
-                <h3 className="text-xs font-mono font-black uppercase tracking-widest text-white">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#00FF88] animate-ping shrink-0" />
+                <h3 className="text-xs font-mono font-black uppercase tracking-widest text-white truncate">
                   AUTHENTIC REAL-TIME VISITOR GEOLOCATION RADAR
                 </h3>
               </div>
-              <span className="text-[10px] font-mono text-[#00FF88] bg-emerald-950/80 border border-emerald-800 px-2 py-0.5 rounded-md font-bold">
+              <span className="text-[10px] font-mono text-[#00FF88] bg-emerald-950/80 border border-emerald-800 px-2 py-0.5 rounded-md font-bold shrink-0 self-start sm:self-auto">
                 {geoNodes.length} ACTIVE HUBS
               </span>
             </div>
@@ -547,7 +547,7 @@ export default function RealTimeMonitoringPage() {
 
               {/* Center Venue Beacon (BALAI IKABAMA) */}
               <div
-                className="absolute z-20 flex flex-col items-center cursor-pointer group"
+                className="absolute z-20 flex flex-col items-center cursor-pointer group -translate-x-1/2 -translate-y-1/2"
                 style={{ left: `48%`, top: `56%` }}
                 onClick={() =>
                   setSelectedCityNode(geoNodes.find((g) => g.name.includes("Depok")) || geoNodes[0])
@@ -562,15 +562,17 @@ export default function RealTimeMonitoringPage() {
                 </span>
               </div>
 
-              {/* Real-time Dynamic City Nodes */}
+              {/* Real-time Dynamic City Nodes with Bounded Constraints */}
               {geoNodes.map((city, idx) => {
                 if (city.name.includes("Venue")) return null;
                 const isSelected = selectedCityNode?.name === city.name;
+                const clampedX = Math.max(15, Math.min(85, city.x));
+                const clampedY = Math.max(15, Math.min(85, city.y));
                 return (
                   <motion.div
                     key={idx}
-                    className="absolute z-10 flex flex-col items-center cursor-pointer group"
-                    style={{ left: `${city.x}%`, top: `${city.y}%` }}
+                    className="absolute z-10 flex flex-col items-center cursor-pointer group -translate-x-1/2 -translate-y-1/2"
+                    style={{ left: `${clampedX}%`, top: `${clampedY}%` }}
                     onClick={() => setSelectedCityNode(city)}
                     whileHover={{ scale: 1.15 }}
                   >
@@ -606,17 +608,17 @@ export default function RealTimeMonitoringPage() {
                 <div
                   key={idx}
                   onClick={() => setSelectedCityNode(city)}
-                  className={`p-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
+                  className={`p-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between min-w-0 ${
                     selectedCityNode?.name === city.name
                       ? "bg-[#182236] border-emerald-500 shadow-md"
                       : "bg-[#10141F] border-[#1C2336] hover:border-[#2C3752]"
                   }`}
                 >
-                  <div className="truncate">
+                  <div className="truncate min-w-0">
                     <span className="text-[11px] font-bold text-white block truncate">{city.name}</span>
-                    <span className="text-[9px] text-[#6C748E] font-mono">{city.region}</span>
+                    <span className="text-[9px] text-[#6C748E] font-mono truncate block">{city.region}</span>
                   </div>
-                  <div className="text-right pl-2">
+                  <div className="text-right pl-2 shrink-0">
                     <span className="text-xs font-black text-[#00FF88] font-mono block">{city.pings}</span>
                     <span className="text-[8.5px] text-[#6C748E]">pings</span>
                   </div>
@@ -628,41 +630,41 @@ export default function RealTimeMonitoringPage() {
           {/* COLUMN 3: SELECTED NODE INSPECTOR & INGESTION TELEMETRY */}
           <div className="space-y-6">
             {/* Selected Node Geo Inspector */}
-            <div className="p-6 rounded-3xl bg-[#0D1018] border border-[#1C2233] shadow-xl space-y-4">
+            <div className="p-4 sm:p-6 rounded-3xl bg-[#0D1018] border border-[#1C2233] shadow-xl space-y-4 overflow-hidden">
               <div className="flex justify-between items-center pb-3 border-b border-[#191F30]">
-                <h3 className="text-xs font-mono font-black uppercase tracking-wider text-[#00FF88]">
+                <h3 className="text-xs font-mono font-black uppercase tracking-wider text-[#00FF88] truncate">
                   NODE GEODATA INSPECTOR
                 </h3>
-                <span className="text-[9.5px] font-mono text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800">
+                <span className="text-[9.5px] font-mono text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800 shrink-0">
                   REAL-TIME IP
                 </span>
               </div>
 
               {selectedCityNode ? (
                 <div className="space-y-2.5 font-mono text-xs">
-                  <div className="p-3 rounded-xl bg-[#121622] border border-[#1F2638] space-y-1">
+                  <div className="p-3 rounded-xl bg-[#121622] border border-[#1F2638] space-y-1 min-w-0">
                     <span className="text-[10px] text-[#6C748E] block uppercase">Selected City</span>
-                    <strong className="text-white text-sm block font-bold">{selectedCityNode.name}</strong>
-                    <span className="text-xs text-[#C8A96B]">{selectedCityNode.region} ({selectedCityNode.country})</span>
+                    <strong className="text-white text-sm block font-bold truncate">{selectedCityNode.name}</strong>
+                    <span className="text-xs text-[#C8A96B] truncate block">{selectedCityNode.region} ({selectedCityNode.country})</span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-[11px]">
-                    <div className="p-2.5 rounded-xl bg-[#121622] border border-[#1F2638]">
+                    <div className="p-2.5 rounded-xl bg-[#121622] border border-[#1F2638] min-w-0">
                       <span className="text-[9.5px] text-[#6C748E] block">Latitude</span>
-                      <strong className="text-white font-mono">{selectedCityNode.lat.toFixed(4)}</strong>
+                      <strong className="text-white font-mono truncate block">{selectedCityNode.lat.toFixed(4)}</strong>
                     </div>
-                    <div className="p-2.5 rounded-xl bg-[#121622] border border-[#1F2638]">
+                    <div className="p-2.5 rounded-xl bg-[#121622] border border-[#1F2638] min-w-0">
                       <span className="text-[9.5px] text-[#6C748E] block">Longitude</span>
-                      <strong className="text-white font-mono">{selectedCityNode.lon.toFixed(4)}</strong>
+                      <strong className="text-white font-mono truncate block">{selectedCityNode.lon.toFixed(4)}</strong>
                     </div>
                   </div>
 
-                  <div className="p-2.5 rounded-xl bg-[#121622] border border-[#1F2638] flex justify-between items-center">
-                    <div>
+                  <div className="p-2.5 rounded-xl bg-[#121622] border border-[#1F2638] flex justify-between items-center gap-2 min-w-0">
+                    <div className="min-w-0 truncate">
                       <span className="text-[9.5px] text-[#6C748E] block">Masked Client IP</span>
-                      <strong className="text-[#00FF88] font-mono">{selectedCityNode.ipMasked}</strong>
+                      <strong className="text-[#00FF88] font-mono truncate block">{selectedCityNode.ipMasked}</strong>
                     </div>
-                    <span className="text-xs font-bold text-white font-mono">{selectedCityNode.pings} Pings</span>
+                    <span className="text-xs font-bold text-white font-mono shrink-0">{selectedCityNode.pings} Pings</span>
                   </div>
                 </div>
               ) : (
@@ -698,29 +700,29 @@ export default function RealTimeMonitoringPage() {
         </div>
 
         {/* ROW 4: REAL-TIME STREAMING ACCESS LOGS TERMINAL WITH CITY BADGES */}
-        <div className="p-6 rounded-3xl bg-[#090B10] border border-[#191E2C] shadow-2xl space-y-4">
+        <div className="p-4 sm:p-6 rounded-3xl bg-[#090B10] border border-[#191E2C] shadow-2xl space-y-4 overflow-hidden">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#191F30]">
-            <div className="flex items-center gap-2.5">
-              <div className="flex gap-1.5">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="flex gap-1.5 shrink-0">
                 <span className="w-3 h-3 rounded-full bg-rose-500/80" />
                 <span className="w-3 h-3 rounded-full bg-amber-500/80" />
                 <span className="w-3 h-3 rounded-full bg-emerald-500/80" />
               </div>
-              <h3 className="text-xs font-mono font-black uppercase tracking-widest text-white ml-2">
+              <h3 className="text-xs font-mono font-black uppercase tracking-widest text-white ml-2 truncate">
                 REAL-TIME LIVE HTTP ACCESS &amp; TELEMETRY LOGS (WITH CITY GEO-TAGS)
               </h3>
             </div>
 
-            <div className="flex items-center gap-2 text-xs font-mono">
+            <div className="flex items-center gap-2 text-xs font-mono shrink-0">
               <span className="text-[10px] text-[#6C748E]">Auto-scrolling stream active</span>
             </div>
           </div>
 
           {/* Terminal Console Box */}
-          <div className="h-64 overflow-y-auto font-mono text-[11.5px] leading-relaxed p-4 bg-[#050608] rounded-2xl border border-[#141722] space-y-1.5 shadow-inner">
+          <div className="h-64 overflow-y-auto overflow-x-hidden font-mono text-[11.5px] leading-relaxed p-3 sm:p-4 bg-[#050608] rounded-2xl border border-[#141722] space-y-1.5 shadow-inner">
             {accessLogs.map((log) => (
-              <div key={log.id} className="flex items-start gap-2.5 hover:bg-[#0E121C] px-1.5 py-0.5 rounded transition-colors">
-                <span className="text-[#4E5670] shrink-0 text-[10.5px]">{log.time}</span>
+              <div key={log.id} className="flex flex-wrap sm:flex-nowrap items-baseline gap-2 hover:bg-[#0E121C] px-1.5 py-1 rounded transition-colors min-w-0">
+                <span className="text-[#4E5670] shrink-0 text-[10.5px] font-mono">{log.time}</span>
                 <span className="px-1.5 py-0.2 rounded text-[9.5px] font-black shrink-0 bg-emerald-950 text-emerald-300 border border-emerald-800">
                   [{log.status} {log.method}]
                 </span>
@@ -729,8 +731,9 @@ export default function RealTimeMonitoringPage() {
                     📍 {log.city}
                   </span>
                 )}
-                <span className="text-[#C8A96B] shrink-0 font-bold">[{log.path}]</span>
-                <span className="text-[#C5CDDF] break-all">{log.client} • {log.latencyMs}ms</span>
+                <span className="text-[#C8A96B] shrink-0 font-bold font-mono">[{log.path}]</span>
+                <span className="text-[#C5CDDF] truncate min-w-0">{log.client}</span>
+                <span className="text-emerald-400 shrink-0 font-mono text-[10.5px] ml-auto">{log.latencyMs}ms</span>
               </div>
             ))}
             <div ref={logEndRef} />

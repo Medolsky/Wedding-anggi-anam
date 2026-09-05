@@ -424,6 +424,104 @@ async function saveToExternalCloud(updatedStore: any) {
   }
 }
 
+async function saveSingleCheckInToCloud(matchedGuest: any, matchedRsvp: any, updatedStore: any) {
+  cloudStore = updatedStore;
+  (globalThis as any).__weddingStore = updatedStore;
+
+  // 1. Save targeted single guest & rsvp to Vercel Postgres / Neon
+  if (sql) {
+    try {
+      await initPostgresTables();
+      if (matchedGuest) {
+        await sql`
+          INSERT INTO guests (id, code, name, phone, category, template, status, checked_in, check_in_time, pax)
+          VALUES (${matchedGuest.id || Date.now().toString()}, ${matchedGuest.code || `GUEST-${matchedGuest.id}`}, ${matchedGuest.name}, ${matchedGuest.phone || null}, ${matchedGuest.category || "Tamu VIP"}, ${matchedGuest.template || "Formal"}, ${matchedGuest.status || "pending"}, ${!!matchedGuest.checkedIn}, ${matchedGuest.checkInTime || null}, ${matchedGuest.pax || 1})
+          ON CONFLICT (id) DO UPDATE SET
+            code = EXCLUDED.code,
+            name = EXCLUDED.name,
+            phone = EXCLUDED.phone,
+            category = EXCLUDED.category,
+            template = EXCLUDED.template,
+            status = EXCLUDED.status,
+            checked_in = EXCLUDED.checked_in,
+            check_in_time = EXCLUDED.check_in_time,
+            pax = EXCLUDED.pax;
+        `;
+      }
+      if (matchedRsvp) {
+        await sql`
+          INSERT INTO rsvps (id, name, status, pax, notes, checked_in, check_in_time)
+          VALUES (${matchedRsvp.id || Date.now().toString()}, ${matchedRsvp.name}, ${matchedRsvp.status || matchedRsvp.attendance || "Hadir"}, ${matchedRsvp.pax || matchedRsvp.guestCount || 1}, ${matchedRsvp.notes || ""}, ${!!matchedRsvp.checkedIn}, ${matchedRsvp.checkInTime || null})
+          ON CONFLICT (id) DO UPDATE SET
+            name = EXCLUDED.name,
+            status = EXCLUDED.status,
+            pax = EXCLUDED.pax,
+            notes = EXCLUDED.notes,
+            checked_in = EXCLUDED.checked_in,
+            check_in_time = EXCLUDED.check_in_time;
+        `;
+      }
+    } catch (err) {
+      console.error("Vercel Postgres single check-in save exception:", err);
+    }
+  }
+
+  // 2. Save to Google Apps Script asynchronously
+  if (GOOGLE_SCRIPT_URL) {
+    fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "sync", data: updatedStore }),
+      redirect: "follow",
+    }).catch((err) => console.error("Google Script single save exception:", err));
+  }
+
+  // 3. Save targeted single guest & rsvp to Supabase
+  if (supabase) {
+    try {
+      if (matchedGuest) {
+        await supabase.from("guests").upsert([{
+          id: matchedGuest.id || Date.now().toString(),
+          code: matchedGuest.code || `GUEST-${matchedGuest.id}`,
+          name: matchedGuest.name,
+          phone: matchedGuest.phone || null,
+          category: matchedGuest.category || "Tamu VIP",
+          template: matchedGuest.template || "Formal",
+          status: matchedGuest.status || "pending",
+          checked_in: !!matchedGuest.checkedIn,
+          check_in_time: matchedGuest.checkInTime || null,
+          pax: matchedGuest.pax || 1,
+        }]);
+      }
+      if (matchedRsvp) {
+        await supabase.from("rsvps").upsert([{
+          id: matchedRsvp.id || Date.now().toString(),
+          name: matchedRsvp.name,
+          status: matchedRsvp.status || "Hadir",
+          pax: matchedRsvp.pax || 1,
+          notes: matchedRsvp.notes || "",
+          checked_in: !!matchedRsvp.checkedIn,
+          check_in_time: matchedRsvp.checkInTime || null,
+        }]);
+      }
+    } catch (err) {
+      console.error("Supabase single check-in save exception:", err);
+    }
+  }
+
+  // 4. Save to JSONBin asynchronously
+  if (JSONBIN_BIN_ID && JSONBIN_API_KEY) {
+    fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Master-Key": JSONBIN_API_KEY,
+      },
+      body: JSON.stringify(updatedStore),
+    }).catch(() => {});
+  }
+}
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const type = searchParams.get("type") || "all";
@@ -624,34 +722,31 @@ export async function POST(req: Request) {
       // Sync and deduplicate RSVPs
       const rsvps = currentStore.rsvps || [];
       const cleanRsvps = rsvps.filter((r: any) => r.name?.trim().toLowerCase() !== matchedGuest.name?.trim().toLowerCase());
-      const updatedRsvps = [
-        {
-          id: String(matchedGuest.id || Date.now()),
-          name: matchedGuest.name,
-          status: "Hadir",
-          checkedIn: true,
-          checkInTime: matchedGuest.checkInTime,
-          pax: matchedGuest.pax || 1,
-          notes: "Checked-In via Scanner Barcode",
-          createdAt: new Date().toLocaleString("id-ID", {
-            timeZone: "Asia/Jakarta",
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-          }) + " WIB",
-        },
-        ...cleanRsvps,
-      ];
+      const newRsvp = {
+        id: String(matchedGuest.id || Date.now()),
+        name: matchedGuest.name,
+        status: "Hadir",
+        checkedIn: true,
+        checkInTime: matchedGuest.checkInTime,
+        pax: matchedGuest.pax || 1,
+        notes: "Checked-In via Scanner Barcode",
+        createdAt: new Date().toLocaleString("id-ID", {
+          timeZone: "Asia/Jakarta",
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        }) + " WIB",
+      };
+      const updatedRsvps = [newRsvp, ...cleanRsvps];
 
       const newStore = { ...currentStore, guests: updatedGuests, rsvps: updatedRsvps };
-      cloudStore = newStore;
-      (globalThis as any).__weddingStore = newStore;
-
-      await saveToExternalCloud(newStore);
+      
+      // Perform ultra-fast single-item DB update instead of full-store multi-query loop
+      await saveSingleCheckInToCloud(matchedGuest, newRsvp, newStore);
 
       return NextResponse.json({
         success: true,

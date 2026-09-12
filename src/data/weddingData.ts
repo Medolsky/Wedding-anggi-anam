@@ -191,9 +191,9 @@ export const weddingData = {
   footer: {
     message: "Atas kehadiran dan doa restunya,\nkami mengucapkan terima kasih.",
     closing: "Hormat kami yang berbahagia,",
-    hashtag: "#AnamAngiForever",
+    hashtag: "#AnamAngiKawin",
     year: 2026,
-    bgPhoto: "/image/gallery-hitam-01.jpg",
+    bgPhoto: "/image/bagroundbawah.jpg",
   },
 
   // Navigation sections

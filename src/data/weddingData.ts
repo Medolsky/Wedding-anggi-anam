@@ -23,8 +23,8 @@ export const weddingData = {
       description:
         "The best chapter of our lives starts today",
     },
-    heroCover: "/image/hero.jpg",
-    welcomeCover: "/image/hero.jpg",
+    heroCover: "/image/1.jpg",
+    welcomeCover: "/image/1.jpg",
   },
 
   // Wedding Date — 10 Oktober 2026 Jam 08:00 WIB
@@ -32,17 +32,17 @@ export const weddingData = {
 
   // Background photos for each section
   sectionBgs: {
-    hero: "/image/hero.jpg",
-    quote: "/image/IMG_5649.jpg",
+    hero: "/image/1.jpg",
+    quote: "/image/3.jpg",
     groom: "/image/mempelai-pria.jpg",
     bride: "/image/mempelai-wanita.jpg",
     event: "/image/balai1.png",
-    story: "/image/IMG_5652.jpg",
-    gallery: "/image/IMG_5655.jpg",
-    rsvp: "/image/IMG_5657.jpg",
-    gift: "/image/IMG_5658.jpg",
-    wishes: "/image/IMG_5659.jpg",
-    footer: "/image/IMG_5660.jpg",
+    story: "/image/gallery-hitam-01.jpg",
+    gallery: "/image/28.jpg",
+    rsvp: "/image/10.jpg",
+    gift: "/image/30.jpg",
+    wishes: "/image/18.jpg",
+    footer: "/image/gallery-hitam-01.jpg",
   },
 
   // Events — BALAI IKABAMA Depok (Sabtu, 10 Oktober 2026)
@@ -72,7 +72,7 @@ export const weddingData = {
     text: "Di balik setiap doa yang dipanjatkan, setiap langkah yang diikhtiarkan, dan setiap waktu yang telah berlalu, kami percaya bahwa takdir selalu menemukan jalannya.\n\nKini, dengan hati yang dipenuhi rasa syukur dan cinta, kami memilih untuk mengikat janji suci dalam sebuah pernikahan. Memulai babak baru sebagai dua jiwa yang akan berjalan berdampingan, saling menguatkan, bertumbuh bersama, dan mencintai tanpa henti.\n\nMerupakan kebahagiaan yang tak terhingga apabila Bapak/Ibu/Saudara/i berkenan hadir untuk menjadi bagian dari hari yang paling berharga dalam hidup kami, serta memberikan doa dan restu bagi perjalanan yang akan kami tempuh bersama.",
     source: "With sincere love, we await your gracious presence.",
     translation: "",
-    bgPhoto: "/image/IMG_5649.jpg",
+    bgPhoto: "/image/2.jpg",
   },
 
   // Love Story / Pertemuan
@@ -82,45 +82,78 @@ export const weddingData = {
       title: "Takdir Pertemuan",
       description:
         "Takdir selalu memiliki caranya sendiri untuk mempertemukan dua jiwa. Di antara perjalanan yang panjang, dalam waktu yang telah ditentukan oleh-Nya, kami dipertemukan pada sebuah kisah yang sederhana, namun penuh makna.",
-      photo: "/image/IMG_5649.jpg",
+      photo: "/image/thumb/3.jpg",
     },
     {
       year: "Bertumbuh",
       title: "Kepercayaan & Harapan",
       description:
         "Seiring berjalannya waktu, pertemuan itu bertumbuh menjadi kepercayaan, kasih, dan harapan. Hingga pada akhirnya, kami menyadari bahwa rumah terbaik adalah hati yang saling memilih untuk tetap tinggal.",
-      photo: "/image/IMG_5650.jpg",
+      photo: "/image/thumb/4.jpg",
     },
     {
       year: "Pepatah Jawa",
       title: "Witing Tresna Jalaran Saka Kulina",
       description:
         "Sebagaimana pepatah Jawa, 'Witing tresna jalaran saka kulina,' cinta bersemi karena kebersamaan. Dengan restu kedua orang tua serta rahmat Tuhan Yang Maha Esa, kami melangkah menuju gerbang kehidupan baru dalam ikatan suci pernikahan.",
-      photo: "/image/IMG_5652.jpg",
+      photo: "/image/thumb/6.jpg",
     },
     {
       year: "Restu",
       title: "Doa & Sukacita",
       description:
         "Merupakan kebahagiaan yang tak ternilai apabila Bapak/Ibu/Saudara/i berkenan hadir untuk menjadi saksi, berbagi sukacita, dan mengiringi langkah kami dengan doa restu.",
-      photo: "/image/IMG_5655.jpg",
+      photo: "/image/thumb/7.jpg",
     },
   ],
 
-  // Gallery
+  // Gallery — Grouped by theme: Formal → Informal → Hitam (Ultra-fast thumbnails with fullSrc for lightbox)
   gallery: [
-    { id: 1, src: "/image/hero.jpg", alt: "Angi & Anam 1", orientation: "landscape" },
-    { id: 2, src: "/image/IMG_5649.jpg", alt: "Angi & Anam 2", orientation: "portrait" },
-    { id: 3, src: "/image/IMG_5650.jpg", alt: "Angi & Anam 3", orientation: "portrait" },
-    { id: 4, src: "/image/IMG_5652.jpg", alt: "Angi & Anam 4", orientation: "landscape" },
-    { id: 5, src: "/image/IMG_5655.jpg", alt: "Angi & Anam 5", orientation: "portrait" },
-    { id: 6, src: "/image/IMG_5657.jpg", alt: "Angi & Anam 6", orientation: "portrait" },
-    { id: 7, src: "/image/IMG_5658.jpg", alt: "Angi & Anam 7", orientation: "landscape" },
-    { id: 8, src: "/image/IMG_5659.jpg", alt: "Angi & Anam 8", orientation: "portrait" },
-    { id: 9, src: "/image/IMG_5660.jpg", alt: "Angi & Anam 9", orientation: "portrait" },
-    { id: 10, src: "/image/IMG_5661.jpg", alt: "Angi & Anam 10", orientation: "landscape" },
-    { id: 11, src: "/image/IMG_5663.jpg", alt: "Angi & Anam 11", orientation: "portrait" },
-    { id: 12, src: "/image/IMG_5664.jpg", alt: "Angi & Anam 12", orientation: "landscape" },
+    { id: 1, src: "/image/thumb/1.jpg", fullSrc: "/image/1.jpg", alt: "Angi & Anam 1", orientation: "portrait" },
+    { id: 2, src: "/image/thumb/2.jpg", fullSrc: "/image/2.jpg", alt: "Angi & Anam 2", orientation: "portrait" },
+    { id: 3, src: "/image/thumb/3.jpg", fullSrc: "/image/3.jpg", alt: "Angi & Anam 3", orientation: "portrait" },
+    { id: 4, src: "/image/thumb/4.jpg", fullSrc: "/image/4.jpg", alt: "Angi & Anam 4", orientation: "portrait" },
+    { id: 5, src: "/image/thumb/5.jpg", fullSrc: "/image/5.jpg", alt: "Angi & Anam 5", orientation: "portrait" },
+    { id: 6, src: "/image/thumb/6.jpg", fullSrc: "/image/6.jpg", alt: "Angi & Anam 6", orientation: "portrait" },
+    { id: 7, src: "/image/thumb/7.jpg", fullSrc: "/image/7.jpg", alt: "Angi & Anam 7", orientation: "portrait" },
+    { id: 8, src: "/image/thumb/8.jpg", fullSrc: "/image/8.jpg", alt: "Angi & Anam 8", orientation: "portrait" },
+    { id: 9, src: "/image/thumb/9.jpg", fullSrc: "/image/9.jpg", alt: "Angi & Anam 9", orientation: "portrait" },
+    { id: 10, src: "/image/thumb/10.jpg", fullSrc: "/image/10.jpg", alt: "Angi & Anam 10", orientation: "portrait" },
+    { id: 11, src: "/image/thumb/11.jpg", fullSrc: "/image/11.jpg", alt: "Angi & Anam 11", orientation: "portrait" },
+    { id: 12, src: "/image/thumb/12.jpg", fullSrc: "/image/12.jpg", alt: "Angi & Anam 12", orientation: "portrait" },
+    { id: 13, src: "/image/thumb/13.jpg", fullSrc: "/image/13.jpg", alt: "Angi & Anam 13", orientation: "portrait" },
+    { id: 14, src: "/image/thumb/14.jpg", fullSrc: "/image/14.jpg", alt: "Angi & Anam 14", orientation: "portrait" },
+    { id: 15, src: "/image/thumb/15.jpg", fullSrc: "/image/15.jpg", alt: "Angi & Anam 15", orientation: "portrait" },
+    { id: 16, src: "/image/thumb/16.jpg", fullSrc: "/image/16.jpg", alt: "Angi & Anam 16", orientation: "portrait" },
+    { id: 17, src: "/image/thumb/17.jpg", fullSrc: "/image/17.jpg", alt: "Angi & Anam 17", orientation: "portrait" },
+    { id: 18, src: "/image/thumb/18.jpg", fullSrc: "/image/18.jpg", alt: "Angi & Anam 18", orientation: "portrait" },
+    { id: 19, src: "/image/thumb/19.jpg", fullSrc: "/image/19.jpg", alt: "Angi & Anam 19", orientation: "portrait" },
+    { id: 20, src: "/image/thumb/20.jpg", fullSrc: "/image/20.jpg", alt: "Angi & Anam 20", orientation: "portrait" },
+    { id: 21, src: "/image/thumb/21.jpg", fullSrc: "/image/21.jpg", alt: "Angi & Anam 21", orientation: "portrait" },
+    { id: 22, src: "/image/thumb/22.jpg", fullSrc: "/image/22.jpg", alt: "Angi & Anam 22", orientation: "portrait" },
+    { id: 23, src: "/image/thumb/23.jpg", fullSrc: "/image/23.jpg", alt: "Angi & Anam 23", orientation: "portrait" },
+    { id: 24, src: "/image/thumb/24.jpg", fullSrc: "/image/24.jpg", alt: "Angi & Anam 24", orientation: "portrait" },
+    { id: 25, src: "/image/thumb/25.jpg", fullSrc: "/image/25.jpg", alt: "Angi & Anam 25", orientation: "portrait" },
+    { id: 26, src: "/image/thumb/26.jpg", fullSrc: "/image/26.jpg", alt: "Angi & Anam 26", orientation: "portrait" },
+    { id: 27, src: "/image/thumb/27.jpg", fullSrc: "/image/27.jpg", alt: "Angi & Anam 27", orientation: "portrait" },
+    { id: 28, src: "/image/thumb/28.jpg", fullSrc: "/image/28.jpg", alt: "Angi & Anam 28", orientation: "portrait" },
+    { id: 29, src: "/image/thumb/29.jpg", fullSrc: "/image/29.jpg", alt: "Angi & Anam 29", orientation: "portrait" },
+    { id: 30, src: "/image/thumb/30.jpg", fullSrc: "/image/30.jpg", alt: "Angi & Anam 30", orientation: "portrait" },
+    { id: 31, src: "/image/thumb/31.jpg", fullSrc: "/image/31.jpg", alt: "Angi & Anam 31", orientation: "portrait" },
+    { id: 32, src: "/image/thumb/32.jpg", fullSrc: "/image/32.jpg", alt: "Angi & Anam 32", orientation: "portrait" },
+    { id: 33, src: "/image/thumb/33.jpg", fullSrc: "/image/33.jpg", alt: "Angi & Anam 33", orientation: "portrait" },
+    { id: 34, src: "/image/thumb/34.jpg", fullSrc: "/image/34.jpg", alt: "Angi & Anam 34", orientation: "portrait" },
+    { id: 35, src: "/image/thumb/35.jpg", fullSrc: "/image/35.jpg", alt: "Angi & Anam 35", orientation: "portrait" },
+    { id: 36, src: "/image/thumb/36.jpg", fullSrc: "/image/36.jpg", alt: "Angi & Anam 36", orientation: "portrait" },
+    { id: 37, src: "/image/thumb/37.jpg", fullSrc: "/image/37.jpg", alt: "Angi & Anam 37", orientation: "portrait" },
+    { id: 38, src: "/image/thumb/38.jpg", fullSrc: "/image/38.jpg", alt: "Angi & Anam 38", orientation: "portrait" },
+    { id: 39, src: "/image/thumb/39.jpg", fullSrc: "/image/39.jpg", alt: "Angi & Anam 39", orientation: "portrait" },
+    { id: 40, src: "/image/thumb/40.jpg", fullSrc: "/image/40.jpg", alt: "Angi & Anam 40", orientation: "portrait" },
+    { id: 41, src: "/image/thumb/41.jpg", fullSrc: "/image/41.jpg", alt: "Angi & Anam 41", orientation: "portrait" },
+    // ═══ HITAM ═══
+    { id: 42, src: "/image/thumb/gallery-hitam-01.jpg", fullSrc: "/image/gallery-hitam-01.jpg", alt: "Angi & Anam - Hitam 1", orientation: "portrait" },
+    { id: 43, src: "/image/thumb/gallery-hitam-02.jpg", fullSrc: "/image/gallery-hitam-02.jpg", alt: "Angi & Anam - Hitam 2", orientation: "portrait" },
+    { id: 44, src: "/image/thumb/gallery-hitam-03.jpg", fullSrc: "/image/gallery-hitam-03.jpg", alt: "Angi & Anam - Hitam 3", orientation: "portrait" },
   ],
 
   // Bank Accounts — Misbakhul Anam Roziqin & Angi Sulistia
@@ -176,7 +209,7 @@ export const weddingData = {
     closing: "Hormat kami yang berbahagia,",
     hashtag: "#AnamAngiForever",
     year: 2026,
-    bgPhoto: "/image/IMG_5664.jpg",
+    bgPhoto: "/image/gallery-hitam-01.jpg",
   },
 
   // Navigation sections
@@ -187,7 +220,6 @@ export const weddingData = {
     { id: "event", label: "Acara", icon: "📅" },
     { id: "story", label: "Kisah", icon: "💕" },
     { id: "gallery", label: "Galeri", icon: "📸" },
-    { id: "rsvp", label: "RSVP", icon: "✉️" },
     { id: "gift", label: "Kado", icon: "🎁" },
     { id: "wishes", label: "Ucapan", icon: "💌" },
   ],

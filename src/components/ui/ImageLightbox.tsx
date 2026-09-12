@@ -94,7 +94,7 @@ export function ImageLightbox() {
               transition={{ duration: 0.3 }}
             >
               <img
-                src={gallery[lightboxIndex].src}
+                src={(gallery[lightboxIndex] as any).fullSrc || gallery[lightboxIndex].src}
                 alt={gallery[lightboxIndex].alt}
                 className="max-w-[90vw] max-h-[80vh] object-contain rounded-lg shadow-2xl border border-white/10"
               />

@@ -1,40 +1,170 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useMemo } from "react";
 import { weddingData } from "@/data/weddingData";
 import { useInvitationStore } from "@/stores/invitationStore";
 import { AnimatedText } from "@/components/ui/AnimatedText";
+
+type PhotoItem = (typeof weddingData.gallery)[number];
+
+interface MarqueeRowProps {
+  photos: PhotoItem[];
+  direction: "left" | "right";
+  duration?: number;
+  onPhotoClick: (item: PhotoItem) => void;
+}
+
+function MarqueeRow({
+  photos,
+  direction,
+  duration,
+  onPhotoClick,
+}: MarqueeRowProps) {
+  // Ensure enough items to seamlessly loop across all viewports
+  const { items, computedDuration } = useMemo(() => {
+    if (photos.length === 0) return { items: [], computedDuration: 80 };
+    let base = [...photos];
+    // Need base length of at least 10 to fill wide screen
+    while (base.length < 10) {
+      base = [...base, ...photos];
+    }
+    // Duplicate base so second half is identical for seamless 50% loop
+    const autoDuration = Math.round(base.length * 4.5);
+    return {
+      items: [...base, ...base],
+      computedDuration: duration || autoDuration,
+    };
+  }, [photos, duration]);
+
+  const animationClass =
+    direction === "left" ? "animate-marquee-left" : "animate-marquee-right";
+
+  return (
+    <div className="marquee-track relative w-full overflow-hidden py-1">
+      <div
+        className={`${animationClass} flex items-center gap-2.5 sm:gap-3.5`}
+        style={
+          {
+            "--marquee-duration": `${computedDuration}s`,
+          } as React.CSSProperties
+        }
+      >
+        {items.map((item, index) => (
+          <div
+            key={`${item.id}-${index}`}
+            onClick={() => onPhotoClick(item)}
+            className="relative flex-shrink-0 cursor-pointer overflow-hidden rounded-xl border border-[#806A42]/60 bg-[#171719] hover:border-[#C8A96B] transition-transform duration-200 active:scale-95 shadow-md shadow-black/40"
+            style={{
+              height: "clamp(128px, 26vw, 175px)",
+              aspectRatio: "3/4",
+              transform: "translateZ(0)",
+              WebkitTransform: "translateZ(0)",
+              backfaceVisibility: "hidden",
+              WebkitBackfaceVisibility: "hidden",
+            }}
+          >
+            <img
+              src={item.src}
+              alt={item.alt}
+              className="w-full h-full object-cover pointer-events-none"
+              loading="lazy"
+              decoding="async"
+              draggable={false}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function GallerySection() {
   const setLightboxIndex = useInvitationStore((s) => s.setLightboxIndex);
   const { gallery, sectionBgs } = weddingData;
 
+  // Split gallery into the 4 requested rows:
+  // Baris 1: Foto 1 - 19
+  const row1 = useMemo(
+    () =>
+      gallery.filter((item) => {
+        const match = item.src.match(/\/(\d+)\.jpg$/);
+        if (!match) return false;
+        const num = parseInt(match[1], 10);
+        return num >= 1 && num <= 19;
+      }),
+    [gallery]
+  );
+
+  // Baris 2: Foto 20 - 29
+  const row2 = useMemo(
+    () =>
+      gallery.filter((item) => {
+        const match = item.src.match(/\/(\d+)\.jpg$/);
+        if (!match) return false;
+        const num = parseInt(match[1], 10);
+        return num >= 20 && num <= 29;
+      }),
+    [gallery]
+  );
+
+  // Baris 3: Foto 30 - 41
+  const row3 = useMemo(
+    () =>
+      gallery.filter((item) => {
+        const match = item.src.match(/\/(\d+)\.jpg$/);
+        if (!match) return false;
+        const num = parseInt(match[1], 10);
+        return num >= 30 && num <= 41;
+      }),
+    [gallery]
+  );
+
+  // Baris 4: Foto Hitam
+  const row4 = useMemo(
+    () => gallery.filter((item) => item.src.includes("hitam")),
+    [gallery]
+  );
+
+  const handlePhotoClick = (item: PhotoItem) => {
+    const idx = gallery.findIndex((p) => p.id === item.id);
+    if (idx !== -1) {
+      setLightboxIndex(idx);
+    }
+  };
+
   return (
     <section
       id="gallery"
       data-section="gallery"
-      className="section-gallery relative py-20 md:py-28 overflow-hidden flex flex-col items-center justify-center text-center bg-[#0E0E0F] text-[#C8C5BE]"
+      className="section-gallery relative py-16 md:py-24 overflow-hidden flex flex-col items-center justify-center text-center bg-[#0E0E0F] text-[#C8C5BE]"
     >
-      {/* Background Image — Clear & Vivid */}
-      <div className="absolute inset-0">
-        <motion.div
+      {/* Background Image — Elegant dark atmospheric texture */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url('${sectionBgs.gallery}')`,
-            filter: "brightness(0.92) contrast(1.02)",
+            filter: "brightness(0.50) contrast(1.1)",
           }}
-          initial={{ scale: 1.15 }}
-          whileInView={{ scale: 1 }}
-          viewport={{ once: false, amount: 0.1 }}
-          transition={{ duration: 10, ease: "linear" }}
         />
-        <div className="absolute inset-0 photo-overlay-cinematic" />
-        <div className="absolute inset-0 film-grain" />
+        <div className="absolute inset-0 bg-[#0E0E0F]/85 backdrop-blur-[2px]" />
+        {/* Soft Gold Glow */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 70% 35% at 50% 15%, rgba(200, 169, 107, 0.10) 0%, transparent 70%)",
+          }}
+        />
       </div>
 
-      <div className="relative z-20 max-w-lg mx-auto px-6 w-full text-center flex flex-col items-center justify-center">
+      <div className="relative z-20 w-full flex flex-col items-center">
         {/* Section header frame card */}
-        <AnimatedText delay={0} variant="fadeUp" className="w-full flex justify-center mb-10">
+        <AnimatedText
+          delay={0}
+          variant="fadeUp"
+          className="w-full flex justify-center mb-8 px-6"
+        >
           <div className="gold-card-pro p-4 md:p-5 border border-[#806A42] shadow-xl rounded-2xl w-full max-w-xs text-center flex flex-col items-center justify-center">
             <p
               className="text-xs uppercase tracking-[5px] text-[#C8A96B] font-extrabold mb-1.5 text-center"
@@ -49,58 +179,58 @@ export function GallerySection() {
             >
               Galeri Foto
             </h2>
+
+            <p className="text-[11px] text-[#C8A96B]/75 mt-2 tracking-wider flex items-center gap-1.5 font-medium">
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
+                <path d="M11 8v6M8 11h6" />
+              </svg>
+              Klik foto untuk memperbesar • Tahan untuk menjeda
+            </p>
           </div>
         </AnimatedText>
 
-        {/* Masonry-style grid */}
-        <div className="grid grid-cols-2 gap-3.5 w-full">
-          {gallery.map((item, index) => (
-            <motion.div
-              key={item.id}
-              className={`relative rounded-2xl overflow-hidden cursor-pointer group shadow-2xl border-2 border-[#806A42] bg-[#171719]
-                ${item.orientation === "portrait" ? "row-span-2" : ""}`}
-              style={{
-                aspectRatio:
-                  item.orientation === "portrait" ? "3/4" : "4/3",
-              }}
-              initial={{ opacity: 0, y: 35, scale: 0.94 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: false, amount: 0.15 }}
-              transition={{
-                duration: 0.6,
-                delay: (index % 4) * 0.1,
-                ease: [0.22, 1, 0.36, 1],
-              }}
-              onClick={() => setLightboxIndex(index)}
-              whileHover={{ scale: 1.03 }}
-            >
-              <img
-                src={item.src}
-                alt={item.alt}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              />
+        {/* Running Photos (Continuous Marquee Ticker) — 4 Baris Berjalan Otomatis */}
+        <div className="relative w-full overflow-hidden space-y-2.5 sm:space-y-3.5">
+          {/* Baris 1: Foto 1 - 19 (Bergerak ke Kiri) */}
+          <MarqueeRow
+            photos={row1}
+            direction="left"
+            duration={85}
+            onPhotoClick={handlePhotoClick}
+          />
 
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/45 transition-colors duration-300 flex items-center justify-center">
-                <motion.div
-                  className="text-[#E0C98F] opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/75 p-2.5 rounded-full border border-[#C8A96B] shadow-md"
-                  initial={false}
-                >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <circle cx="11" cy="11" r="8" />
-                    <path d="m21 21-4.35-4.35" />
-                    <path d="M11 8v6M8 11h6" />
-                  </svg>
-                </motion.div>
-              </div>
-            </motion.div>
-          ))}
+          {/* Baris 2: Foto 20 - 29 (Bergerak ke Kanan) */}
+          <MarqueeRow
+            photos={row2}
+            direction="right"
+            duration={75}
+            onPhotoClick={handlePhotoClick}
+          />
+
+          {/* Baris 3: Foto 30 - 41 (Bergerak ke Kiri) */}
+          <MarqueeRow
+            photos={row3}
+            direction="left"
+            duration={80}
+            onPhotoClick={handlePhotoClick}
+          />
+
+          {/* Baris 4: Foto Hitam (Bergerak ke Kanan) */}
+          <MarqueeRow
+            photos={row4}
+            direction="right"
+            duration={70}
+            onPhotoClick={handlePhotoClick}
+          />
         </div>
       </div>
     </section>

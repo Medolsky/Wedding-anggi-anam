@@ -368,3 +368,67 @@ section {
   resize: vertical;
   min-height: 80px;
 }
+
+/* ========================================
+   RUNNING MARQUEE / TICKER PHOTO GALLERY (60/120 FPS GPU ACCELERATED)
+   ======================================== */
+
+@keyframes marquee-left {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes marquee-right {
+  from {
+    transform: translate3d(-50%, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.marquee-track {
+  contain: paint layout;
+  overflow: hidden;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.animate-marquee-left {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  animation: marquee-left var(--marquee-duration, 90s) linear infinite;
+}
+
+.animate-marquee-right {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  animation: marquee-right var(--marquee-duration, 90s) linear infinite;
+}
+
+.marquee-track:hover .animate-marquee-left,
+.marquee-track:hover .animate-marquee-right,
+.marquee-track:active .animate-marquee-left,
+.marquee-track:active .animate-marquee-right,
+.animate-marquee-left:hover,
+.animate-marquee-right:hover,
+.animate-marquee-left:active,
+.animate-marquee-right:active {
+  animation-play-state: paused;
+}

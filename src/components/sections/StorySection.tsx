@@ -13,21 +13,32 @@ export function StorySection() {
       data-section="story"
       className="section-story relative py-18 md:py-24 overflow-hidden flex flex-col items-center justify-center text-center bg-[#0E0E0F] text-[#C8C5BE]"
     >
-      {/* Background Image — Clear & Vivid */}
-      <div className="absolute inset-0">
-        <motion.div
+      {/* Background — Elegant Deep Luxury with Soft Ambient Gold Glow */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Subtle Atmospheric Texture */}
+        <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage: `url('${sectionBgs.story}')`,
-            filter: "brightness(0.92) contrast(1.02)",
+            filter: "brightness(0.5) contrast(1.1)",
           }}
-          initial={{ scale: 1.15 }}
-          whileInView={{ scale: 1 }}
-          viewport={{ once: false, amount: 0.1 }}
-          transition={{ duration: 10, ease: "linear" }}
         />
-        <div className="absolute inset-0 photo-overlay-cinematic" />
-        <div className="absolute inset-0 film-grain" />
+
+        {/* Deep luxury veil to prevent distracting blurry shapes */}
+        <div className="absolute inset-0 bg-[#0E0E0F]/88 backdrop-blur-[2px]" />
+
+        {/* Ambient Gold Radial Glows */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 70% 35% at 50% 15%, rgba(200, 169, 107, 0.12) 0%, transparent 70%), radial-gradient(ellipse 70% 40% at 50% 65%, rgba(200, 169, 107, 0.07) 0%, transparent 70%)",
+          }}
+        />
+
+        {/* Seamless top & bottom blending gradients */}
+        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#0E0E0F] to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#0E0E0F] to-transparent" />
       </div>
 
       <div className="relative z-20 max-w-md mx-auto px-6 w-full text-center flex flex-col items-center justify-center">
@@ -110,14 +121,15 @@ export function StorySection() {
                   </p>
 
                   <motion.div
-                    className="w-full h-36 md:h-40 rounded-xl overflow-hidden shadow-md border border-[#806A42]/60 group"
-                    whileHover={{ scale: 1.02 }}
+                    className="w-full aspect-[3/4] sm:aspect-[4/5] rounded-xl overflow-hidden shadow-lg border border-[#806A42]/60 group bg-[#171719]"
+                    whileHover={{ scale: 1.01 }}
                     transition={{ duration: 0.3 }}
                   >
                     <img
                       src={story.photo}
                       alt={story.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                      loading="lazy"
                     />
                   </motion.div>
                 </div>

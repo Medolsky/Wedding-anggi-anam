@@ -25,7 +25,6 @@ import { BrideSection } from "@/components/sections/BrideSection";
 import { EventSection } from "@/components/sections/EventSection";
 import { StorySection } from "@/components/sections/StorySection";
 import { GallerySection } from "@/components/sections/GallerySection";
-import { RSVPSection } from "@/components/sections/RSVPSection";
 import { GiftSection } from "@/components/sections/GiftSection";
 import { WishesSection } from "@/components/sections/WishesSection";
 import { FooterSection } from "@/components/sections/FooterSection";
@@ -173,7 +172,6 @@ function InvitationContent() {
           <EventSection />
           <StorySection />
           <GallerySection />
-          <RSVPSection />
           <GiftSection />
           <WishesSection />
           <FooterSection />

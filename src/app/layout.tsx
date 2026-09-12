@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     siteName: "The Wedding of Anam & Angi",
     images: [
       {
-        url: "/image/hero.jpg",
+        url: "/image/1.jpg",
         width: 1200,
         height: 630,
         alt: "The Wedding of Anam & Angi",
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "The Wedding of Anam & Angi",
     description: "Undangan Pernikahan Digital Misbakhul Anam Roziqin & Angi Sulistia — Sabtu, 10 Oktober 2026 di BALAI IKABAMA, Depok.",
-    images: ["/image/hero.jpg"],
+    images: ["/image/1.jpg"],
   },
   robots: {
     index: true,

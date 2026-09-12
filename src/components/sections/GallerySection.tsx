@@ -55,7 +55,7 @@ function MarqueeRow({
             onClick={() => onPhotoClick(item)}
             className="relative flex-shrink-0 cursor-pointer overflow-hidden rounded-xl border border-[#806A42]/60 bg-[#171719] hover:border-[#C8A96B] transition-transform duration-200 active:scale-95 shadow-md shadow-black/40"
             style={{
-              height: "clamp(128px, 26vw, 175px)",
+              height: "clamp(145px, 28vw, 195px)",
               aspectRatio: "3/4",
               transform: "translateZ(0)",
               WebkitTransform: "translateZ(0)",
@@ -67,8 +67,7 @@ function MarqueeRow({
               src={item.src}
               alt={item.alt}
               className="w-full h-full object-cover pointer-events-none"
-              loading="lazy"
-              decoding="async"
+              loading="eager"
               draggable={false}
             />
           </div>
@@ -82,48 +81,15 @@ export function GallerySection() {
   const setLightboxIndex = useInvitationStore((s) => s.setLightboxIndex);
   const { gallery, sectionBgs } = weddingData;
 
-  // Split gallery into the 4 requested rows:
-  // Baris 1: Foto 1 - 19
-  const row1 = useMemo(
-    () =>
-      gallery.filter((item) => {
-        const match = item.src.match(/\/(\d+)\.jpg$/);
-        if (!match) return false;
-        const num = parseInt(match[1], 10);
-        return num >= 1 && num <= 19;
-      }),
-    [gallery]
-  );
+  // Split the 29 prewedding photos (1 - 29) into 3 balanced rows:
+  // Baris 1: Foto 1 - 10 (Bergerak ke Kiri)
+  const row1 = useMemo(() => gallery.slice(0, 10), [gallery]);
 
-  // Baris 2: Foto 20 - 29
-  const row2 = useMemo(
-    () =>
-      gallery.filter((item) => {
-        const match = item.src.match(/\/(\d+)\.jpg$/);
-        if (!match) return false;
-        const num = parseInt(match[1], 10);
-        return num >= 20 && num <= 29;
-      }),
-    [gallery]
-  );
+  // Baris 2: Foto 11 - 19 (Bergerak ke Kanan)
+  const row2 = useMemo(() => gallery.slice(10, 19), [gallery]);
 
-  // Baris 3: Foto 30 - 41
-  const row3 = useMemo(
-    () =>
-      gallery.filter((item) => {
-        const match = item.src.match(/\/(\d+)\.jpg$/);
-        if (!match) return false;
-        const num = parseInt(match[1], 10);
-        return num >= 30 && num <= 41;
-      }),
-    [gallery]
-  );
-
-  // Baris 4: Foto Hitam
-  const row4 = useMemo(
-    () => gallery.filter((item) => item.src.includes("hitam")),
-    [gallery]
-  );
+  // Baris 3: Foto 20 - 29 (Bergerak ke Kiri)
+  const row3 = useMemo(() => gallery.slice(19, 29), [gallery]);
 
   const handlePhotoClick = (item: PhotoItem) => {
     const idx = gallery.findIndex((p) => p.id === item.id);
@@ -198,36 +164,28 @@ export function GallerySection() {
           </div>
         </AnimatedText>
 
-        {/* Running Photos (Continuous Marquee Ticker) — 4 Baris Berjalan Otomatis */}
+        {/* Running Photos (Continuous Marquee Ticker) — 3 Baris Berjalan Otomatis */}
         <div className="relative w-full overflow-hidden space-y-2.5 sm:space-y-3.5">
-          {/* Baris 1: Foto 1 - 19 (Bergerak ke Kiri) */}
+          {/* Baris 1: Foto 1 - 10 (Bergerak ke Kiri) */}
           <MarqueeRow
             photos={row1}
             direction="left"
-            duration={85}
+            duration={70}
             onPhotoClick={handlePhotoClick}
           />
 
-          {/* Baris 2: Foto 20 - 29 (Bergerak ke Kanan) */}
+          {/* Baris 2: Foto 11 - 19 (Bergerak ke Kanan) */}
           <MarqueeRow
             photos={row2}
             direction="right"
-            duration={75}
+            duration={65}
             onPhotoClick={handlePhotoClick}
           />
 
-          {/* Baris 3: Foto 30 - 41 (Bergerak ke Kiri) */}
+          {/* Baris 3: Foto 20 - 29 (Bergerak ke Kiri) */}
           <MarqueeRow
             photos={row3}
             direction="left"
-            duration={80}
-            onPhotoClick={handlePhotoClick}
-          />
-
-          {/* Baris 4: Foto Hitam (Bergerak ke Kanan) */}
-          <MarqueeRow
-            photos={row4}
-            direction="right"
             duration={70}
             onPhotoClick={handlePhotoClick}
           />

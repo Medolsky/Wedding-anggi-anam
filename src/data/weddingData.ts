@@ -38,7 +38,7 @@ export const weddingData = {
     bride: "/image/mempelai-wanita.jpg",
     event: "/image/balai1.png",
     story: "/image/gallery-hitam-01.jpg",
-    gallery: "/image/28.jpg",
+    gallery: "/image/30.jpg",
     rsvp: "/image/10.jpg",
     gift: "/image/30.jpg",
     wishes: "/image/18.jpg",
@@ -82,32 +82,32 @@ export const weddingData = {
       title: "Takdir Pertemuan",
       description:
         "Takdir selalu memiliki caranya sendiri untuk mempertemukan dua jiwa. Di antara perjalanan yang panjang, dalam waktu yang telah ditentukan oleh-Nya, kami dipertemukan pada sebuah kisah yang sederhana, namun penuh makna.",
-      photo: "/image/thumb/30.jpg",
+      photo: "/image/thumb/kisah1.jpg",
     },
     {
       year: "Bertumbuh",
       title: "Kepercayaan & Harapan",
       description:
         "Seiring berjalannya waktu, pertemuan itu bertumbuh menjadi kepercayaan, kasih, dan harapan. Hingga pada akhirnya, kami menyadari bahwa rumah terbaik adalah hati yang saling memilih untuk tetap tinggal.",
-      photo: "/image/thumb/32.jpg",
+      photo: "/image/thumb/kisah2.jpg",
     },
     {
       year: "Pepatah Jawa",
       title: "Witing Tresna Jalaran Saka Kulina",
       description:
         "Sebagaimana pepatah Jawa, 'Witing tresna jalaran saka kulina,' cinta bersemi karena kebersamaan. Dengan restu kedua orang tua serta rahmat Tuhan Yang Maha Esa, kami melangkah menuju gerbang kehidupan baru dalam ikatan suci pernikahan.",
-      photo: "/image/thumb/35.jpg",
+      photo: "/image/thumb/kisah3.jpg",
     },
     {
       year: "Restu",
       title: "Doa & Sukacita",
       description:
         "Merupakan kebahagiaan yang tak ternilai apabila Bapak/Ibu/Saudara/i berkenan hadir untuk menjadi saksi, berbagi sukacita, dan mengiringi langkah kami dengan doa restu.",
-      photo: "/image/thumb/38.jpg",
+      photo: "/image/thumb/kisah4.jpg",
     },
   ],
 
-  // Gallery — Grouped by theme: Formal → Informal → Hitam (Ultra-fast thumbnails with fullSrc for lightbox)
+  // Gallery — Prewedding Series (Foto 1 - 29)
   gallery: [
     { id: 1, src: "/image/thumb/1.jpg", fullSrc: "/image/1.jpg", alt: "Angi & Anam 1", orientation: "portrait" },
     { id: 2, src: "/image/thumb/2.jpg", fullSrc: "/image/2.jpg", alt: "Angi & Anam 2", orientation: "portrait" },
@@ -138,22 +138,6 @@ export const weddingData = {
     { id: 27, src: "/image/thumb/27.jpg", fullSrc: "/image/27.jpg", alt: "Angi & Anam 27", orientation: "portrait" },
     { id: 28, src: "/image/thumb/28.jpg", fullSrc: "/image/28.jpg", alt: "Angi & Anam 28", orientation: "portrait" },
     { id: 29, src: "/image/thumb/29.jpg", fullSrc: "/image/29.jpg", alt: "Angi & Anam 29", orientation: "portrait" },
-    { id: 30, src: "/image/thumb/30.jpg", fullSrc: "/image/30.jpg", alt: "Angi & Anam 30", orientation: "portrait" },
-    { id: 31, src: "/image/thumb/31.jpg", fullSrc: "/image/31.jpg", alt: "Angi & Anam 31", orientation: "portrait" },
-    { id: 32, src: "/image/thumb/32.jpg", fullSrc: "/image/32.jpg", alt: "Angi & Anam 32", orientation: "portrait" },
-    { id: 33, src: "/image/thumb/33.jpg", fullSrc: "/image/33.jpg", alt: "Angi & Anam 33", orientation: "portrait" },
-    { id: 34, src: "/image/thumb/34.jpg", fullSrc: "/image/34.jpg", alt: "Angi & Anam 34", orientation: "portrait" },
-    { id: 35, src: "/image/thumb/35.jpg", fullSrc: "/image/35.jpg", alt: "Angi & Anam 35", orientation: "portrait" },
-    { id: 36, src: "/image/thumb/36.jpg", fullSrc: "/image/36.jpg", alt: "Angi & Anam 36", orientation: "portrait" },
-    { id: 37, src: "/image/thumb/37.jpg", fullSrc: "/image/37.jpg", alt: "Angi & Anam 37", orientation: "portrait" },
-    { id: 38, src: "/image/thumb/38.jpg", fullSrc: "/image/38.jpg", alt: "Angi & Anam 38", orientation: "portrait" },
-    { id: 39, src: "/image/thumb/39.jpg", fullSrc: "/image/39.jpg", alt: "Angi & Anam 39", orientation: "portrait" },
-    { id: 40, src: "/image/thumb/40.jpg", fullSrc: "/image/40.jpg", alt: "Angi & Anam 40", orientation: "portrait" },
-    { id: 41, src: "/image/thumb/41.jpg", fullSrc: "/image/41.jpg", alt: "Angi & Anam 41", orientation: "portrait" },
-    // ═══ HITAM ═══
-    { id: 42, src: "/image/thumb/gallery-hitam-01.jpg", fullSrc: "/image/gallery-hitam-01.jpg", alt: "Angi & Anam - Hitam 1", orientation: "portrait" },
-    { id: 43, src: "/image/thumb/gallery-hitam-02.jpg", fullSrc: "/image/gallery-hitam-02.jpg", alt: "Angi & Anam - Hitam 2", orientation: "portrait" },
-    { id: 44, src: "/image/thumb/gallery-hitam-03.jpg", fullSrc: "/image/gallery-hitam-03.jpg", alt: "Angi & Anam - Hitam 3", orientation: "portrait" },
   ],
 
   // Bank Accounts — Misbakhul Anam Roziqin & Angi Sulistia

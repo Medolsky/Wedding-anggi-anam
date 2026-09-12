@@ -82,28 +82,28 @@ export const weddingData = {
       title: "Takdir Pertemuan",
       description:
         "Takdir selalu memiliki caranya sendiri untuk mempertemukan dua jiwa. Di antara perjalanan yang panjang, dalam waktu yang telah ditentukan oleh-Nya, kami dipertemukan pada sebuah kisah yang sederhana, namun penuh makna.",
-      photo: "/image/thumb/3.jpg",
+      photo: "/image/thumb/30.jpg",
     },
     {
       year: "Bertumbuh",
       title: "Kepercayaan & Harapan",
       description:
         "Seiring berjalannya waktu, pertemuan itu bertumbuh menjadi kepercayaan, kasih, dan harapan. Hingga pada akhirnya, kami menyadari bahwa rumah terbaik adalah hati yang saling memilih untuk tetap tinggal.",
-      photo: "/image/thumb/4.jpg",
+      photo: "/image/thumb/32.jpg",
     },
     {
       year: "Pepatah Jawa",
       title: "Witing Tresna Jalaran Saka Kulina",
       description:
         "Sebagaimana pepatah Jawa, 'Witing tresna jalaran saka kulina,' cinta bersemi karena kebersamaan. Dengan restu kedua orang tua serta rahmat Tuhan Yang Maha Esa, kami melangkah menuju gerbang kehidupan baru dalam ikatan suci pernikahan.",
-      photo: "/image/thumb/6.jpg",
+      photo: "/image/thumb/35.jpg",
     },
     {
       year: "Restu",
       title: "Doa & Sukacita",
       description:
         "Merupakan kebahagiaan yang tak ternilai apabila Bapak/Ibu/Saudara/i berkenan hadir untuk menjadi saksi, berbagi sukacita, dan mengiringi langkah kami dengan doa restu.",
-      photo: "/image/thumb/7.jpg",
+      photo: "/image/thumb/38.jpg",
     },
   ],
 

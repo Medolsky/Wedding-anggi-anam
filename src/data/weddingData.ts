@@ -55,7 +55,7 @@ export const weddingData = {
       startTime: "08:00 WIB",
       endTime: "17:00 WIB",
       akadTime: "08:00 - 10:00 WIB",
-      resepsiTime: "13:00 - 17:00 WIB",
+      resepsiTime: "11:00 - 17:00 WIB",
       venue: "BALAI IKABAMA",
       address: "Jl. Mawar I, RT.6/RW.4, Depok Jaya, Kec. Pancoran Mas, Kota Depok, Jawa Barat 16432",
       latitude: -6.3934,

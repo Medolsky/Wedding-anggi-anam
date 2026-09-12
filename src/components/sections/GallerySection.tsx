@@ -81,15 +81,12 @@ export function GallerySection() {
   const setLightboxIndex = useInvitationStore((s) => s.setLightboxIndex);
   const { gallery, sectionBgs } = weddingData;
 
-  // Split the 29 prewedding photos (1 - 29) into 3 balanced rows:
-  // Baris 1: Foto 1 - 10 (Bergerak ke Kiri)
-  const row1 = useMemo(() => gallery.slice(0, 10), [gallery]);
+  // Split the 29 prewedding photos (1 - 29) into 2 balanced rows:
+  // Baris 1: Foto 1 - 15 (Bergerak ke Kiri)
+  const row1 = useMemo(() => gallery.slice(0, 15), [gallery]);
 
-  // Baris 2: Foto 11 - 19 (Bergerak ke Kanan)
-  const row2 = useMemo(() => gallery.slice(10, 19), [gallery]);
-
-  // Baris 3: Foto 20 - 29 (Bergerak ke Kiri)
-  const row3 = useMemo(() => gallery.slice(19, 29), [gallery]);
+  // Baris 2: Foto 16 - 29 (Bergerak ke Kanan)
+  const row2 = useMemo(() => gallery.slice(15, 29), [gallery]);
 
   const handlePhotoClick = (item: PhotoItem) => {
     const idx = gallery.findIndex((p) => p.id === item.id);
@@ -164,29 +161,21 @@ export function GallerySection() {
           </div>
         </AnimatedText>
 
-        {/* Running Photos (Continuous Marquee Ticker) — 3 Baris Berjalan Otomatis */}
-        <div className="relative w-full overflow-hidden space-y-2.5 sm:space-y-3.5">
-          {/* Baris 1: Foto 1 - 10 (Bergerak ke Kiri) */}
+        {/* Running Photos (Continuous Marquee Ticker) — 2 Baris Berjalan Otomatis */}
+        <div className="relative w-full overflow-hidden space-y-3 sm:space-y-4">
+          {/* Baris 1: Foto 1 - 15 (Bergerak ke Kiri) */}
           <MarqueeRow
             photos={row1}
             direction="left"
-            duration={70}
+            duration={85}
             onPhotoClick={handlePhotoClick}
           />
 
-          {/* Baris 2: Foto 11 - 19 (Bergerak ke Kanan) */}
+          {/* Baris 2: Foto 16 - 29 (Bergerak ke Kanan) */}
           <MarqueeRow
             photos={row2}
             direction="right"
-            duration={65}
-            onPhotoClick={handlePhotoClick}
-          />
-
-          {/* Baris 3: Foto 20 - 29 (Bergerak ke Kiri) */}
-          <MarqueeRow
-            photos={row3}
-            direction="left"
-            duration={70}
+            duration={80}
             onPhotoClick={handlePhotoClick}
           />
         </div>

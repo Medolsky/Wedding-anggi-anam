@@ -42,7 +42,7 @@ export const weddingData = {
     rsvp: "/image/10.jpg",
     gift: "/image/30.jpg",
     wishes: "/image/18.jpg",
-    footer: "/image/gallery-hitam-01.jpg",
+    footer: "/image/bagroundbawah.jpg",
   },
 
   // Events — BALAI IKABAMA Depok (Sabtu, 10 Oktober 2026)

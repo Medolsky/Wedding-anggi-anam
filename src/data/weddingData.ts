@@ -179,10 +179,10 @@ export const weddingData = {
     phone: "0812-3456-7890",
   },
 
-  // Music — Nuca - Masa Ini, Nanti, dan Masa Indah Lainnya
+  // Music — JVKE - Golden Hour (Cinematic Violin Cover - ItsAMoney)
   music: {
-    src: "/music/nuca-masa-ini.mp3",
-    title: "Nuca - Masa Ini, Nanti, dan Masa Indah Lainnya",
+    src: "/music/golden-hour-violin.mp3",
+    title: "Golden Hour - JVKE (Cinematic Violin Cover by ItsAMoney)",
     autoplay: false,
     defaultVolume: 0.45,
   },

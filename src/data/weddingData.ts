@@ -181,7 +181,7 @@ export const weddingData = {
 
   // Music — JVKE - Golden Hour (Cinematic Violin Cover - ItsAMoney)
   music: {
-    src: "/music/cucak.mp3",
+    src: "/music/catal",
     title: "Golden Hour - JVKE (Cinematic Violin Cover by ItsAMoney)",
     autoplay: false,
     defaultVolume: 0.45,

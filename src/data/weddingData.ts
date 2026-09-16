@@ -32,10 +32,10 @@ export const weddingData = {
 
   // Background photos for each section
   sectionBgs: {
-    hero: "/image/1.jpg",
+    hero: "/image/heroo.jpg",
     quote: "/image/3.jpg",
     groom: "/image/mempelai-pria.jpg",
-    bride: "/image/mempelai-wanita.jpg",
+    bride: "/image/Angi.jpg",
     event: "/image/balai1.png",
     story: "/image/gallery-hitam-01.jpg",
     gallery: "/image/30.jpg",

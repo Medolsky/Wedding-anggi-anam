@@ -35,7 +35,7 @@ export const weddingData = {
     hero: "/image/heroo.jpg",
     quote: "/image/3.jpg",
     groom: "/image/mempelai-pria.jpg",
-    bride: "/image/Angi2.jpg",
+    bride: "/image/Angi3.jpg",
     event: "/image/balai1.png",
     story: "/image/gallery-hitam-01.jpg",
     gallery: "/image/30.jpg",

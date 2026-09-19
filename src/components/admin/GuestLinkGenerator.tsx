@@ -245,16 +245,14 @@ export function GuestLinkGenerator() {
     }
   }
 
-  function getGuestUrl(name: string, code?: string) {
-    const encodedName = encodeURIComponent(name);
-    const codeParam = code ? `&code=${encodeURIComponent(code)}` : "";
-    return `${origin}/?to=${encodedName}${codeParam}`;
+  function getGuestUrl(name: string) {
+    // Clean & compact short link (readable, no %20 clutter, no long code params)
+    const safeName = (name || "Tamu Undangan").trim().replace(/&/g, "%26").replace(/\s+/g, "+");
+    return `${origin}/?to=${encodeURI(safeName)}`;
   }
 
   function getWaMessage(name: string, codeOrTmpl?: string, code?: string) {
-    const actualCode =
-      code || (codeOrTmpl && !["Formal", "Hangat", "Singkat", "Standar"].includes(codeOrTmpl) ? codeOrTmpl : undefined);
-    const url = getGuestUrl(name, actualCode);
+    const url = getGuestUrl(name);
 
     const cleanName = name.trim();
     let guestDisplayName = cleanName;
@@ -294,8 +292,8 @@ Wassalamu’alaikum Wr. Wb.
 *Anam & Angi*`;
   }
 
-  async function handleCopy(name: string, id: string, code?: string) {
-    const url = getGuestUrl(name, code);
+  async function handleCopy(name: string, id: string) {
+    const url = getGuestUrl(name);
     try {
       await navigator.clipboard.writeText(url);
       setCopiedId(id);
@@ -936,7 +934,7 @@ Budi Santoso, 081987654321`}
                 )}
 
                 <div className="bg-[#1C1D21] p-2.5 rounded-xl text-[10.5px] font-mono text-[#E0C98F] truncate border border-[#2B2C32]">
-                  {getGuestUrl(g.name, g.code)}
+                  {getGuestUrl(g.name)}
                 </div>
 
                 {/* QR Code Preview Toggle */}
@@ -980,7 +978,7 @@ Budi Santoso, 081987654321`}
 
                     {/* Copy Link Only Button */}
                     <button
-                      onClick={() => handleCopy(g.name, g.id, g.code)}
+                      onClick={() => handleCopy(g.name, g.id)}
                       className="text-[10.5px] py-2 px-3 flex items-center gap-1.5 bg-[#28292F] border border-[#35373E] text-[#C5C4C0] hover:text-white hover:bg-[#32343B] rounded-xl cursor-pointer transition-all"
                     >
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

@@ -138,14 +138,20 @@ export function scrollToSection(sectionId: string) {
  * Parse guest parameters from URL search params
  */
 export function parseGuestParams(searchParams: URLSearchParams) {
+  const rawTo = searchParams.get("to") || searchParams.get("u") || searchParams.get("n");
+  let name = "Tamu Undangan";
+  if (rawTo) {
+    name = rawTo.replace(/\+/g, " ").replace(/-/g, " ").trim();
+  }
+
   return {
-    name: searchParams.get("to")?.replace(/-/g, " ") || "Tamu Undangan",
+    name: name || "Tamu Undangan",
     guestId: searchParams.get("guestId") || undefined,
     maxGuest: searchParams.get("maxGuest")
       ? parseInt(searchParams.get("maxGuest")!, 10)
       : undefined,
     category: searchParams.get("category") || undefined,
     session: searchParams.get("session") || undefined,
-    code: searchParams.get("code") || undefined,
+    code: searchParams.get("code") || searchParams.get("c") || undefined,
   };
 }

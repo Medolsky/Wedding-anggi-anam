@@ -43,10 +43,35 @@ function InvitationContent() {
   // Initialize scroll section tracking
   useScrollSection();
 
-  // Parse guest params from URL
+  // Parse guest params from URL & auto-resolve code if using short link
   useEffect(() => {
     const guestData = parseGuestParams(searchParams);
     setGuest(guestData);
+
+    // If code is not present in URL, try to resolve assigned code from cloud DB in background
+    if (guestData.name && guestData.name !== "Tamu Undangan" && !guestData.code) {
+      fetch(`/api/db?type=guests&t=${Date.now()}`, { cache: "no-store" })
+        .then((res) => res.json())
+        .then((json) => {
+          if (json.success && Array.isArray(json.data)) {
+            const searchName = guestData.name.trim().toLowerCase();
+            const matched = json.data.find(
+              (g: any) =>
+                g.name?.trim().toLowerCase() === searchName ||
+                searchName.includes(g.name?.trim().toLowerCase()) ||
+                g.name?.trim().toLowerCase().includes(searchName)
+            );
+            if (matched && (matched.code || matched.id)) {
+              setGuest({
+                ...guestData,
+                code: matched.code || matched.id,
+                category: matched.category || guestData.category,
+              });
+            }
+          }
+        })
+        .catch(() => {});
+    }
   }, [searchParams, setGuest]);
 
   // Real-time Visitor Telemetry Heartbeat Beacon

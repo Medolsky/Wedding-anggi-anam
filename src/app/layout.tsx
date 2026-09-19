@@ -86,12 +86,16 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
         <link rel="icon" type="image/png" href="/icon.png" />
         <link rel="apple-touch-icon" href="/apple-icon.png" />
-        <link rel="image_src" href="/og-image.jpg" />
-        <meta property="og:image" content="/og-image.jpg" />
-        <meta property="og:image:secure_url" content="/og-image.jpg" />
+        <link rel="image_src" href={`${siteUrl}/og-image.jpg`} />
+        <meta property="og:title" content="The Wedding of Anam & Angi" />
+        <meta property="og:description" content="Sabtu, 10 Oktober 2026" />
+        <meta property="og:image" content={`${siteUrl}/og-image.jpg`} />
+        <meta property="og:image:secure_url" content={`${siteUrl}/og-image.jpg`} />
         <meta property="og:image:type" content="image/jpeg" />
         <meta property="og:image:width" content="1080" />
         <meta property="og:image:height" content="1350" />
+        <meta property="og:url" content={siteUrl} />
+        <meta property="og:type" content="website" />
       </head>
       <body
         className="min-h-screen"

@@ -11,11 +11,15 @@ export interface GeneratedGuest {
   phone?: string;
   category: string;
   template?: string;
-  status?: "pending" | "sending" | "sent" | "failed";
+  status?: "pending" | "sending" | "sent" | "copied" | "sent_and_copied" | "failed";
   checkedIn?: boolean;
   checkInTime?: string;
   pax?: number;
   createdAt: string;
+  isCopied?: boolean;
+  isSentWa?: boolean;
+  copiedAt?: string;
+  sentWaAt?: string;
 }
 
 export function GuestLinkGenerator() {
@@ -62,7 +66,12 @@ export function GuestLinkGenerator() {
       const res = await fetch(`/api/db?type=guests&t=${Date.now()}`, { cache: "no-store" });
       const json = await res.json();
       if (json.success && Array.isArray(json.data)) {
-        setGuests(json.data);
+        const mapped = json.data.map((g: any) => ({
+          ...g,
+          isSentWa: g.isSentWa || g.status === "sent" || g.status === "sent_and_copied",
+          isCopied: g.isCopied || g.status === "copied" || g.status === "sent_and_copied",
+        }));
+        setGuests(mapped);
       }
 
       const cfgRes = await fetch(`/api/db?type=config&t=${Date.now()}`, { cache: "no-store" });
@@ -297,6 +306,28 @@ Wassalamu’alaikum Wr. Wb.
       await navigator.clipboard.writeText(url);
       setCopiedId(id);
       setTimeout(() => setCopiedId(null), 2000);
+
+      const timeStr =
+        new Date().toLocaleTimeString("id-ID", {
+          timeZone: "Asia/Jakarta",
+          hour: "2-digit",
+          minute: "2-digit",
+        }) + " WIB";
+
+      const updated = guests.map((g) => {
+        if (g.id === id) {
+          const isAlreadySent = g.isSentWa || g.status === "sent" || g.status === "sent_and_copied";
+          const nextStatus = isAlreadySent ? ("sent_and_copied" as const) : ("copied" as const);
+          return {
+            ...g,
+            status: nextStatus,
+            isCopied: true,
+            copiedAt: timeStr,
+          };
+        }
+        return g;
+      });
+      saveGuests(updated);
     } catch {
       alert("Gagal menyalin link");
     }
@@ -329,7 +360,25 @@ Wassalamu’alaikum Wr. Wb.
       const data = await res.json();
 
       if (data.success) {
-        const updated = guests.map((g) => (g.id === guest.id ? { ...g, status: "sent" as const } : g));
+        const timeStr =
+          new Date().toLocaleTimeString("id-ID", {
+            timeZone: "Asia/Jakarta",
+            hour: "2-digit",
+            minute: "2-digit",
+          }) + " WIB";
+        const isAlreadyCopied = guest.isCopied || guest.status === "copied" || guest.status === "sent_and_copied";
+        const nextStatus = isAlreadyCopied ? ("sent_and_copied" as const) : ("sent" as const);
+
+        const updated = guests.map((g) =>
+          g.id === guest.id
+            ? {
+                ...g,
+                status: nextStatus,
+                isSentWa: true,
+                sentWaAt: timeStr,
+              }
+            : g
+        );
         saveGuests(updated);
         return true;
       } else {
@@ -397,8 +446,27 @@ Wassalamu’alaikum Wr. Wb.
     
     window.open(waUrl, "_blank");
 
-    // Automatically mark status as sent
-    const updated = guests.map((g) => (g.id === guest.id ? { ...g, status: "sent" as const } : g));
+    const timeStr =
+      new Date().toLocaleTimeString("id-ID", {
+        timeZone: "Asia/Jakarta",
+        hour: "2-digit",
+        minute: "2-digit",
+      }) + " WIB";
+
+    const isAlreadyCopied = guest.isCopied || guest.status === "copied" || guest.status === "sent_and_copied";
+    const nextStatus = isAlreadyCopied ? ("sent_and_copied" as const) : ("sent" as const);
+
+    // Automatically mark status as sent to WA
+    const updated = guests.map((g) =>
+      g.id === guest.id
+        ? {
+            ...g,
+            status: nextStatus,
+            isSentWa: true,
+            sentWaAt: timeStr,
+          }
+        : g
+    );
     saveGuests(updated);
   }
 
@@ -408,6 +476,28 @@ Wassalamu’alaikum Wr. Wb.
       await navigator.clipboard.writeText(text);
       setCopiedId(`msg-${guest.id}`);
       setTimeout(() => setCopiedId(null), 2000);
+
+      const timeStr =
+        new Date().toLocaleTimeString("id-ID", {
+          timeZone: "Asia/Jakarta",
+          hour: "2-digit",
+          minute: "2-digit",
+        }) + " WIB";
+
+      const isAlreadySent = guest.isSentWa || guest.status === "sent" || guest.status === "sent_and_copied";
+      const nextStatus = isAlreadySent ? ("sent_and_copied" as const) : ("copied" as const);
+
+      const updated = guests.map((g) =>
+        g.id === guest.id
+          ? {
+              ...g,
+              status: nextStatus,
+              isCopied: true,
+              copiedAt: timeStr,
+            }
+          : g
+      );
+      saveGuests(updated);
     } catch {
       alert("Gagal menyalin pesan");
     }
@@ -416,8 +506,25 @@ Wassalamu’alaikum Wr. Wb.
   function toggleGuestStatus(id: string) {
     const updated = guests.map((g) => {
       if (g.id === id) {
-        const nextStatus = g.status === "sent" ? ("pending" as const) : ("sent" as const);
-        return { ...g, status: nextStatus };
+        let nextStatus: GeneratedGuest["status"] = "sent";
+        let isSentWa = true;
+        let isCopied = false;
+
+        if (g.status === "sent") {
+          nextStatus = "copied";
+          isSentWa = false;
+          isCopied = true;
+        } else if (g.status === "copied") {
+          nextStatus = "sent_and_copied";
+          isSentWa = true;
+          isCopied = true;
+        } else if (g.status === "sent_and_copied") {
+          nextStatus = "pending";
+          isSentWa = false;
+          isCopied = false;
+        }
+
+        return { ...g, status: nextStatus, isSentWa, isCopied };
       }
       return g;
     });
@@ -764,15 +871,20 @@ Budi Santoso, 081987654321`}
 
           const matchCat = filterCategory === "all" || g.category === filterCategory;
 
+          const isSent = g.isSentWa || g.status === "sent" || g.status === "sent_and_copied";
+          const isCopied = g.isCopied || g.status === "copied" || g.status === "sent_and_copied";
+
           const matchStatus =
             filterStatus === "all"
               ? true
               : filterStatus === "checkedIn"
               ? g.checkedIn
               : filterStatus === "sent"
-              ? g.status === "sent"
+              ? isSent
+              : filterStatus === "copied"
+              ? isCopied
               : filterStatus === "pending"
-              ? g.status === "pending" || !g.status
+              ? !isSent && !isCopied && !g.checkedIn
               : true;
 
           return matchSearch && matchCat && matchStatus;
@@ -814,12 +926,13 @@ Budi Santoso, 081987654321`}
                   <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
-                    className="text-xs py-2.5 px-3 rounded-xl border border-[#35373E] bg-[#28292F] text-[#F1F0EC] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none flex-1 sm:w-36"
+                    className="text-xs py-2.5 px-3 rounded-xl border border-[#35373E] bg-[#28292F] text-[#F1F0EC] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none flex-1 sm:w-40"
                   >
                     <option value="all">Semua Status</option>
-                    <option value="pending">Belum Kirim</option>
-                    <option value="sent">Terkirim Bot</option>
-                    <option value="checkedIn">Checked-In (Hadir)</option>
+                    <option value="pending">⏳ Belum Diproses</option>
+                    <option value="sent">✓ Sudah Kirim WA</option>
+                    <option value="copied">📋 Sudah Salin Link</option>
+                    <option value="checkedIn">🎟️ Hadir di Lokasi</option>
                   </select>
                 </div>
               </div>
@@ -931,158 +1044,213 @@ Budi Santoso, 081987654321`}
                     : "space-y-3"
                 }
               >
-                {filteredGuests.map((g) => (
-                  <div
-                    key={g.id}
-                    className={`bg-[#202125] p-3.5 sm:p-4 border rounded-2xl flex flex-col justify-between gap-3 shadow-xs transition-all hover:border-[#C8A96B]/50 ${
-                      g.status === "sent" ? "border-emerald-800/70 bg-[#161F1A]" : "border-[#2D2E34]"
-                    }`}
-                  >
-                    <div className="space-y-2">
-                      {/* Row 1: Name, Category, Created Time */}
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0 flex-1">
+                {filteredGuests.map((g) => {
+                  const isSent = g.isSentWa || g.status === "sent" || g.status === "sent_and_copied";
+                  const isCopied = g.isCopied || g.status === "copied" || g.status === "sent_and_copied";
+
+                  const cardTheme = g.checkedIn
+                    ? "border-emerald-600/90 bg-[#0E2015] shadow-[0_0_15px_rgba(16,185,129,0.15)]"
+                    : isSent && isCopied
+                    ? "border-emerald-700/80 bg-[#14231A] shadow-[0_0_12px_rgba(16,185,129,0.1)]"
+                    : isSent
+                    ? "border-emerald-800/70 bg-[#16211C]"
+                    : isCopied
+                    ? "border-sky-900/80 bg-[#141B24]"
+                    : "border-[#2D2E34] bg-[#202125]";
+
+                  return (
+                    <div
+                      key={g.id}
+                      className={`p-3.5 sm:p-4 border rounded-2xl flex flex-col justify-between gap-3 shadow-xs transition-all hover:border-[#C8A96B]/50 ${cardTheme}`}
+                    >
+                      <div className="space-y-2">
+                        {/* Row 1: Name, Category, Created Time */}
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <h4
+                                className="text-sm font-bold text-[#F1F0EC] font-serif tracking-wide truncate max-w-full"
+                                title={g.name}
+                              >
+                                {g.name}
+                              </h4>
+                              <span className="text-[9px] bg-[#28292F] border border-[#35373E] text-[#E0C98F] px-2 py-0.5 rounded-full font-semibold shrink-0">
+                                {g.category}
+                              </span>
+                              {g.code && g.code !== g.name && !g.code.startsWith("GUEST-") && (
+                                <span className="text-[9px] bg-[#28292F] border border-[#35373E] text-[#A1A4B2] px-2 py-0.5 rounded-full font-mono font-bold shrink-0">
+                                  {g.code}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <span className="text-[10px] text-[#9E9D98] font-mono shrink-0">
+                            {g.createdAt}
+                          </span>
+                        </div>
+
+                        {/* Row 2: Status Badges (WA Sent & Link Copied) & Phone */}
+                        <div className="flex items-center justify-between gap-2 flex-wrap text-xs">
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <h4
-                              className="text-sm font-bold text-[#F1F0EC] font-serif tracking-wide truncate max-w-full"
-                              title={g.name}
+                            {/* Status WA Badge (Interactive click-to-cycle) */}
+                            <button
+                              onClick={() => toggleGuestStatus(g.id)}
+                              title="Klik untuk ubah status pengiriman"
+                              className={`text-[9px] px-2.5 py-0.5 rounded-full font-extrabold cursor-pointer transition-all flex items-center gap-1 ${
+                                g.checkedIn
+                                  ? "bg-emerald-950 text-emerald-300 border border-emerald-700"
+                                  : isSent
+                                  ? "bg-emerald-900/90 text-emerald-200 border border-emerald-500 shadow-xs"
+                                  : "bg-amber-950/90 text-amber-300 border border-amber-700 hover:bg-amber-900"
+                              }`}
                             >
-                              {g.name}
-                            </h4>
-                            <span className="text-[9px] bg-[#28292F] border border-[#35373E] text-[#E0C98F] px-2 py-0.5 rounded-full font-semibold shrink-0">
-                              {g.category}
-                            </span>
-                            {g.code && g.code !== g.name && !g.code.startsWith("GUEST-") && (
-                              <span className="text-[9px] bg-[#28292F] border border-[#35373E] text-[#A1A4B2] px-2 py-0.5 rounded-full font-mono font-bold shrink-0">
-                                {g.code}
+                              {g.checkedIn ? (
+                                <span>✓ HADIR ({g.checkInTime || "Check-In"})</span>
+                              ) : isSent ? (
+                                <>
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                  <span>✓ Terkirim WA</span>
+                                </>
+                              ) : (
+                                <>
+                                  <span>⏳</span>
+                                  <span>Belum Kirim</span>
+                                </>
+                              )}
+                            </button>
+
+                            {/* Link Copied Badge Indicator */}
+                            {isCopied && (
+                              <span
+                                className="text-[9px] px-2 py-0.5 rounded-full font-extrabold bg-sky-950/90 text-sky-300 border border-sky-600 flex items-center gap-1 shadow-xs"
+                                title={`Link undangan telah disalin ${g.copiedAt ? `(${g.copiedAt})` : ""}`}
+                              >
+                                <span>📋</span>
+                                <span>Link Disalin</span>
                               </span>
                             )}
                           </div>
+
+                          {g.phone && (
+                            <div className="text-[11px] text-emerald-400 font-mono flex items-center gap-1 shrink-0">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                                <line x1="12" y1="18" x2="12.01" y2="18" />
+                              </svg>
+                              <span className="font-bold">+{formatPhoneNumber(g.phone)}</span>
+                            </div>
+                          )}
                         </div>
 
-                        <span className="text-[10px] text-[#9E9D98] font-mono shrink-0">
-                          {g.createdAt}
-                        </span>
-                      </div>
-
-                      {/* Row 2: Status pill & WhatsApp phone */}
-                      <div className="flex items-center justify-between gap-2 flex-wrap text-xs">
-                        <button
-                          onClick={() => toggleGuestStatus(g.id)}
-                          title="Klik untuk ubah status terkirim/belum"
-                          className={`text-[9px] px-2.5 py-0.5 rounded-full font-extrabold cursor-pointer transition-all ${
-                            g.checkedIn
-                              ? "bg-emerald-950 text-emerald-300 border border-emerald-700"
-                              : g.status === "sent"
-                              ? "bg-emerald-900/80 text-emerald-200 border border-emerald-600 hover:bg-emerald-800"
-                              : "bg-amber-950 text-amber-300 border border-amber-700 hover:bg-amber-900"
+                        {/* Row 3: Link preview box */}
+                        <div
+                          className={`px-2.5 py-1.5 rounded-xl text-[10.5px] font-mono truncate border select-all cursor-pointer transition-colors ${
+                            isCopied
+                              ? "bg-[#161D26] text-sky-300 border-sky-800/80 hover:border-sky-500"
+                              : "bg-[#1C1D21] text-[#E0C98F] border-[#2B2C32] hover:border-[#C8A96B]/50"
                           }`}
+                          title="Klik untuk menyalin link"
+                          onClick={() => handleCopy(g.name, g.id)}
                         >
-                          {g.checkedIn
-                            ? `✓ HADIR (${g.checkInTime || "Check-In"})`
-                            : g.status === "sent"
-                            ? "✓ Terkirim WA"
-                            : "⏳ Belum Kirim"}
-                        </button>
+                          {getGuestUrl(g.name)}
+                        </div>
 
-                        {g.phone && (
-                          <div className="text-[11px] text-emerald-400 font-mono flex items-center gap-1 shrink-0">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
-                              <line x1="12" y1="18" x2="12.01" y2="18" />
-                            </svg>
-                            <span className="font-bold">+{formatPhoneNumber(g.phone)}</span>
+                        {/* QR Preview (if active) */}
+                        {qrPreviewId === g.id && (
+                          <div className="flex flex-col items-center gap-2 p-3 bg-white border border-[#35373E] rounded-2xl my-1 animate-fadeIn">
+                            <QRCodeCanvas
+                              data={g.name}
+                              size={140}
+                              className="rounded-lg"
+                            />
+                            <span className="text-[11px] font-bold text-[#18181B] bg-[#F4F4F6] px-3 py-1 rounded-lg border border-[#E4E4E7] text-center max-w-[240px] truncate">
+                              {g.name}
+                            </span>
+                            <p className="text-[9.5px] text-[#71717A]">Scan saat check-in tamu</p>
                           </div>
                         )}
                       </div>
 
-                      {/* Row 3: Link preview box */}
-                      <div
-                        className="bg-[#1C1D21] px-2.5 py-1.5 rounded-xl text-[10.5px] font-mono text-[#E0C98F] truncate border border-[#2B2C32] select-all cursor-pointer hover:border-[#C8A96B]/50 transition-colors"
-                        title="Klik untuk menyalin link"
-                        onClick={() => handleCopy(g.name, g.id)}
-                      >
-                        {getGuestUrl(g.name)}
-                      </div>
+                      {/* Bottom Row: Actions */}
+                      <div className="flex items-center justify-between gap-1.5 pt-2 border-t border-[#2B2C32]/60">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {/* Direct 1-Click WhatsApp Button */}
+                          <button
+                            onClick={() => handleDirectWaWeb(g)}
+                            className={`text-[10.5px] py-1.5 px-2.5 flex items-center gap-1 font-black rounded-xl cursor-pointer transition-all active:scale-95 shrink-0 ${
+                              isSent
+                                ? "bg-[#1E7E34] hover:bg-[#25D366] text-white border border-emerald-500 shadow-sm"
+                                : "bg-[#25D366] hover:bg-[#20ba59] text-[#0A0B0D] shadow-xs"
+                            }`}
+                            title={isSent ? "Sudah pernah dikirim ke WA. Klik untuk kirim ulang." : "Kirim langsung via WhatsApp Web"}
+                          >
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.969.587 1.771.889 2.796.889 3.183 0 5.77-2.587 5.77-5.766.001-3.18-2.585-5.776-5.77-5.776zm0 10.455c-.93 0-1.745-.278-2.493-.728l-.178-.107-1.574.413.42-1.534-.117-.186c-.496-.789-.758-1.564-.757-2.547.001-2.584 2.102-4.686 4.689-4.686 2.586 0 4.688 2.102 4.688 4.687 0 2.585-2.102 4.688-4.689 4.688z" />
+                            </svg>
+                            <span>{isSent ? "✓ Terkirim" : "Kirim WA"}</span>
+                          </button>
 
-                      {/* QR Preview (if active) */}
-                      {qrPreviewId === g.id && (
-                        <div className="flex flex-col items-center gap-2 p-3 bg-white border border-[#35373E] rounded-2xl my-1 animate-fadeIn">
-                          <QRCodeCanvas
-                            data={g.name}
-                            size={140}
-                            className="rounded-lg"
-                          />
-                          <span className="text-[11px] font-bold text-[#18181B] bg-[#F4F4F6] px-3 py-1 rounded-lg border border-[#E4E4E7] text-center max-w-[240px] truncate">
-                            {g.name}
-                          </span>
-                          <p className="text-[9.5px] text-[#71717A]">Scan saat check-in tamu</p>
+                          {/* Copy Message */}
+                          <button
+                            onClick={() => handleCopyFullMessage(g)}
+                            className={`text-[10px] py-1.5 px-2 rounded-xl cursor-pointer transition-all shrink-0 border ${
+                              copiedId === `msg-${g.id}`
+                                ? "bg-emerald-950 text-emerald-300 border-emerald-600 font-bold"
+                                : isCopied
+                                ? "bg-[#1E293B] text-sky-300 border-sky-700/80 hover:bg-[#27354A]"
+                                : "bg-[#28292F] hover:bg-[#32343B] border-[#35373E] text-[#E5E3DF] hover:text-white"
+                            }`}
+                            title="Salin template pesan WhatsApp"
+                          >
+                            {copiedId === `msg-${g.id}` ? "✓ Tersalin!" : isCopied ? "✓ Pesan" : "Pesan"}
+                          </button>
+
+                          {/* Copy Link */}
+                          <button
+                            onClick={() => handleCopy(g.name, g.id)}
+                            className={`text-[10px] py-1.5 px-2 rounded-xl cursor-pointer transition-all shrink-0 border ${
+                              copiedId === g.id
+                                ? "bg-emerald-950 text-emerald-300 border-emerald-600 font-bold"
+                                : isCopied
+                                ? "bg-[#1E293B] text-sky-300 border-sky-700/80 hover:bg-[#27354A]"
+                                : "bg-[#28292F] hover:bg-[#32343B] border-[#35373E] text-[#C5C4C0] hover:text-white"
+                            }`}
+                            title="Salin link undangan"
+                          >
+                            {copiedId === g.id ? "✓ Tersalin!" : isCopied ? "✓ Link" : "Link"}
+                          </button>
+
+                          {/* Toggle QR */}
+                          <button
+                            type="button"
+                            onClick={() => setQrPreviewId(qrPreviewId === g.id ? null : g.id)}
+                            className={`text-[10px] py-1.5 px-2 rounded-xl cursor-pointer font-bold transition-all shrink-0 flex items-center gap-1 ${
+                              qrPreviewId === g.id
+                                ? "bg-[#C8A96B] text-black font-black"
+                                : "bg-[#28292F] hover:bg-[#32343B] text-[#E0C98F] border border-[#35373E]"
+                            }`}
+                            title="Tampilkan / Sembunyikan QR Code"
+                          >
+                            <span>QR</span>
+                          </button>
                         </div>
-                      )}
-                    </div>
 
-                    {/* Bottom Row: Actions */}
-                    <div className="flex items-center justify-between gap-1.5 pt-2 border-t border-[#2B2C32]/60">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        {/* Direct 1-Click WhatsApp Button */}
+                        {/* Delete button */}
                         <button
-                          onClick={() => handleDirectWaWeb(g)}
-                          className="text-[10.5px] py-1.5 px-2.5 flex items-center gap-1 bg-[#25D366] hover:bg-[#20ba59] text-[#0A0B0D] font-black rounded-xl cursor-pointer shadow-xs transition-all active:scale-95 shrink-0"
-                          title="Kirim ke WhatsApp Web"
+                          onClick={() => handleDelete(g.id)}
+                          className="text-[#8A8C94] hover:text-rose-400 p-1.5 hover:bg-rose-950/40 rounded-lg cursor-pointer transition-colors shrink-0"
+                          title="Hapus Tamu"
                         >
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.969.587 1.771.889 2.796.889 3.183 0 5.77-2.587 5.77-5.766.001-3.18-2.585-5.776-5.77-5.776zm0 10.455c-.93 0-1.745-.278-2.493-.728l-.178-.107-1.574.413.42-1.534-.117-.186c-.496-.789-.758-1.564-.757-2.547.001-2.584 2.102-4.686 4.689-4.686 2.586 0 4.688 2.102 4.688 4.687 0 2.585-2.102 4.688-4.689 4.688z" />
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                           </svg>
-                          <span>Kirim WA</span>
-                        </button>
-
-                        {/* Copy Message */}
-                        <button
-                          onClick={() => handleCopyFullMessage(g)}
-                          className="text-[10px] py-1.5 px-2 bg-[#28292F] hover:bg-[#32343B] border border-[#35373E] text-[#E5E3DF] hover:text-white rounded-xl cursor-pointer transition-all shrink-0"
-                          title="Salin template pesan WhatsApp"
-                        >
-                          {copiedId === `msg-${g.id}` ? "✓ Pesan" : "Pesan"}
-                        </button>
-
-                        {/* Copy Link */}
-                        <button
-                          onClick={() => handleCopy(g.name, g.id)}
-                          className="text-[10px] py-1.5 px-2 bg-[#28292F] hover:bg-[#32343B] border border-[#35373E] text-[#C5C4C0] hover:text-white rounded-xl cursor-pointer transition-all shrink-0"
-                          title="Salin link undangan"
-                        >
-                          {copiedId === g.id ? "✓ Link" : "Link"}
-                        </button>
-
-                        {/* Toggle QR */}
-                        <button
-                          type="button"
-                          onClick={() => setQrPreviewId(qrPreviewId === g.id ? null : g.id)}
-                          className={`text-[10px] py-1.5 px-2 rounded-xl cursor-pointer font-bold transition-all shrink-0 flex items-center gap-1 ${
-                            qrPreviewId === g.id
-                              ? "bg-[#C8A96B] text-black font-black"
-                              : "bg-[#28292F] hover:bg-[#32343B] text-[#E0C98F] border border-[#35373E]"
-                          }`}
-                          title="Tampilkan / Sembunyikan QR Code"
-                        >
-                          <span>QR</span>
                         </button>
                       </div>
-
-                      {/* Delete button */}
-                      <button
-                        onClick={() => handleDelete(g.id)}
-                        className="text-[#8A8C94] hover:text-rose-400 p-1.5 hover:bg-rose-950/40 rounded-lg cursor-pointer transition-colors shrink-0"
-                        title="Hapus Tamu"
-                      >
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <polyline points="3 6 5 6 21 6" />
-                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                        </svg>
-                      </button>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
       </div>

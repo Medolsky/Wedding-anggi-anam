@@ -11,15 +11,14 @@ export function ETicketSection() {
   const guest = useInvitationStore((s) => s.guest);
   const [copied, setCopied] = useState(false);
 
-  const guestCode =
-    guest.code ||
-    `GUEST-${(guest.name || "VIP")
-      .replace(/[^a-zA-Z0-9]/g, "")
-      .substring(0, 6)
-      .toUpperCase()}`;
+  // Use the exact registered guest name for QR data and display (no 'GUEST-' prefix)
+  const qrValue =
+    guest.name && guest.name !== "Tamu Undangan"
+      ? guest.name
+      : (guest.code?.replace(/^GUEST-?/i, "") || "Tamu Undangan");
 
   const handleCopyCode = async () => {
-    const success = await copyToClipboard(guestCode);
+    const success = await copyToClipboard(qrValue);
     if (success) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -118,18 +117,18 @@ export function ETicketSection() {
         {/* Barcode Frame */}
         <div className="bg-[#0E0E0F] p-4 rounded-2xl border-2 border-[#C8A96B]/60 shadow-[0_0_30px_rgba(200,169,107,0.15)] flex flex-col items-center justify-center my-2 space-y-3">
           <div className="p-2 bg-white rounded-xl shadow-md">
-            <QRCodeCanvas data={guestCode} size={180} className="rounded-lg" />
+            <QRCodeCanvas data={qrValue} size={180} className="rounded-lg" />
           </div>
 
-          {/* Guest Code Pill & Copy Button */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-mono font-extrabold tracking-[2px] text-[#E0C98F] bg-[#171719] px-3 py-1 rounded-lg border border-[#806A42] shadow-sm">
-              {guestCode}
+          {/* Guest Name Pill & Copy Button */}
+          <div className="flex items-center gap-2 max-w-full">
+            <span className="text-xs font-semibold tracking-wide text-[#E0C98F] bg-[#171719] px-3.5 py-1.5 rounded-lg border border-[#806A42] shadow-sm truncate max-w-[260px]">
+              {qrValue}
             </span>
             <button
               onClick={handleCopyCode}
-              className="p-1.5 bg-[#22242B] hover:bg-[#2B2E38] text-[#C8A96B] hover:text-white rounded-lg border border-[#35373E] text-[11px] transition-all cursor-pointer"
-              title="Salin Kode"
+              className="p-1.5 bg-[#22242B] hover:bg-[#2B2E38] text-[#C8A96B] hover:text-white rounded-lg border border-[#35373E] text-[11px] transition-all cursor-pointer shrink-0"
+              title="Salin Nama"
             >
               {copied ? "✓" : "📋"}
             </button>

@@ -271,7 +271,7 @@ async function saveToExternalCloud(updatedStore: any) {
           for (const g of updatedStore.guests) {
             await sql`
               INSERT INTO guests (id, code, name, phone, category, template, status, checked_in, check_in_time, pax)
-              VALUES (${g.id || Date.now().toString()}, ${g.code || `GUEST-${g.id}`}, ${g.name}, ${g.phone || null}, ${g.category || "Tamu VIP"}, ${g.template || "Formal"}, ${g.status || "pending"}, ${!!g.checkedIn}, ${g.checkInTime || null}, ${g.pax || 1})
+              VALUES (${g.id || Date.now().toString()}, ${g.code || g.name || g.id}, ${g.name}, ${g.phone || null}, ${g.category || "Tamu VIP"}, ${g.template || "Formal"}, ${g.status || "pending"}, ${!!g.checkedIn}, ${g.checkInTime || null}, ${g.pax || 1})
               ON CONFLICT (id) DO UPDATE SET
                 code = EXCLUDED.code,
                 name = EXCLUDED.name,
@@ -375,7 +375,7 @@ async function saveToExternalCloud(updatedStore: any) {
         } else {
           const sqlGuests = updatedStore.guests.map((g: any) => ({
             id: String(g.id || Date.now()),
-            code: g.code || `GUEST-${g.id}`,
+            code: g.code || g.name || g.id,
             name: g.name,
             phone: g.phone || null,
             category: g.category || "Tamu VIP",
@@ -467,7 +467,7 @@ async function saveSingleCheckInToCloud(matchedGuest: any, matchedRsvp: any, upd
       if (matchedGuest) {
         await sql`
           INSERT INTO guests (id, code, name, phone, category, template, status, checked_in, check_in_time, pax)
-          VALUES (${matchedGuest.id || Date.now().toString()}, ${matchedGuest.code || `GUEST-${matchedGuest.id}`}, ${matchedGuest.name}, ${matchedGuest.phone || null}, ${matchedGuest.category || "Tamu VIP"}, ${matchedGuest.template || "Formal"}, ${matchedGuest.status || "pending"}, ${!!matchedGuest.checkedIn}, ${matchedGuest.checkInTime || null}, ${matchedGuest.pax || 1})
+          VALUES (${matchedGuest.id || Date.now().toString()}, ${matchedGuest.code || matchedGuest.name || matchedGuest.id}, ${matchedGuest.name}, ${matchedGuest.phone || null}, ${matchedGuest.category || "Tamu VIP"}, ${matchedGuest.template || "Formal"}, ${matchedGuest.status || "pending"}, ${!!matchedGuest.checkedIn}, ${matchedGuest.checkInTime || null}, ${matchedGuest.pax || 1})
           ON CONFLICT (id) DO UPDATE SET
             code = EXCLUDED.code,
             name = EXCLUDED.name,
@@ -514,7 +514,7 @@ async function saveSingleCheckInToCloud(matchedGuest: any, matchedRsvp: any, upd
       if (matchedGuest) {
         await supabase.from("guests").upsert([{
           id: matchedGuest.id || Date.now().toString(),
-          code: matchedGuest.code || `GUEST-${matchedGuest.id}`,
+          code: matchedGuest.code || matchedGuest.name || matchedGuest.id,
           name: matchedGuest.name,
           phone: matchedGuest.phone || null,
           category: matchedGuest.category || "Tamu VIP",
@@ -777,15 +777,41 @@ export async function POST(req: Request) {
     }
 
     if (action === "checkin") {
-      const codeToMatch = (item?.code || item?.id || item?.name || "").toString().trim().toLowerCase();
+      const rawCode = (item?.code || item?.id || item?.name || "").toString().trim();
+      const codeToMatch = rawCode.toLowerCase();
       let wasAlreadyCheckedIn = false;
       let matchedGuest: any = null;
 
       const guests = currentStore.guests || [];
+      const clean = (s: string) =>
+        s
+          .toLowerCase()
+          .replace(/^yth\.?\s*/i, "")
+          .replace(/^bapak\/ibu\s*/i, "")
+          .replace(/^bpk\.?\s*/i, "")
+          .replace(/^ibu\.?\s*/i, "")
+          .replace(/^sdr\.?\s*/i, "")
+          .replace(/\s*&\s*partner/i, "")
+          .replace(/\s*&\s*pasangan/i, "")
+          .replace(/\s*dan\s*keluarga/i, "")
+          .replace(/[^a-z0-9]/g, "");
+
+      const cleanSearch = clean(codeToMatch);
+
       const updatedGuests = guests.map((g: any) => {
         const guestCode = (g.code || g.id || "").toString().trim().toLowerCase();
         const guestName = (g.name || "").toString().trim().toLowerCase();
-        if (guestCode === codeToMatch || guestName === codeToMatch || (codeToMatch && (guestCode.includes(codeToMatch) || codeToMatch.includes(guestCode)))) {
+        const cleanGName = clean(guestName);
+        const cleanGCode = clean(guestCode);
+
+        const isMatch =
+          guestCode === codeToMatch ||
+          guestName === codeToMatch ||
+          (cleanSearch && cleanGName && (cleanGName === cleanSearch || cleanGName.includes(cleanSearch) || cleanSearch.includes(cleanGName))) ||
+          (cleanSearch && cleanGCode && (cleanGCode === cleanSearch || cleanGCode.includes(cleanSearch) || cleanSearch.includes(cleanGCode))) ||
+          (codeToMatch && (guestCode.includes(codeToMatch) || codeToMatch.includes(guestCode)));
+
+        if (isMatch) {
           if (g.checkedIn) {
             wasAlreadyCheckedIn = true;
             matchedGuest = g;
@@ -828,10 +854,11 @@ export async function POST(req: Request) {
           second: "2-digit",
         }) + " WIB";
 
+        const assignedName = item?.name || item?.code || "Tamu Undangan";
         matchedGuest = {
           id: Date.now().toString(),
-          code: item?.code || `GUEST-${Date.now()}`,
-          name: item?.name || item?.code || "Tamu Undangan",
+          code: assignedName,
+          name: assignedName,
           category: "Tamu General",
           template: "Formal",
           checkedIn: true,

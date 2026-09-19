@@ -129,20 +129,18 @@ export function GuestLinkGenerator() {
   }
 
   function generateUniqueCode(name: string): string {
-    const cleanName = name.replace(/[^a-zA-Z0-9]/g, "").substring(0, 4).toUpperCase() || "VIP";
-    const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
-    return `${cleanName}-${rand}`;
+    return name.trim();
   }
 
   function handleGenerate(e: React.FormEvent) {
     e.preventDefault();
     if (!guestName.trim()) return;
 
-    const code = generateUniqueCode(guestName.trim());
+    const trimmedName = guestName.trim();
     const newGuest: GeneratedGuest = {
       id: Date.now().toString(),
-      code,
-      name: guestName.trim(),
+      code: trimmedName,
+      name: trimmedName,
       phone: phone.trim() ? formatPhoneNumber(phone.trim()) : undefined,
       category,
       template: "Standar",
@@ -896,9 +894,11 @@ Budi Santoso, 081987654321`}
                     <span className="text-[9px] bg-[#28292F] border border-[#35373E] text-[#E0C98F] px-2.5 py-0.5 rounded-full font-semibold">
                       {g.category}
                     </span>
-                    <span className="text-[9px] bg-[#28292F] border border-[#35373E] text-[#A1A4B2] px-2.5 py-0.5 rounded-full font-mono font-bold">
-                      {g.code || g.id}
-                    </span>
+                    {g.code && g.code !== g.name && !g.code.startsWith("GUEST-") && (
+                      <span className="text-[9px] bg-[#28292F] border border-[#35373E] text-[#A1A4B2] px-2.5 py-0.5 rounded-full font-mono font-bold">
+                        {g.code}
+                      </span>
+                    )}
                     
                     {/* Status Badge with Click-to-Toggle feature */}
                     <button
@@ -941,14 +941,14 @@ Budi Santoso, 081987654321`}
                 {qrPreviewId === g.id && (
                   <div className="flex flex-col items-center gap-2 p-4 bg-white border border-[#35373E] rounded-2xl">
                     <QRCodeCanvas
-                      data={g.code || g.id}
+                      data={g.name}
                       size={160}
                       className="rounded-lg"
                     />
-                    <span className="text-[10px] font-mono font-bold text-[#18181B] bg-[#F4F4F6] px-3 py-1 rounded-lg border border-[#E4E4E7]">
-                      {g.code || g.id}
+                    <span className="text-[11px] font-bold text-[#18181B] bg-[#F4F4F6] px-3 py-1.5 rounded-lg border border-[#E4E4E7] text-center max-w-[260px] truncate">
+                      {g.name}
                     </span>
-                    <p className="text-[10px] text-[#71717A]">QR Code unik tamu untuk scan saat check-in.</p>
+                    <p className="text-[10px] text-[#71717A]">QR Code tamu untuk scan saat check-in.</p>
                   </div>
                 )}
 

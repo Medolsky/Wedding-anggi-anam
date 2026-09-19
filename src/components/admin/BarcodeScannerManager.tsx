@@ -699,9 +699,11 @@ export function BarcodeScannerManager() {
                     <span className="text-[9px] bg-emerald-900 text-emerald-300 border border-emerald-700 px-2.5 py-0.5 rounded-full font-bold">
                       ✓ HADIR (Checked-In)
                     </span>
-                    <span className="text-[9px] bg-[#28292F] text-[#E0C98F] border border-[#35373E] px-2.5 py-0.5 rounded-full font-mono font-semibold">
-                      {g.code || g.id}
-                    </span>
+                    {g.code && g.code !== g.name && !g.code.startsWith("GUEST-") && (
+                      <span className="text-[9px] bg-[#28292F] text-[#E0C98F] border border-[#35373E] px-2.5 py-0.5 rounded-full font-mono font-semibold">
+                        {g.code}
+                      </span>
+                    )}
                   </div>
 
                   <div className="text-[11px] text-[#9E9D98] flex gap-4 flex-wrap">

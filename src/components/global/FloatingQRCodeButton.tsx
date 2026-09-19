@@ -13,12 +13,11 @@ export function FloatingQRCodeButton() {
 
   if (appState !== "OPENED") return null;
 
-  const guestCode =
-    guest.code ||
-    `GUEST-${(guest.name || "VIP")
-      .replace(/[^a-zA-Z0-9]/g, "")
-      .substring(0, 6)
-      .toUpperCase()}`;
+  // Use the exact registered guest name for QR data and display (no 'GUEST-' prefix)
+  const qrValue =
+    guest.name && guest.name !== "Tamu Undangan"
+      ? guest.name
+      : (guest.code?.replace(/^GUEST-?/i, "") || "Tamu Undangan");
 
   return (
     <>
@@ -86,9 +85,9 @@ export function FloatingQRCodeButton() {
 
               {/* QR Code Frame — Black & Gold Frame */}
               <div className="bg-[#0E0E0F] p-4 rounded-2xl border-2 border-[#C8A96B]/60 shadow-[0_0_25px_rgba(200,169,107,0.15)] flex flex-col items-center justify-center my-3 space-y-2">
-                <QRCodeCanvas data={guestCode} size={190} className="rounded-xl shadow-md p-2 bg-white" />
-                <span className="text-xs font-mono font-extrabold tracking-[2px] text-[#E0C98F] bg-[#171719] px-3 py-1 rounded-lg border border-[#806A42] shadow-sm">
-                  {guestCode}
+                <QRCodeCanvas data={qrValue} size={190} className="rounded-xl shadow-md p-2 bg-white" />
+                <span className="text-xs font-semibold tracking-wide text-[#E0C98F] bg-[#171719] px-3.5 py-1.5 rounded-lg border border-[#806A42] shadow-sm truncate max-w-[260px]">
+                  {qrValue}
                 </span>
               </div>
 

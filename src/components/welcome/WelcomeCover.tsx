@@ -3,12 +3,20 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 
+import { InvalidGuestCard } from "./InvalidGuestCard";
+
 export function WelcomeCover({
   guestName,
   onOpen,
+  isVerified = true,
+  isChecking = false,
+  onVerifySuccess,
 }: {
   guestName?: string;
   onOpen?: () => void;
+  isVerified?: boolean;
+  isChecking?: boolean;
+  onVerifySuccess?: (guest: any) => void;
 }) {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -61,13 +69,29 @@ export function WelcomeCover({
         ))}
       </div>
 
-      {/* Render content synced with video loop at 2.7s */}
-      {guestName && onOpen && (
-        <WelcomeContent
-          guestName={guestName}
-          onOpen={onOpen}
-          isVisible={isVisible}
+      {/* Checking Verification Indicator */}
+      {isChecking ? (
+        <div className="absolute inset-x-0 top-[81%] -translate-y-1/2 z-20 flex flex-col items-center justify-center px-6 text-center">
+          <div className="px-5 py-2.5 bg-black/65 backdrop-blur-md border border-[#C8A96B]/50 rounded-2xl flex items-center gap-2.5 shadow-2xl">
+            <span className="w-3.5 h-3.5 border-2 border-[#C8A96B] border-t-transparent rounded-full animate-spin" />
+            <span className="text-[11px] text-[#E0C98F] font-bold tracking-wider uppercase">
+              Memverifikasi Undangan...
+            </span>
+          </div>
+        </div>
+      ) : !isVerified ? (
+        <InvalidGuestCard
+          enteredName={guestName}
+          onVerifySuccess={onVerifySuccess}
         />
+      ) : (
+        guestName && onOpen && (
+          <WelcomeContent
+            guestName={guestName}
+            onOpen={onOpen}
+            isVisible={isVisible}
+          />
+        )
       )}
     </div>
   );

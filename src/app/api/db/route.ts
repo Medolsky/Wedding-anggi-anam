@@ -572,6 +572,89 @@ export async function GET(req: Request) {
     ? "jsonbin"
     : "memory";
 
+  if (type === "verify") {
+    const toParam = (searchParams.get("to") || searchParams.get("name") || "").trim();
+    const codeParam = (searchParams.get("code") || "").trim();
+
+    if (!toParam && !codeParam) {
+      return NextResponse.json({
+        success: true,
+        valid: false,
+        reason: "empty_query",
+        message: "Silakan gunakan link undangan resmi yang telah dibagikan.",
+      });
+    }
+
+    const guests = data.guests || [];
+    if (guests.length === 0) {
+      return NextResponse.json({
+        success: true,
+        valid: true,
+        guest: { name: toParam || "Tamu Undangan" },
+      });
+    }
+
+    const clean = (s: string) =>
+      s
+        .toLowerCase()
+        .replace(/^yth\.?\s*/i, "")
+        .replace(/^bapak\/ibu\s*/i, "")
+        .replace(/^bpk\.?\s*/i, "")
+        .replace(/^ibu\.?\s*/i, "")
+        .replace(/^sdr\.?\s*/i, "")
+        .replace(/\s*&\s*partner/i, "")
+        .replace(/\s*&\s*pasangan/i, "")
+        .replace(/\s*dan\s*keluarga/i, "")
+        .replace(/[^a-z0-9]/g, "");
+
+    const matched = guests.find((g: any) => {
+      const gCode = String(g.code || g.id || "").trim().toLowerCase();
+      const gName = String(g.name || "").trim().toLowerCase();
+      const searchCode = codeParam.toLowerCase();
+      const searchTo = toParam.toLowerCase();
+
+      if (searchCode && (gCode === searchCode || gCode.includes(searchCode) || searchCode.includes(gCode))) {
+        return true;
+      }
+
+      if (searchTo) {
+        if (gName === searchTo) return true;
+        if (
+          clean(gName) &&
+          clean(searchTo) &&
+          (clean(gName) === clean(searchTo) ||
+            clean(gName).includes(clean(searchTo)) ||
+            clean(searchTo).includes(clean(gName)))
+        ) {
+          return true;
+        }
+      }
+
+      return false;
+    });
+
+    if (matched) {
+      return NextResponse.json({
+        success: true,
+        valid: true,
+        guest: {
+          id: matched.id,
+          name: matched.name,
+          code: matched.code || matched.id,
+          category: matched.category || "Tamu VIP",
+          pax: matched.pax || 1,
+        },
+      });
+    }
+
+    return NextResponse.json({
+      success: true,
+      valid: false,
+      reason: "not_found",
+      message: "Nama atau tautan tidak ditemukan dalam daftar tamu resmi.",
+    });
+  }
+
   if (type === "guests") return NextResponse.json({ success: true, data: data.guests, persistent: isUsingDB, provider });
   if (type === "rsvps") return NextResponse.json({ success: true, data: data.rsvps, persistent: isUsingDB, provider });
   if (type === "wishes") return NextResponse.json({ success: true, data: data.wishes, persistent: isUsingDB, provider });

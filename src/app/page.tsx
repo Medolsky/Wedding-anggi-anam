@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, Suspense } from "react";
+import { useEffect, useCallback, Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -40,39 +40,69 @@ function InvitationContent() {
   const setGuest = useInvitationStore((s) => s.setGuest);
   const setMusicPlaying = useInvitationStore((s) => s.setMusicPlaying);
 
+  // Guest Authorization & Verification States
+  const [isCheckingGuest, setIsCheckingGuest] = useState(true);
+  const [isGuestVerified, setIsGuestVerified] = useState(false);
+
   // Initialize scroll section tracking
   useScrollSection();
 
-  // Parse guest params from URL & auto-resolve code if using short link
+  // Parse & strictly verify guest from URL against database registry
   useEffect(() => {
     const guestData = parseGuestParams(searchParams);
     setGuest(guestData);
 
-    // If code is not present in URL, try to resolve assigned code from cloud DB in background
-    if (guestData.name && guestData.name !== "Tamu Undangan" && !guestData.code) {
-      fetch(`/api/db?type=guests&t=${Date.now()}`, { cache: "no-store" })
-        .then((res) => res.json())
-        .then((json) => {
-          if (json.success && Array.isArray(json.data)) {
-            const searchName = guestData.name.trim().toLowerCase();
-            const matched = json.data.find(
-              (g: any) =>
-                g.name?.trim().toLowerCase() === searchName ||
-                searchName.includes(g.name?.trim().toLowerCase()) ||
-                g.name?.trim().toLowerCase().includes(searchName)
-            );
-            if (matched && (matched.code || matched.id)) {
-              setGuest({
-                ...guestData,
-                code: matched.code || matched.id,
-                category: matched.category || guestData.category,
-              });
-            }
-          }
-        })
-        .catch(() => {});
+    const queryTo = guestData.name !== "Tamu Undangan" ? guestData.name : "";
+    const queryCode = guestData.code || "";
+
+    // If neither name nor code is provided (e.g. opened root URL directly):
+    if (!queryTo && !queryCode) {
+      setIsCheckingGuest(false);
+      setIsGuestVerified(false);
+      return;
     }
+
+    // Verify against official guest registry in database
+    setIsCheckingGuest(true);
+    fetch(
+      `/api/db?type=verify&to=${encodeURIComponent(queryTo)}&code=${encodeURIComponent(queryCode)}&t=${Date.now()}`,
+      { cache: "no-store" }
+    )
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && json.valid && json.guest) {
+          setIsGuestVerified(true);
+          setGuest({
+            ...guestData,
+            name: json.guest.name || guestData.name,
+            code: json.guest.code || guestData.code,
+            category: json.guest.category || guestData.category,
+            maxGuest: json.guest.pax || guestData.maxGuest,
+          });
+        } else {
+          setIsGuestVerified(false);
+        }
+      })
+      .catch(() => {
+        setIsGuestVerified(false);
+      })
+      .finally(() => {
+        setIsCheckingGuest(false);
+      });
   }, [searchParams, setGuest]);
+
+  const handleVerifySuccess = useCallback(
+    (verifiedGuest: any) => {
+      setGuest({
+        name: verifiedGuest.name,
+        code: verifiedGuest.code,
+        category: verifiedGuest.category,
+        maxGuest: verifiedGuest.pax,
+      });
+      setIsGuestVerified(true);
+    },
+    [setGuest]
+  );
 
   // Real-time Visitor Telemetry Heartbeat Beacon
   useEffect(() => {
@@ -132,6 +162,7 @@ function InvitationContent() {
 
   // Direct open transition from Welcome Page to Main Page
   const handleOpen = useCallback(() => {
+    if (!isGuestVerified) return;
     setState("OPENING");
     setMusicPlaying(true);
 
@@ -140,7 +171,7 @@ function InvitationContent() {
       setState("OPENED");
       window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
     }, 850);
-  }, [setState, setMusicPlaying]);
+  }, [isGuestVerified, setState, setMusicPlaying]);
 
   return (
     <div className="min-h-screen w-full bg-[#faf8f5] text-[var(--color-text)] flex justify-center items-center relative overflow-x-hidden">
@@ -176,6 +207,9 @@ function InvitationContent() {
               <WelcomeCover
                 guestName={guest.name}
                 onOpen={handleOpen}
+                isVerified={isGuestVerified}
+                isChecking={isCheckingGuest}
+                onVerifySuccess={handleVerifySuccess}
               />
             </motion.div>
           )}
@@ -183,31 +217,36 @@ function InvitationContent() {
 
         {/* ==========================================
             MAIN PAGE (State: OPENED or OPENING)
+            Protected: Only accessible for verified guests
             ========================================== */}
-        <main
-          className={`relative w-full transition-opacity duration-500 ${
-            state === "CLOSED" ? "h-screen overflow-hidden opacity-90" : "opacity-100"
-          }`}
-        >
-          <HeroSection />
-          <ETicketSection />
-          <QuoteSection />
-          <GroomSection />
-          <BrideSection />
-          <EventSection />
-          <StorySection />
-          <GallerySection />
-          <GiftSection />
-          <WishesSection />
-          <FooterSection />
-        </main>
+        {isGuestVerified && (
+          <>
+            <main
+              className={`relative w-full transition-opacity duration-500 ${
+                state === "CLOSED" ? "h-screen overflow-hidden opacity-90" : "opacity-100"
+              }`}
+            >
+              <HeroSection />
+              <ETicketSection />
+              <QuoteSection />
+              <GroomSection />
+              <BrideSection />
+              <EventSection />
+              <StorySection />
+              <GallerySection />
+              <GiftSection />
+              <WishesSection />
+              <FooterSection />
+            </main>
 
-        {/* ==========================================
-            GLOBAL OVERLAYS
-            ========================================== */}
-        <MusicPlayer />
-        <FloatingNavigation />
-        <ImageLightbox />
+            {/* ==========================================
+                GLOBAL OVERLAYS
+                ========================================== */}
+            <MusicPlayer />
+            <FloatingNavigation />
+            <ImageLightbox />
+          </>
+        )}
       </div>
     </div>
   );

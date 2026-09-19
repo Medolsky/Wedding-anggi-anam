@@ -30,19 +30,9 @@ export function GuestLinkGenerator() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [origin, setOrigin] = useState("");
 
-  // Bulk Import & Auto-Blast States
+  // Bulk Import States
   const [showBulkInput, setShowBulkInput] = useState(false);
   const [bulkText, setBulkText] = useState("");
-  const [isBlasting, setIsBlasting] = useState(false);
-  const [blastProgress, setBlastProgress] = useState({ current: 0, total: 0 });
-
-  // WA Gateway State
-  const [provider, setProvider] = useState<"local" | "meta" | "fonnte" | "wablas">("fonnte");
-  const [waToken, setWaToken] = useState("");
-  const [phoneNumberId, setPhoneNumberId] = useState("");
-  const [customServerUrl, setCustomServerUrl] = useState("");
-  const [showTokenInput, setShowTokenInput] = useState(false);
-  const [sendingId, setSendingId] = useState<string | null>(null);
 
   // QR Preview
   const [qrPreviewId, setQrPreviewId] = useState<string | null>(null);
@@ -73,14 +63,6 @@ export function GuestLinkGenerator() {
         }));
         setGuests(mapped);
       }
-
-      const cfgRes = await fetch(`/api/db?type=config&t=${Date.now()}`, { cache: "no-store" });
-      const cfgJson = await cfgRes.json();
-      if (cfgJson.success && cfgJson.data) {
-        if (cfgJson.data.customServerUrl) setCustomServerUrl(cfgJson.data.customServerUrl);
-        if (cfgJson.data.provider) setProvider(cfgJson.data.provider);
-        if (cfgJson.data.waToken) setWaToken(cfgJson.data.waToken);
-      }
     } catch {
       // API failed
     }
@@ -97,32 +79,6 @@ export function GuestLinkGenerator() {
           action: "set",
           type: "guests",
           item: updated,
-        }),
-      });
-    } catch {
-      // Fallback
-    }
-  }
-
-  async function saveConfig(
-    token: string,
-    phoneId: string,
-    prov: "local" | "meta" | "fonnte" | "wablas",
-    cUrl: string
-  ) {
-    setWaToken(token);
-    setPhoneNumberId(phoneId);
-    setProvider(prov);
-    setCustomServerUrl(cUrl);
-
-    try {
-      await fetch("/api/db", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "set",
-          type: "config",
-          item: { waToken: token, phoneNumberId: phoneId, provider: prov, customServerUrl: cUrl },
         }),
       });
     } catch {
@@ -333,108 +289,7 @@ Wassalamu’alaikum Wr. Wb.
     }
   }
 
-  // Single Background Auto Send
-  async function handleSingleAutoSend(guest: GeneratedGuest) {
-    if (!guest.phone) {
-      alert("Masukkan nomor WhatsApp terlebih dahulu untuk kirim otomatis.");
-      return false;
-    }
 
-    setSendingId(guest.id);
-    const message = getWaMessage(guest.name, guest.code);
-
-    try {
-      const res = await fetch("/api/send-whatsapp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          phone: guest.phone,
-          message: message,
-          apiKey: waToken,
-          phoneNumberId: phoneNumberId,
-          provider: provider,
-          customServerUrl: customServerUrl,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        const timeStr =
-          new Date().toLocaleTimeString("id-ID", {
-            timeZone: "Asia/Jakarta",
-            hour: "2-digit",
-            minute: "2-digit",
-          }) + " WIB";
-        const isAlreadyCopied = guest.isCopied || guest.status === "copied" || guest.status === "sent_and_copied";
-        const nextStatus = isAlreadyCopied ? ("sent_and_copied" as const) : ("sent" as const);
-
-        const updated = guests.map((g) =>
-          g.id === guest.id
-            ? {
-                ...g,
-                status: nextStatus,
-                isSentWa: true,
-                sentWaAt: timeStr,
-              }
-            : g
-        );
-        saveGuests(updated);
-        return true;
-      } else {
-        const updated = guests.map((g) => (g.id === guest.id ? { ...g, status: "failed" as const } : g));
-        saveGuests(updated);
-        setShowTokenInput(true);
-        alert(`Notice: ${data.error || "Pesan gagal terkirim. Pengaturan URL bot otomatis dibuka di bawah."}`);
-        return false;
-      }
-    } catch {
-      const updated = guests.map((g) => (g.id === guest.id ? { ...g, status: "failed" as const } : g));
-      saveGuests(updated);
-      setShowTokenInput(true);
-      return false;
-    } finally {
-      setSendingId(null);
-    }
-  }
-
-  // 1-Click Automated Bulk Auto-Blast Loop across all pending guests
-  async function handleBulkAutoBlast() {
-    const targetGuests = guests.filter((g) => g.phone && g.status !== "sent");
-
-    if (targetGuests.length === 0) {
-      alert("Semua tamu dengan nomor WA sudah terkirim atau belum ada daftar nomor WA.");
-      return;
-    }
-
-    if (
-      !confirm(
-        `Siap mengirim undangan 100% otomatis via ${
-          provider === "local" ? "Bot Lokal Self-Hosted (Unlimited)" : provider
-        } ke ${targetGuests.length} tamu sekaligus?`
-      )
-    ) {
-      return;
-    }
-
-    setIsBlasting(true);
-    setBlastProgress({ current: 0, total: targetGuests.length });
-
-    let successCount = 0;
-    for (let i = 0; i < targetGuests.length; i++) {
-      const currentGuest = targetGuests[i];
-      setBlastProgress({ current: i + 1, total: targetGuests.length });
-
-      const ok = await handleSingleAutoSend(currentGuest);
-      if (ok) successCount++;
-
-      // Safe delay 1.2s between calls
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-    }
-
-    setIsBlasting(false);
-    alert(`🎉 SELESAI! Berhasil mengirim ${successCount} dari ${targetGuests.length} undangan secara 100% otomatis!`);
-  }
 
   function handleDirectWaWeb(guest: GeneratedGuest) {
     const text = getWaMessage(guest.name, guest.code);
@@ -531,189 +386,21 @@ Wassalamu’alaikum Wr. Wb.
     saveGuests(updated);
   }
 
-  const pendingWithPhoneCount = guests.filter((g) => g.phone && g.status !== "sent").length;
-
   return (
     <div className="space-y-6">
-      {/* Fonnte Token & Bot Config Card */}
-      <div className="bg-[#202125] border border-[#2D2E34] rounded-2xl shadow-xs p-5 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <span className="text-sm font-bold text-[#F1F0EC] flex items-center gap-2">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E0C98F" strokeWidth="2">
-                <line x1="22" y1="2" x2="11" y2="13" />
-                <polygon points="22 2 15 22 11 13 2 9 22 2" />
-              </svg>
-              <span>{provider === "fonnte" ? "Fonnte WA Gateway" : provider === "local" ? "Pure Bot WA (Nomor Baru)" : provider.toUpperCase()}</span>
-            </span>
-            <span className={`text-[9.5px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
-              waToken
-                ? "bg-emerald-950 text-emerald-300 border border-emerald-700"
-                : "bg-amber-950 text-amber-300 border border-amber-700"
-            }`}>
-              {waToken ? "Token Aktif" : "Token Belum Diisi"}
-            </span>
-          </div>
-
-          <button
-            onClick={() => setShowTokenInput(!showTokenInput)}
-            className="text-xs py-1.5 px-3 font-semibold whitespace-nowrap cursor-pointer bg-[#28292F] hover:bg-[#32343B] text-[#E0C98F] border border-[#35373E] rounded-xl transition-all flex items-center gap-1.5"
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="3" />
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-            </svg>
-            <span>{showTokenInput ? "Tutup" : "Pengaturan"}</span>
-          </button>
-        </div>
-
-        {/* Token Fonnte — Inline Quick Input */}
-        <div className="flex items-center gap-2.5">
-          <label className="text-[10px] uppercase text-[#E0C98F] font-bold whitespace-nowrap">Token Fonnte:</label>
-          <input
-            type="text"
-            placeholder="Paste token Fonnte Anda di sini..."
-            value={waToken}
-            onChange={(e) => setWaToken(e.target.value)}
-            className="flex-1 text-xs py-2 px-3 font-mono rounded-xl border border-[#35373E] bg-[#28292F] text-[#F1F0EC] placeholder-[#71717A] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
-          />
-          <button
-            onClick={async () => {
-              await saveConfig(waToken, phoneNumberId, provider, customServerUrl);
-              alert("Token berhasil disimpan!");
-            }}
-            className="text-[11px] py-2 px-4 font-bold bg-gradient-to-r from-[#C8A96B] to-[#B8860B] text-white hover:opacity-95 rounded-xl cursor-pointer transition-all whitespace-nowrap shadow-sm flex items-center gap-1"
-          >
-            <span>Simpan</span>
-          </button>
-        </div>
-
-        {provider === "fonnte" && !waToken && (
-          <p className="text-[10.5px] text-amber-300 bg-amber-950/40 border border-amber-700/60 rounded-xl px-3.5 py-2">
-            Token Fonnte belum diisi. Dapatkan token di <strong>fonnte.com</strong> → Dashboard → API Token, lalu paste di atas.
-          </p>
-        )}
-      </div>
-
-      {/* Expanded Provider Config */}
-      {showTokenInput && (
-        <div className="bg-white border border-[#d4af37]/40 rounded-2xl shadow-sm p-4 space-y-3">
-          <h4 className="text-xs uppercase tracking-wider font-bold text-[#b8860b]">
-            ⚙️ Pengaturan Server WhatsApp Bot Gateway
-          </h4>
-
-          <div className="space-y-3">
-            <div>
-              <label className="block text-[10px] uppercase text-[#b8860b] font-semibold mb-1">
-                Provider Bot Pengirim
-              </label>
-              <select
-                value={provider}
-                onChange={(e) => setProvider(e.target.value as any)}
-                className="w-full text-xs py-2 px-3 bg-[#faf8f5] border border-[#d4af37]/40 rounded-xl text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
-              >
-                <option value="fonnte">🌐 Fonnte WA Gateway (Token Aktif)</option>
-                <option value="local">🤖 Pure Bot WA Nomor Baru (npm run wa-pure-bot)</option>
-                <option value="meta">Meta Official Cloud API (Gratis 1.000 msgs/bulan)</option>
-                <option value="wablas">Wablas WA Gateway</option>
-              </select>
-            </div>
-
-            {/* Custom Tunnel URL */}
-            <div className="bg-[#faf8f5] p-3 rounded-xl border border-[#d4af37]/30 space-y-1">
-              <label className="block text-[11px] uppercase text-[#b8860b] font-bold">
-                🔗 URL Server Bot Custom (Localtunnel / Cloudflare)
-              </label>
-              <input
-                type="text"
-                placeholder="Paste URL Tunnel (contoh: https://xxx.trycloudflare.com)"
-                value={customServerUrl}
-                onChange={(e) => setCustomServerUrl(e.target.value)}
-                className="w-full text-xs py-2 px-3 font-mono rounded-lg border border-[#d4af37]/40 bg-white text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
-              />
-            </div>
-
-            {provider === "meta" && (
-              <div>
-                <label className="block text-[10px] uppercase text-[#b8860b] font-semibold mb-0.5">
-                  Meta Phone Number ID
-                </label>
-                <input
-                  type="text"
-                  placeholder="Contoh: 104829381928301"
-                  value={phoneNumberId}
-                  onChange={(e) => setPhoneNumberId(e.target.value)}
-                  className="w-full text-xs py-1.5 px-3 font-mono border border-[#d4af37]/40 rounded-lg bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
-                />
-              </div>
-            )}
-
-            {provider !== "local" && (
-              <div>
-                <label className="block text-[10px] uppercase text-[#b8860b] font-semibold mb-0.5">
-                  API Token Key
-                </label>
-                <input
-                  type="text"
-                  placeholder="Masukkan Token API..."
-                  value={waToken}
-                  onChange={(e) => setWaToken(e.target.value)}
-                  className="w-full text-xs py-1.5 px-3 font-mono border border-[#d4af37]/40 rounded-lg bg-[#faf8f5] text-[#2a2723] focus:ring-2 focus:ring-[#d4af37] focus:outline-none"
-                />
-              </div>
-            )}
-
-            <button
-              onClick={() => {
-                saveConfig(waToken, phoneNumberId, provider, customServerUrl);
-                setShowTokenInput(false);
-                alert("✓ Pengaturan Provider WA Bot berhasil disimpan!");
-              }}
-              className="w-full text-xs py-2 px-4 font-bold bg-[#d4af37] text-white hover:bg-[#b8860b] rounded-xl cursor-pointer transition-all mt-2"
-            >
-              Simpan Pengaturan
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Quick Action Top Bar: Import & Bulk Auto-Blast */}
-      <div className="flex gap-2.5">
+      {/* Quick Action Bar: Impor Tamu */}
+      <div className="flex justify-end">
         <button
+          type="button"
           onClick={() => setShowBulkInput(!showBulkInput)}
-          className="text-xs py-2.5 px-4 font-bold flex-1 flex items-center justify-center gap-1.5 bg-[#202125] border border-[#35373E] text-[#F1F0EC] hover:bg-[#28292F] rounded-xl cursor-pointer transition-all"
+          className="text-xs py-2 px-3.5 font-bold flex items-center justify-center gap-2 bg-[#202125] border border-[#35373E] text-[#F1F0EC] hover:bg-[#28292F] hover:border-[#C8A96B]/60 rounded-xl cursor-pointer transition-all shadow-xs"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E0C98F" strokeWidth="2">
             <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
             <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
           </svg>
-          <span>{showBulkInput ? "Tutup Impor" : "Impor Banyak Tamu (Copas List)"}</span>
+          <span>{showBulkInput ? "Tutup Form Impor" : "📋 Impor Banyak Tamu (Copas List)"}</span>
         </button>
-
-        {pendingWithPhoneCount > 0 && (
-          <button
-            onClick={handleBulkAutoBlast}
-            disabled={isBlasting}
-            className="text-xs py-2.5 px-4 font-extrabold flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-none shadow-md flex items-center justify-center gap-1.5 cursor-pointer hover:from-emerald-500 hover:to-teal-500 rounded-xl transition-all"
-          >
-            {isBlasting ? (
-              <span className="flex items-center gap-1.5">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="animate-spin">
-                  <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
-                </svg>
-                <span>Sending {blastProgress.current}/{blastProgress.total}</span>
-              </span>
-            ) : (
-              <span className="flex items-center gap-1.5">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="22" y1="2" x2="11" y2="13" />
-                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                </svg>
-                <span>KIRIM MASSAL OTOMATIS ({pendingWithPhoneCount})</span>
-              </span>
-            )}
-          </button>
-        )}
       </div>
 
       {/* Bulk Import Textarea Card */}

@@ -26,7 +26,7 @@ const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||
   (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : null) ||
   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
-  "https://wedding-anggi-anam.vercel.app";
+  "https://wedding-angi-anam.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
       {
         url: "/og-image.jpg",
         width: 1080,
-        height: 1350,
+        height: 1080,
         alt: "The Wedding of Anam & Angi",
         type: "image/jpeg",
       },
@@ -93,7 +93,7 @@ export default function RootLayout({
         <meta property="og:image:secure_url" content={`${siteUrl}/og-image.jpg`} />
         <meta property="og:image:type" content="image/jpeg" />
         <meta property="og:image:width" content="1080" />
-        <meta property="og:image:height" content="1350" />
+        <meta property="og:image:height" content="1080" />
         <meta property="og:url" content={siteUrl} />
         <meta property="og:type" content="website" />
       </head>

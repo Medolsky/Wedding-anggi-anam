@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { neon } from "@neondatabase/serverless";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 /**
  * Universal Cloud Database API Route for Wedding Invitation App
  * Supports: Vercel Postgres / Neon, Google Sheets (Apps Script), Supabase SQL, and JSONBin.
@@ -281,6 +284,17 @@ async function saveToExternalCloud(updatedStore: any) {
                 pax = EXCLUDED.pax;
             `;
           }
+          // Remove orphan guests that were deleted
+          try {
+            const allPg = await sql`SELECT id FROM guests`;
+            if (Array.isArray(allPg)) {
+              const activeSet = new Set(guestIds);
+              const orphans = allPg.map((r: any) => String(r.id)).filter((id: string) => !activeSet.has(id));
+              for (const oId of orphans) {
+                await sql`DELETE FROM guests WHERE id = ${oId}`;
+              }
+            }
+          } catch {}
         } else {
           await sql`TRUNCATE TABLE guests`;
         }
@@ -356,20 +370,38 @@ async function saveToExternalCloud(updatedStore: any) {
   if (supabase) {
     try {
       if (updatedStore.guests) {
-        const sqlGuests = updatedStore.guests.map((g: any) => ({
-          id: g.id || Date.now().toString(),
-          code: g.code || `GUEST-${g.id}`,
-          name: g.name,
-          phone: g.phone || null,
-          category: g.category || "Tamu VIP",
-          template: g.template || "Formal",
-          status: g.status || "pending",
-          checked_in: !!g.checkedIn,
-          check_in_time: g.checkInTime || null,
-          pax: g.pax || 1,
-        }));
-        const { error: guestErr } = await supabase.from("guests").upsert(sqlGuests);
-        if (guestErr) console.error("Supabase Save Guests Error:", guestErr);
+        if (updatedStore.guests.length === 0) {
+          await supabase.from("guests").delete().neq("id", "___dummy___");
+        } else {
+          const sqlGuests = updatedStore.guests.map((g: any) => ({
+            id: String(g.id || Date.now()),
+            code: g.code || `GUEST-${g.id}`,
+            name: g.name,
+            phone: g.phone || null,
+            category: g.category || "Tamu VIP",
+            template: g.template || "Standar",
+            status: g.status || "pending",
+            checked_in: !!g.checkedIn,
+            check_in_time: g.checkInTime || null,
+            pax: g.pax || 1,
+          }));
+          const { error: guestErr } = await supabase.from("guests").upsert(sqlGuests);
+          if (guestErr) console.error("Supabase Save Guests Error:", guestErr);
+
+          // Synchronize/delete orphan guests in Supabase that are no longer in updatedStore.guests
+          try {
+            const { data: existingRows } = await supabase.from("guests").select("id");
+            if (Array.isArray(existingRows)) {
+              const activeIdSet = new Set(sqlGuests.map((g: any) => String(g.id)));
+              const orphanIds = existingRows.map((r: any) => String(r.id)).filter((id: string) => !activeIdSet.has(id));
+              for (const orphanId of orphanIds) {
+                await supabase.from("guests").delete().eq("id", orphanId);
+              }
+            }
+          } catch (delErr) {
+            console.error("Supabase orphan guests deletion error:", delErr);
+          }
+        }
       }
 
       if (updatedStore.rsvps) {
@@ -596,15 +628,20 @@ export async function POST(req: Request) {
     if (action === "delete" && type && item) {
       const targetId = String(item.id || "").trim();
       const targetName = String(item.name || "").trim();
+      const targetCode = String(item.code || "").trim();
       const targetMessage = String(item.message || "").trim();
 
       const list = currentStore[type as "guests" | "rsvps" | "wishes"] || [];
       const updatedList = list.filter((i: any) => {
         const rowId = String(i.id || "").trim();
         const rowName = String(i.name || "").trim();
+        const rowCode = String(i.code || "").trim();
         const rowMsg = String(i.message || i.notes || "").trim();
         if (targetId && rowId === targetId) return false;
+        if (targetCode && rowCode === targetCode) return false;
         if (targetName && targetMessage && rowName === targetName && rowMsg === targetMessage) return false;
+        if (type === "guests" && targetName && rowName === targetName) return false;
+        if (type === "rsvps" && targetName && rowName === targetName) return false;
         return true;
       });
 
@@ -620,11 +657,12 @@ export async function POST(req: Request) {
           }
           if (type === "guests") {
             if (targetId) await sql`DELETE FROM guests WHERE id = ${targetId}`;
-            if (targetName) await sql`DELETE FROM guests WHERE name = ${targetName}`;
+            if (targetCode) await sql`DELETE FROM guests WHERE code = ${targetCode}`;
+            if (targetName && !targetId) await sql`DELETE FROM guests WHERE name = ${targetName}`;
           }
           if (type === "rsvps") {
             if (targetId) await sql`DELETE FROM rsvps WHERE id = ${targetId}`;
-            if (targetName) await sql`DELETE FROM rsvps WHERE name = ${targetName}`;
+            if (targetName && !targetId) await sql`DELETE FROM rsvps WHERE name = ${targetName}`;
           }
         } catch (err) {
           console.error("Postgres delete error:", err);
@@ -634,10 +672,21 @@ export async function POST(req: Request) {
       if (supabase) {
         try {
           if (targetId) await supabase.from(type).delete().eq("id", targetId);
+          if (type === "guests" && targetCode) {
+            await supabase.from("guests").delete().eq("code", targetCode);
+          }
+          if (type === "guests" && targetName && !targetId) {
+            await supabase.from("guests").delete().eq("name", targetName);
+          }
           if (targetName && targetMessage && type === "wishes") {
             await supabase.from(type).delete().eq("name", targetName).eq("message", targetMessage);
           }
-        } catch {}
+          if (type === "rsvps" && targetName && !targetId) {
+            await supabase.from("rsvps").delete().eq("name", targetName);
+          }
+        } catch (err) {
+          console.error("Supabase delete error:", err);
+        }
       }
 
       await saveToExternalCloud(newStore);

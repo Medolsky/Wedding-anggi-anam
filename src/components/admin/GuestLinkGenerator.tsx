@@ -10,7 +10,7 @@ export interface GeneratedGuest {
   name: string;
   phone?: string;
   category: string;
-  template: "Formal" | "Hangat" | "Singkat";
+  template?: string;
   status?: "pending" | "sending" | "sent" | "failed";
   checkedIn?: boolean;
   checkInTime?: string;
@@ -22,7 +22,6 @@ export function GuestLinkGenerator() {
   const [guestName, setGuestName] = useState("");
   const [phone, setPhone] = useState("");
   const [category, setCategory] = useState("Tamu VIP");
-  const [template, setTemplate] = useState<"Formal" | "Hangat" | "Singkat">("Formal");
   const [guests, setGuests] = useState<GeneratedGuest[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [origin, setOrigin] = useState("");
@@ -43,6 +42,7 @@ export function GuestLinkGenerator() {
 
   // QR Preview
   const [qrPreviewId, setQrPreviewId] = useState<string | null>(null);
+  const [showTemplatePreview, setShowTemplatePreview] = useState(false);
 
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState("");
@@ -58,13 +58,13 @@ export function GuestLinkGenerator() {
 
   async function loadCloudGuests() {
     try {
-      const res = await fetch("/api/db?type=guests");
+      const res = await fetch(`/api/db?type=guests&t=${Date.now()}`, { cache: "no-store" });
       const json = await res.json();
       if (json.success && Array.isArray(json.data)) {
         setGuests(json.data);
       }
 
-      const cfgRes = await fetch("/api/db?type=config");
+      const cfgRes = await fetch(`/api/db?type=config&t=${Date.now()}`, { cache: "no-store" });
       const cfgJson = await cfgRes.json();
       if (cfgJson.success && cfgJson.data) {
         if (cfgJson.data.customServerUrl) setCustomServerUrl(cfgJson.data.customServerUrl);
@@ -145,7 +145,7 @@ export function GuestLinkGenerator() {
       name: guestName.trim(),
       phone: phone.trim() ? formatPhoneNumber(phone.trim()) : undefined,
       category,
-      template,
+      template: "Standar",
       status: "pending",
       checkedIn: false,
       pax: 1,
@@ -199,7 +199,7 @@ export function GuestLinkGenerator() {
           name,
           phone: rawPhone ? formatPhoneNumber(rawPhone) : undefined,
           category,
-          template,
+          template: "Standar",
           status: "pending",
           checkedIn: false,
           pax: 1,
@@ -221,9 +221,28 @@ export function GuestLinkGenerator() {
     }
   }
 
-  function handleDelete(id: string) {
+  async function handleDelete(id: string) {
+    const targetGuest = guests.find((g) => g.id === id);
     const updated = guests.filter((g) => g.id !== id);
-    saveGuests(updated);
+    setGuests(updated);
+
+    try {
+      await fetch("/api/db", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "delete",
+          type: "guests",
+          item: {
+            id,
+            name: targetGuest?.name,
+            code: targetGuest?.code,
+          },
+        }),
+      });
+    } catch (err) {
+      console.error("Failed to delete guest from cloud DB:", err);
+    }
   }
 
   function getGuestUrl(name: string, code?: string) {
@@ -232,75 +251,51 @@ export function GuestLinkGenerator() {
     return `${origin}/?to=${encodedName}${codeParam}`;
   }
 
-  function getWaMessage(name: string, tmpl: "Formal" | "Hangat" | "Singkat" = "Formal", code?: string) {
-    const url = getGuestUrl(name, code);
+  function getWaMessage(name: string, codeOrTmpl?: string, code?: string) {
+    const actualCode =
+      code || (codeOrTmpl && !["Formal", "Hangat", "Singkat", "Standar"].includes(codeOrTmpl) ? codeOrTmpl : undefined);
+    const url = getGuestUrl(name, actualCode);
 
-    if (tmpl === "Singkat") {
-      return `Halo *${name}*,
-
-Tanpa mengurangi rasa hormat, kami mengundang kamu untuk hadir di acara pernikahan kami:
-
-*${weddingData.couple.groom.nickname} & ${weddingData.couple.bride.nickname}*
-🗓 Sabtu, 10 Oktober 2026
-📍 BALAI IKABAMA, Depok
-
-Link Undangan Digital:
-${url}
-
-Terima kasih atas doa restunya!
-- Anam & Angi`;
+    const cleanName = name.trim();
+    let guestDisplayName = cleanName;
+    if (/^Bapak\/Ibu\s+/i.test(cleanName)) {
+      guestDisplayName = cleanName.replace(/^Bapak\/Ibu\s+/i, "");
     }
 
-    if (tmpl === "Hangat") {
-      return `Assalamu'alaikum Wr. Wb.
+    const hasPartnerOrFamily = /(&|dan\s+|partner|keluarga|istri|suami|pasangan)/i.test(guestDisplayName);
+    const guestWithPartner = hasPartnerOrFamily ? guestDisplayName : `${guestDisplayName} & Partner`;
 
-Dear *${name}*,
+    return `Assalamu’alaikum Wr. Wb.
 
-Semoga sehat dan bahagia selalu! 🌸
-Dengan penuh rasa syukur, kami ingin mengundang kamu untuk hadir menjadi bagian dari hari bahagia pernikahan kami:
+*Yth. Bapak/Ibu ${guestDisplayName}*
 
-*${weddingData.couple.groom.nickname} & ${weddingData.couple.bride.nickname}*
-(Misbakhul Anam Roziqin & Angi Sulistia)
+Tanpa mengurangi rasa hormat, perkenankan kami mengundang Bapak/Ibu/Saudara/i *${guestWithPartner}*, Untuk menghadiri acara pernikahan kami. 
 
-🗓 *Sabtu, 10 Oktober 2026*
-📍 *BALAI IKABAMA*, Depok
+*Misbakhul Anam Roziqin & Angi Sulistia*
 
-Informasi lengkap acara, peta lokasi, dan konfirmasi kehadiran (RSVP) dapat dilihat pada link berikut:
-${url}
+Kami mengundang Bapak/Ibu untuk hadir dan turut memberikan doa restu pada:
 
-Kehadiran dan doa restumu sangat berarti bagi perjalanan kehidupan baru kami. Sampai jumpa di hari H!
+*🗓️Sabtu, 10 Oktober 2026*
+*⏱️ 08.00 s/d Selesai*
+*💍Balai Ikabama, Kota Depok*
 
-Warm regards,
-*Anam & Angi*`;
-    }
+Undangan lengkap beserta informasi acara dapat diakses melalui tautan berikut:
 
-    return `Bismillah-ir-Rahman-ir-Rahim
+🔗 ${url}
 
-Kepada Yth.
-*${name}*
+Kami berharap Bapak/Ibu dapat hadir dan menjadi bagian dari hari bahagia kami.
 
-Tanpa mengurangi rasa hormat, perkenankan kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara pernikahan kami:
+Mohon maaf apabila undangan ini disampaikan melalui pesan digital.
 
-*${weddingData.couple.groom.nickname} & ${weddingData.couple.bride.nickname}*
-(Misbakhul Anam Roziqin & Angi Sulistia)
+Terima kasih atas perhatian dan doa yang diberikan.
 
-🗓 *Sabtu, 10 Oktober 2026*
-📍 *BALAI IKABAMA*, Depok
+Wassalamu’alaikum Wr. Wb.
 
-Berikut link undangan digital kami untuk informasi lengkap acara & RSVP:
-${url}
-
-Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu.
-
-Terima kasih.
-Wassalamu'alaikum Wr. Wb.
-
-Hormat kami,
 *Anam & Angi*`;
   }
 
-  async function handleCopy(name: string, id: string) {
-    const url = getGuestUrl(name);
+  async function handleCopy(name: string, id: string, code?: string) {
+    const url = getGuestUrl(name, code);
     try {
       await navigator.clipboard.writeText(url);
       setCopiedId(id);
@@ -318,7 +313,7 @@ Hormat kami,
     }
 
     setSendingId(guest.id);
-    const message = getWaMessage(guest.name, guest.template);
+    const message = getWaMessage(guest.name, guest.code);
 
     try {
       const res = await fetch("/api/send-whatsapp", {
@@ -396,7 +391,7 @@ Hormat kami,
   }
 
   function handleDirectWaWeb(guest: GeneratedGuest) {
-    const text = getWaMessage(guest.name, guest.template, guest.code);
+    const text = getWaMessage(guest.name, guest.code);
     const encodedText = encodeURIComponent(text);
     const cleanNum = guest.phone ? formatPhoneNumber(guest.phone) : "";
     const waUrl = cleanNum
@@ -411,7 +406,7 @@ Hormat kami,
   }
 
   async function handleCopyFullMessage(guest: GeneratedGuest) {
-    const text = getWaMessage(guest.name, guest.template, guest.code);
+    const text = getWaMessage(guest.name, guest.code);
     try {
       await navigator.clipboard.writeText(text);
       setCopiedId(`msg-${guest.id}`);
@@ -703,7 +698,7 @@ Budi Santoso, 081987654321`}
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
             <div>
               <label className="block text-[10.5px] uppercase tracking-wider text-[#E0C98F] font-bold mb-1">
                 Kategori Tamu
@@ -721,27 +716,42 @@ Budi Santoso, 081987654321`}
               </select>
             </div>
 
-            <div>
-              <label className="block text-[10.5px] uppercase tracking-wider text-[#E0C98F] font-bold mb-1">
-                Template Pesan
-              </label>
-              <select
-                value={template}
-                onChange={(e) => setTemplate(e.target.value as any)}
-                className="w-full text-xs py-2.5 px-3 rounded-xl border border-[#35373E] bg-[#28292F] text-[#F1F0EC] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
-              >
-                <option value="Formal">Formal (Sopan)</option>
-                <option value="Hangat">Hangat (Teman/Sahabat)</option>
-                <option value="Singkat">Singkat &amp; Padat</option>
-              </select>
-            </div>
-
             <button
               type="submit"
-              className="py-2.5 px-5 text-xs font-bold col-span-2 md:col-span-1 mt-4 md:mt-5 bg-gradient-to-r from-[#C8A96B] to-[#B8860B] text-white hover:opacity-95 rounded-xl cursor-pointer transition-all shadow-sm"
+              className="py-2.5 px-5 text-xs font-bold bg-gradient-to-r from-[#C8A96B] to-[#B8860B] text-white hover:opacity-95 rounded-xl cursor-pointer transition-all shadow-sm h-[38px] flex items-center justify-center gap-1.5"
             >
               + Tambah ke Daftar
             </button>
+          </div>
+
+          {/* Single Unified Template Info Badge with Interactive Preview */}
+          <div className="bg-[#1C1D21] border border-[#2D2E34] rounded-xl overflow-hidden transition-all">
+            <div className="p-3 flex items-center justify-between flex-wrap gap-2 text-[11px] text-[#A1A4B2]">
+              <div className="flex items-center gap-2">
+                <span className="text-base">📋</span>
+                <span className="text-[#F1F0EC] font-semibold">Template Pesan WhatsApp Resmi (Berlaku untuk Semua Tamu)</span>
+                <span className="text-[10px] bg-[#28292F] text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-[#35373E]">
+                  Standar Tunggal
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowTemplatePreview(!showTemplatePreview)}
+                className="text-[10.5px] text-[#E0C98F] hover:text-[#F3E5AB] font-bold cursor-pointer transition-colors flex items-center gap-1"
+              >
+                {showTemplatePreview ? "Sembunyikan Format ▲" : "Lihat Format Pesan ▼"}
+              </button>
+            </div>
+            {showTemplatePreview && (
+              <div className="px-3.5 pb-3.5 pt-1 border-t border-[#2D2E34]/70 bg-[#16171A]">
+                <p className="text-[10px] text-[#8E909A] mb-2">
+                  * Nama tamu dan tautan undangan akan terisi otomatis sesuai data masing-masing:
+                </p>
+                <pre className="text-[11px] text-[#E5E3DF] font-mono whitespace-pre-wrap leading-relaxed bg-[#202125] p-3 rounded-lg border border-[#2B2C32] select-all">
+                  {getWaMessage("Bapak Budi Santoso", "GUEST-001")}
+                </pre>
+              </div>
+            )}
           </div>
         </form>
       </div>
@@ -829,9 +839,6 @@ Budi Santoso, 081987654321`}
               <div className="flex gap-2">
                 <button
                   onClick={async () => {
-                    if (guests.length > 0) {
-                      await saveGuests(guests);
-                    }
                     await loadCloudGuests();
                   }}
                   className="text-[11px] text-[#E0C98F] bg-[#28292F] hover:bg-[#32343B] px-3 py-1 rounded-xl border border-[#35373E] cursor-pointer font-bold transition-all flex items-center gap-1"
@@ -844,9 +851,22 @@ Budi Santoso, 081987654321`}
 
                 {guests.length > 0 && (
                   <button
-                    onClick={() => {
-                      if (confirm("Yakin ingin menghapus seluruh daftar tamu?")) {
-                        saveGuests([]);
+                    onClick={async () => {
+                      if (confirm("Apakah Anda yakin ingin menghapus SEMUA daftar tamu dari database?")) {
+                        setGuests([]);
+                        try {
+                          await fetch("/api/db", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              action: "set",
+                              type: "guests",
+                              item: [],
+                            }),
+                          });
+                        } catch (err) {
+                          console.error("Failed to clear guests from cloud:", err);
+                        }
                       }
                     }}
                     className="text-[11px] text-rose-400 hover:underline cursor-pointer font-bold px-2 py-1"
@@ -960,7 +980,7 @@ Budi Santoso, 081987654321`}
 
                     {/* Copy Link Only Button */}
                     <button
-                      onClick={() => handleCopy(g.name, g.id)}
+                      onClick={() => handleCopy(g.name, g.id, g.code)}
                       className="text-[10.5px] py-2 px-3 flex items-center gap-1.5 bg-[#28292F] border border-[#35373E] text-[#C5C4C0] hover:text-white hover:bg-[#32343B] rounded-xl cursor-pointer transition-all"
                     >
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

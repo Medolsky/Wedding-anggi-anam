@@ -31,8 +31,7 @@ const siteUrl =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: "The Wedding of Anam & Angi",
-  description:
-    "Undangan Pernikahan Digital Misbakhul Anam Roziqin & Angi Sulistia — Sabtu, 10 Oktober 2026 di BALAI IKABAMA, Depok.",
+  description: "Sabtu, 10 Oktober 2026",
   keywords: ["Undangan Pernikahan", "Anam & Angi", "The Wedding of Anam & Angi", "Wedding Invitation"],
   icons: {
     icon: [
@@ -45,7 +44,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "The Wedding of Anam & Angi",
-    description: "Undangan Pernikahan Digital Misbakhul Anam Roziqin & Angi Sulistia — Sabtu, 10 Oktober 2026 di BALAI IKABAMA, Depok.",
+    description: "Sabtu, 10 Oktober 2026",
     url: siteUrl,
     type: "website",
     locale: "id_ID",
@@ -53,16 +52,9 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
+        width: 1080,
+        height: 1350,
         alt: "The Wedding of Anam & Angi",
-        type: "image/jpeg",
-      },
-      {
-        url: "/image/og-whatsapp.jpg",
-        width: 800,
-        height: 800,
-        alt: "Foto Pernikahan Anam & Angi",
         type: "image/jpeg",
       },
     ],
@@ -70,7 +62,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "The Wedding of Anam & Angi",
-    description: "Undangan Pernikahan Digital Misbakhul Anam Roziqin & Angi Sulistia — Sabtu, 10 Oktober 2026 di BALAI IKABAMA, Depok.",
+    description: "Sabtu, 10 Oktober 2026",
     images: ["/og-image.jpg"],
   },
   robots: {
@@ -98,8 +90,8 @@ export default function RootLayout({
         <meta property="og:image" content="/og-image.jpg" />
         <meta property="og:image:secure_url" content="/og-image.jpg" />
         <meta property="og:image:type" content="image/jpeg" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
+        <meta property="og:image:width" content="1080" />
+        <meta property="og:image:height" content="1350" />
       </head>
       <body
         className="min-h-screen"

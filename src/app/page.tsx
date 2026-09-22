@@ -40,14 +40,10 @@ function InvitationContent() {
   const setGuest = useInvitationStore((s) => s.setGuest);
   const setMusicPlaying = useInvitationStore((s) => s.setMusicPlaying);
 
-  // Guest Authorization & Verification States
-  const [isCheckingGuest, setIsCheckingGuest] = useState(true);
-  const [isGuestVerified, setIsGuestVerified] = useState(false);
-
   // Initialize scroll section tracking
   useScrollSection();
 
-  // Parse & strictly verify guest from URL against database registry
+  // Parse guest from URL parameters and optionally enrich from DB
   useEffect(() => {
     const guestData = parseGuestParams(searchParams);
     setGuest(guestData);
@@ -55,54 +51,26 @@ function InvitationContent() {
     const queryTo = guestData.name !== "Tamu Undangan" ? guestData.name : "";
     const queryCode = guestData.code || "";
 
-    // If neither name nor code is provided (e.g. opened root URL directly):
-    if (!queryTo && !queryCode) {
-      setIsCheckingGuest(false);
-      setIsGuestVerified(false);
-      return;
+    if (queryTo || queryCode) {
+      fetch(
+        `/api/db?type=verify&to=${encodeURIComponent(queryTo)}&code=${encodeURIComponent(queryCode)}&t=${Date.now()}`,
+        { cache: "no-store" }
+      )
+        .then((res) => res.json())
+        .then((json) => {
+          if (json.success && json.valid && json.guest) {
+            setGuest({
+              ...guestData,
+              name: json.guest.name || guestData.name,
+              code: json.guest.code || guestData.code,
+              category: json.guest.category || guestData.category,
+              maxGuest: json.guest.pax || guestData.maxGuest,
+            });
+          }
+        })
+        .catch(() => {});
     }
-
-    // Verify against official guest registry in database
-    setIsCheckingGuest(true);
-    fetch(
-      `/api/db?type=verify&to=${encodeURIComponent(queryTo)}&code=${encodeURIComponent(queryCode)}&t=${Date.now()}`,
-      { cache: "no-store" }
-    )
-      .then((res) => res.json())
-      .then((json) => {
-        if (json.success && json.valid && json.guest) {
-          setIsGuestVerified(true);
-          setGuest({
-            ...guestData,
-            name: json.guest.name || guestData.name,
-            code: json.guest.code || guestData.code,
-            category: json.guest.category || guestData.category,
-            maxGuest: json.guest.pax || guestData.maxGuest,
-          });
-        } else {
-          setIsGuestVerified(false);
-        }
-      })
-      .catch(() => {
-        setIsGuestVerified(false);
-      })
-      .finally(() => {
-        setIsCheckingGuest(false);
-      });
   }, [searchParams, setGuest]);
-
-  const handleVerifySuccess = useCallback(
-    (verifiedGuest: any) => {
-      setGuest({
-        name: verifiedGuest.name,
-        code: verifiedGuest.code,
-        category: verifiedGuest.category,
-        maxGuest: verifiedGuest.pax,
-      });
-      setIsGuestVerified(true);
-    },
-    [setGuest]
-  );
 
   // Real-time Visitor Telemetry Heartbeat Beacon
   useEffect(() => {
@@ -162,7 +130,6 @@ function InvitationContent() {
 
   // Direct open transition from Welcome Page to Main Page
   const handleOpen = useCallback(() => {
-    if (!isGuestVerified) return;
     setState("OPENING");
     setMusicPlaying(true);
 
@@ -171,7 +138,7 @@ function InvitationContent() {
       setState("OPENED");
       window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
     }, 850);
-  }, [isGuestVerified, setState, setMusicPlaying]);
+  }, [setState, setMusicPlaying]);
 
   return (
     <div className="min-h-screen w-full bg-[#faf8f5] text-[var(--color-text)] flex justify-center items-center relative overflow-x-hidden">
@@ -207,9 +174,6 @@ function InvitationContent() {
               <WelcomeCover
                 guestName={guest.name}
                 onOpen={handleOpen}
-                isVerified={isGuestVerified}
-                isChecking={isCheckingGuest}
-                onVerifySuccess={handleVerifySuccess}
               />
             </motion.div>
           )}
@@ -217,36 +181,31 @@ function InvitationContent() {
 
         {/* ==========================================
             MAIN PAGE (State: OPENED or OPENING)
-            Protected: Only accessible for verified guests
             ========================================== */}
-        {isGuestVerified && (
-          <>
-            <main
-              className={`relative w-full transition-opacity duration-500 ${
-                state === "CLOSED" ? "h-screen overflow-hidden opacity-90" : "opacity-100"
-              }`}
-            >
-              <HeroSection />
-              <ETicketSection />
-              <QuoteSection />
-              <GroomSection />
-              <BrideSection />
-              <EventSection />
-              <StorySection />
-              <GallerySection />
-              <GiftSection />
-              <WishesSection />
-              <FooterSection />
-            </main>
+        <main
+          className={`relative w-full transition-opacity duration-500 ${
+            state === "CLOSED" ? "h-screen overflow-hidden opacity-90" : "opacity-100"
+          }`}
+        >
+          <HeroSection />
+          <ETicketSection />
+          <QuoteSection />
+          <GroomSection />
+          <BrideSection />
+          <EventSection />
+          <StorySection />
+          <GallerySection />
+          <GiftSection />
+          <WishesSection />
+          <FooterSection />
+        </main>
 
-            {/* ==========================================
-                GLOBAL OVERLAYS
-                ========================================== */}
-            <MusicPlayer />
-            <FloatingNavigation />
-            <ImageLightbox />
-          </>
-        )}
+        {/* ==========================================
+            GLOBAL OVERLAYS
+            ========================================== */}
+        <MusicPlayer />
+        <FloatingNavigation />
+        <ImageLightbox />
       </div>
     </div>
   );

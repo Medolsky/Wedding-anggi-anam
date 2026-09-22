@@ -246,9 +246,9 @@ export function BarcodeScannerManager({ initialFullScreen = false }: BarcodeScan
       const cleanIdentifier = extractGuestIdentifier(codeToSubmit);
       if (!cleanIdentifier) return;
 
-      // Anti-Spam Protection: Ultra-fast debounce
+      // Anti-Spam Protection: Fast debounce (reduced for quicker consecutive scans)
       const now = Date.now();
-      const minCooldown = isExpressMode ? 1200 : 2000;
+      const minCooldown = isExpressMode ? 800 : 1500;
       if (
         isProcessingRef.current ||
         (lastScannedRef.current.code.toLowerCase() === cleanIdentifier.toLowerCase() &&
@@ -402,7 +402,7 @@ export function BarcodeScannerManager({ initialFullScreen = false }: BarcodeScan
     await new Promise((resolve) => setTimeout(resolve, 250));
 
     try {
-      const { Html5Qrcode } = await import("html5-qrcode");
+      const { Html5Qrcode, Html5QrcodeSupportedFormats } = await import("html5-qrcode");
 
       if (scannerRef.current) {
         try {
@@ -424,6 +424,7 @@ export function BarcodeScannerManager({ initialFullScreen = false }: BarcodeScan
 
       const html5QrCode = new Html5Qrcode(scannerId, {
         verbose: false,
+        formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
         experimentalFeatures: {
           useBarCodeDetectorIfSupported: true,
         },
@@ -433,16 +434,17 @@ export function BarcodeScannerManager({ initialFullScreen = false }: BarcodeScan
       await html5QrCode.start(
         { facingMode: mode },
         {
-          fps: 26,
-          qrbox: (viewfinderWidth: number, viewfinderHeight: number) => {
-            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-            const size = Math.floor(minEdge * 0.75);
-            return {
-              width: Math.max(size, 220),
-              height: Math.max(size, 220),
-            };
-          },
+          fps: 30,
+          // NO qrbox — scan the ENTIRE camera frame for maximum speed.
+          // Users no longer need to carefully align QR codes inside a small box.
+          qrbox: undefined,
           aspectRatio: undefined,
+          disableFlip: false,
+          videoConstraints: {
+            facingMode: mode,
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
         },
         (decodedText: string) => {
           handleCheckInCode(decodedText);
@@ -640,7 +642,7 @@ export function BarcodeScannerManager({ initialFullScreen = false }: BarcodeScan
             </div>
 
             <p className="text-[11.5px] font-bold text-[#E0C98F] tracking-wider mt-5 bg-black/60 px-4 py-1.5 rounded-full border border-[#C8A96B]/40 shadow-lg backdrop-blur-md">
-              Posisikan QR Code di dalam kotak
+              Arahkan kamera ke QR Code — langsung scan otomatis
             </p>
           </div>
 

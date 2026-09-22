@@ -847,8 +847,8 @@ Budi Santoso, 081987654321`}
                         {qrPreviewId === g.id && (
                           <div className="flex flex-col items-center gap-2 p-3 bg-white border border-[#35373E] rounded-2xl my-1 animate-fadeIn">
                             <QRCodeCanvas
-                              data={g.name}
-                              size={140}
+                              data={getGuestUrl(g.name)}
+                              size={180}
                               className="rounded-lg"
                             />
                             <span className="text-[11px] font-bold text-[#18181B] bg-[#F4F4F6] px-3 py-1 rounded-lg border border-[#E4E4E7] text-center max-w-[240px] truncate">

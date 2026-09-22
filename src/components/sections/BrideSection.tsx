@@ -17,9 +17,10 @@ export function BrideSection() {
       {/* Background Image — Clear & Vivid */}
       <div className="absolute inset-0">
         <motion.div
-          className="absolute inset-0 bg-cover bg-center transform-gpu"
+          className="absolute inset-0 bg-cover transform-gpu"
           style={{
             backgroundImage: `url('${sectionBgs.bride}')`,
+            backgroundPosition: "center 20%",
             filter: "brightness(0.92) contrast(1.02)",
           }}
           initial={{ scale: 1.15 }}
@@ -67,8 +68,8 @@ export function BrideSection() {
             <img
               src={bride.photo}
               alt={bride.fullName}
-              className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
-              style={{ objectPosition: "center top" }}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              style={{ objectPosition: "center 70%" }}
             />
             <div className="absolute inset-1.5 border border-[#E0C98F]/30 rounded-xl pointer-events-none" />
           </motion.div>

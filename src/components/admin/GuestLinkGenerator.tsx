@@ -499,10 +499,14 @@ Budi Santoso, 081987654321`}
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full text-xs py-2.5 px-3 rounded-xl border border-[#35373E] bg-[#28292F] text-[#F1F0EC] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
               >
-                <option value="Tamu VIP">Tamu VIP</option>
-                <option value="Keluarga">Keluarga</option>
+                <option value="Keluarga Anam">Keluarga Anam</option>
+                <option value="Kel. Alm Mama">Kel. Alm Mama</option>
+                <option value="Kel. Mba Ayu">Kel. Mba Ayu</option>
+                <option value="Kel. Mba Diah">Kel. Mba Diah</option>
                 <option value="Teman Anam">Teman Anam</option>
+                <option value="Teman Ilham">Teman Ilham</option>
                 <option value="Teman Angi">Teman Angi</option>
+                <option value="Tamu VIP">Tamu VIP</option>
                 <option value="Rekan Kerja">Rekan Kerja</option>
               </select>
             </div>
@@ -603,11 +607,26 @@ Budi Santoso, 081987654321`}
                     className="text-xs py-2.5 px-3 rounded-xl border border-[#35373E] bg-[#28292F] text-[#F1F0EC] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none flex-1 sm:w-36"
                   >
                     <option value="all">Semua Kategori</option>
-                    <option value="Tamu VIP">Tamu VIP</option>
-                    <option value="Keluarga">Keluarga</option>
-                    <option value="Teman Anam">Teman Anam</option>
-                    <option value="Teman Angi">Teman Angi</option>
-                    <option value="Rekan Kerja">Rekan Kerja</option>
+                    {Array.from(
+                      new Set([
+                        "Keluarga Anam",
+                        "Kel. Alm Mama",
+                        "Kel. Mba Ayu",
+                        "Kel. Mba Diah",
+                        "Teman Anam",
+                        "Teman Ilham",
+                        "Teman Angi",
+                        "Tamu VIP",
+                        "Rekan Kerja",
+                        ...guests.map((g) => g.category),
+                      ])
+                    )
+                      .filter(Boolean)
+                      .map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
                   </select>
 
                   <select

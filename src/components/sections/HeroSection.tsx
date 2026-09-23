@@ -95,8 +95,8 @@ export function HeroSection() {
         </AnimatedText>
 
         {/* Countdown Card Frame */}
-        <AnimatedText delay={1.0} variant="scaleUp" className="w-full flex justify-center mt-1">
-          <div className="gold-card-pro p-3.5 border border-[#806A42] shadow-2xl w-full max-w-sm text-center">
+        <AnimatedText delay={1.0} variant="scaleUp" className="w-full flex justify-center mt-10 md:mt-12 mb-1">
+          <div className="gold-card-pro py-2.5 px-3 border border-[#806A42]/90 shadow-2xl w-full max-w-[280px] text-center">
             <Countdown targetDate={weddingData.weddingDate} />
           </div>
         </AnimatedText>

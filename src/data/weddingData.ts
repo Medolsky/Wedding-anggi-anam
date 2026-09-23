@@ -17,8 +17,8 @@ export const weddingData = {
       fullName: "Angi Sulistia",
       nickname: "Angi",
       parents: "Putri dari Bpk. Suhendi Widodo & Ibu. Lina",
-      photo: "/image/foto-angi.jpg",
-      bgPhoto: "/image/foto-angi.jpg",
+      photo: "/image/coba_angi.jpeg",
+      bgPhoto: "/image/coba_angi.jpeg",
       instagram: "@angisulistie",
       description:
         "The best chapter of our lives starts today",
@@ -35,7 +35,7 @@ export const weddingData = {
     hero: "/image/heroo.jpg",
     quote: "/image/3.jpg",
     groom: "/image/mempelai-pria.jpg",
-    bride: "/image/foto-angi.jpg",
+    bride: "/image/coba_angi.jpeg",
     event: "/image/balai1.png",
     story: "/image/gallery-hitam-01.jpg",
     gallery: "/image/30.jpg",
@@ -179,10 +179,10 @@ export const weddingData = {
     phone: "0812-3456-7890",
   },
 
-  // Music — JVKE - Golden Hour (Cinematic Violin Cover - ItsAMoney)
+  // Music — Niken Salindry - Kusuma Wijaya (Kembar Campursari)
   music: {
-    src: "/music/catal.mp3",
-    title: "Golden Hour - JVKE (Cinematic Violin Cover by ItsAMoney)",
+    src: "/music/niken.mp3",
+    title: "Kusuma Wijaya - Niken Salindry (Kembar Campursari)",
     autoplay: false,
     defaultVolume: 0.45,
   },

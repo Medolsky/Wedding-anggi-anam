@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { neon } from "@neondatabase/serverless";
 
+import fs from "fs";
+import path from "path";
+import initialGuests from "@/data/initialGuests.json";
+
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
@@ -30,7 +34,7 @@ let cloudStore: {
   wishes: any[];
   config: any;
 } = (globalThis as any).__weddingStore || {
-  guests: [],
+  guests: initialGuests || [],
   config: {
     customServerUrl: "",
     provider: "fonnte",
@@ -39,6 +43,9 @@ let cloudStore: {
   rsvps: [],
   wishes: [],
 };
+if (!cloudStore.guests || cloudStore.guests.length === 0) {
+  cloudStore.guests = (initialGuests as any[]) || [];
+}
 (globalThis as any).__weddingStore = cloudStore;
 
 // Optional external free Cloud Database Integration (Google Sheets / JSONBin.io / Supabase / KV)
@@ -259,6 +266,14 @@ async function fetchFromExternalCloud() {
 
 async function saveToExternalCloud(updatedStore: any) {
   cloudStore = updatedStore;
+
+  // Persist to local JSON file
+  try {
+    const filePath = path.join(process.cwd(), "src/data/initialGuests.json");
+    if (updatedStore.guests && Array.isArray(updatedStore.guests)) {
+      fs.writeFileSync(filePath, JSON.stringify(updatedStore.guests, null, 2));
+    }
+  } catch {}
 
   // 1. Save to Vercel Postgres / Neon if configured
   if (sql) {

@@ -81,12 +81,9 @@ export function GallerySection() {
   const setLightboxIndex = useInvitationStore((s) => s.setLightboxIndex);
   const { gallery, sectionBgs } = weddingData;
 
-  // Split the 29 prewedding photos (1 - 29) into 2 balanced rows:
-  // Baris 1: Foto 1 - 15 (Bergerak ke Kiri)
-  const row1 = useMemo(() => gallery.slice(0, 15), [gallery]);
-
-  // Baris 2: Foto 16 - 29 (Bergerak ke Kanan)
-  const row2 = useMemo(() => gallery.slice(15, 29), [gallery]);
+  const half = Math.ceil(gallery.length / 2);
+  const row1 = useMemo(() => gallery.slice(0, half), [gallery, half]);
+  const row2 = useMemo(() => gallery.slice(half), [gallery, half]);
 
   const handlePhotoClick = (item: PhotoItem) => {
     const idx = gallery.findIndex((p) => p.id === item.id);
@@ -143,42 +140,49 @@ export function GallerySection() {
               Galeri Foto
             </h2>
 
-            <p className="text-[11px] text-[#C8A96B]/75 mt-2 tracking-wider flex items-center gap-1.5 font-medium">
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.35-4.35" />
-                <path d="M11 8v6M8 11h6" />
-              </svg>
-              Klik foto untuk memperbesar • Tahan untuk menjeda
-            </p>
+            {gallery.length > 0 ? (
+              <p className="text-[11px] text-[#C8A96B]/75 mt-2 tracking-wider flex items-center gap-1.5 font-medium">
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.35-4.35" />
+                  <path d="M11 8v6M8 11h6" />
+                </svg>
+                Klik foto untuk memperbesar • Tahan untuk menjeda
+              </p>
+            ) : null}
           </div>
         </AnimatedText>
 
-        {/* Running Photos (Continuous Marquee Ticker) — 2 Baris Berjalan Otomatis */}
-        <div className="relative w-full overflow-hidden space-y-3 sm:space-y-4">
-          {/* Baris 1: Foto 1 - 15 (Bergerak ke Kiri) */}
-          <MarqueeRow
-            photos={row1}
-            direction="left"
-            duration={85}
-            onPhotoClick={handlePhotoClick}
-          />
-
-          {/* Baris 2: Foto 16 - 29 (Bergerak ke Kanan) */}
-          <MarqueeRow
-            photos={row2}
-            direction="right"
-            duration={80}
-            onPhotoClick={handlePhotoClick}
-          />
-        </div>
+        {/* Running Photos or Placeholder */}
+        {gallery.length > 0 ? (
+          <div className="relative w-full overflow-hidden space-y-3 sm:space-y-4">
+            <MarqueeRow
+              photos={row1}
+              direction="left"
+              duration={85}
+              onPhotoClick={handlePhotoClick}
+            />
+            <MarqueeRow
+              photos={row2}
+              direction="right"
+              duration={80}
+              onPhotoClick={handlePhotoClick}
+            />
+          </div>
+        ) : (
+          <div className="py-6 px-6 max-w-xs mx-auto border border-[#806A42]/40 rounded-xl bg-[#171719]/80 backdrop-blur-sm shadow-md">
+            <p className="text-xs text-[#C8C5BE]/80 italic tracking-wide">
+              Foto galeri akan segera hadir.
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );

@@ -11,7 +11,7 @@ export function ImageLightbox() {
   const lightboxIndex = useInvitationStore((s) => s.lightboxIndex);
   const setLightboxIndex = useInvitationStore((s) => s.setLightboxIndex);
   const gallery = weddingData.gallery;
-  const isOpen = lightboxIndex !== null;
+  const isOpen = lightboxIndex !== null && gallery.length > 0;
 
   const touchStartX = useRef<number | null>(null);
 
@@ -20,13 +20,13 @@ export function ImageLightbox() {
   }, []);
 
   const goNext = useCallback(() => {
-    if (lightboxIndex !== null) {
+    if (lightboxIndex !== null && gallery.length > 0) {
       setLightboxIndex((lightboxIndex + 1) % gallery.length);
     }
   }, [lightboxIndex, gallery.length, setLightboxIndex]);
 
   const goPrev = useCallback(() => {
-    if (lightboxIndex !== null) {
+    if (lightboxIndex !== null && gallery.length > 0) {
       setLightboxIndex(
         (lightboxIndex - 1 + gallery.length) % gallery.length
       );

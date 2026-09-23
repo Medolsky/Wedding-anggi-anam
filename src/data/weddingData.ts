@@ -179,10 +179,10 @@ export const weddingData = {
     phone: "0812-3456-7890",
   },
 
-  // Music — Niken Salindry - Kusuma Wijaya (Kembar Campursari)
+  // Music — The Catalyst
   music: {
-    src: "/music/niken.mp3",
-    title: "Kusuma Wijaya - Niken Salindry (Kembar Campursari)",
+    src: "/music/catal.mp3",
+    title: "The Catalyst",
     autoplay: false,
     defaultVolume: 0.45,
   },

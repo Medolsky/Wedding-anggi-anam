@@ -69,7 +69,6 @@ export function BrideSection() {
               src={bride.photo}
               alt={bride.fullName}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              style={{ objectPosition: "center 40%" }}
             />
             <div className="absolute inset-1.5 border border-[#E0C98F]/30 rounded-xl pointer-events-none" />
           </motion.div>

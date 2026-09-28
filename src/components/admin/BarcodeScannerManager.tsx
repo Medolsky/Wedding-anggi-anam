@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useAdminStore } from "@/stores/adminStore";
 
 export interface CheckedInGuest {
   id: string;
@@ -159,7 +160,11 @@ interface BarcodeScannerManagerProps {
 
 export function BarcodeScannerManager({ initialFullScreen = false }: BarcodeScannerManagerProps) {
   const [scannedCode, setScannedCode] = useState("");
-  const [guests, setGuests] = useState<CheckedInGuest[]>([]);
+  const guests = useAdminStore((s) => s.guests as CheckedInGuest[]);
+  const adjustPax = useAdminStore((s) => s.adjustPax);
+  const updateAfterCheckIn = useAdminStore((s) => s.updateAfterCheckIn);
+  const fetchData = useAdminStore((s) => s.fetchData);
+
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState<{
     status: "success" | "warning" | "error" | null;
@@ -193,14 +198,11 @@ export function BarcodeScannerManager({ initialFullScreen = false }: BarcodeScan
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    loadCloudGuests();
     if (inputRef.current) {
       inputRef.current.focus();
     }
 
-    const interval = setInterval(loadCloudGuests, 8000);
     return () => {
-      clearInterval(interval);
       stopCameraScanner();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -227,18 +229,6 @@ export function BarcodeScannerManager({ initialFullScreen = false }: BarcodeScan
 
     return () => clearInterval(interval);
   }, [activePopup, isExpressMode]);
-
-  async function loadCloudGuests() {
-    try {
-      const res = await fetch("/api/db?type=guests");
-      const json = await res.json();
-      if (json.success && Array.isArray(json.data)) {
-        setGuests(json.data);
-      }
-    } catch {
-      // Fallback
-    }
-  }
 
   // Handle checking in guest code
   const handleCheckInCode = useCallback(
@@ -305,11 +295,7 @@ export function BarcodeScannerManager({ initialFullScreen = false }: BarcodeScan
             });
           }
 
-          if (Array.isArray(json.guests)) {
-            setGuests(json.guests);
-          } else {
-            loadCloudGuests();
-          }
+          updateAfterCheckIn(json.guest, json.guests, json.rsvps);
 
           setScannedCode("");
           setShowManualInputDrawer(false);
@@ -345,7 +331,7 @@ export function BarcodeScannerManager({ initialFullScreen = false }: BarcodeScan
         if (inputRef.current) inputRef.current.focus();
       }
     },
-    [isExpressMode, isSoundOn]
+    [isExpressMode, isSoundOn, updateAfterCheckIn]
   );
 
   function handleFormSubmit(e: React.FormEvent) {
@@ -360,9 +346,6 @@ export function BarcodeScannerManager({ initialFullScreen = false }: BarcodeScan
     const currentPax = target.pax || 1;
     const newPax = Math.max(1, currentPax + delta);
 
-    const updatedGuests = guests.map((g) => (g.id === guestId ? { ...g, pax: newPax } : g));
-    setGuests(updatedGuests);
-
     if (activePopup?.guest?.id === guestId) {
       setActivePopup({
         ...activePopup,
@@ -370,19 +353,7 @@ export function BarcodeScannerManager({ initialFullScreen = false }: BarcodeScan
       });
     }
 
-    try {
-      await fetch("/api/db", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "set",
-          type: "guests",
-          item: updatedGuests,
-        }),
-      });
-    } catch {
-      // Fallback
-    }
+    await adjustPax(guestId, delta);
   }
 
   // Camera QR Scanner using html5-qrcode
@@ -1230,7 +1201,7 @@ export function BarcodeScannerManager({ initialFullScreen = false }: BarcodeScan
             <span>Daftar Riwayat Hadir di Lokasi ({checkedInCount})</span>
           </h4>
           <button
-            onClick={loadCloudGuests}
+            onClick={() => fetchData()}
             className="text-[11px] text-[#E0C98F] bg-[#28292F] hover:bg-[#32343B] px-3 py-1.5 rounded-xl border border-[#35373E] cursor-pointer font-bold transition-all flex items-center gap-1.5"
           >
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

@@ -670,12 +670,13 @@ export async function GET(req: Request) {
     });
   }
 
-  if (type === "guests") return NextResponse.json({ success: true, data: data.guests, persistent: isUsingDB, provider });
-  if (type === "rsvps") return NextResponse.json({ success: true, data: data.rsvps, persistent: isUsingDB, provider });
-  if (type === "wishes") return NextResponse.json({ success: true, data: data.wishes, persistent: isUsingDB, provider });
-  if (type === "config") return NextResponse.json({ success: true, data: data.config, persistent: isUsingDB, provider });
+  const cacheHeaders = { "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" };
+  if (type === "guests") return NextResponse.json({ success: true, data: data.guests, persistent: isUsingDB, provider }, { headers: cacheHeaders });
+  if (type === "rsvps") return NextResponse.json({ success: true, data: data.rsvps, persistent: isUsingDB, provider }, { headers: cacheHeaders });
+  if (type === "wishes") return NextResponse.json({ success: true, data: data.wishes, persistent: isUsingDB, provider }, { headers: cacheHeaders });
+  if (type === "config") return NextResponse.json({ success: true, data: data.config, persistent: isUsingDB, provider }, { headers: cacheHeaders });
 
-  return NextResponse.json({ success: true, data, persistent: isUsingDB, provider });
+  return NextResponse.json({ success: true, data, persistent: isUsingDB, provider }, { headers: cacheHeaders });
 }
 
 export async function POST(req: Request) {
@@ -685,7 +686,7 @@ export async function POST(req: Request) {
 
     const currentStore = await fetchFromExternalCloud();
 
-    if (action === "add" && type) {
+    if (action === "add" && type && item) {
       const list = currentStore[type as "guests" | "rsvps" | "wishes"] || [];
       const updatedList = [item, ...list];
       const newStore = { ...currentStore, [type]: updatedList };
@@ -693,8 +694,261 @@ export async function POST(req: Request) {
       cloudStore = newStore;
       (globalThis as any).__weddingStore = newStore;
 
-      await saveToExternalCloud(newStore);
-      return NextResponse.json({ success: true, data: newStore[type as "guests" | "rsvps" | "wishes"] });
+      // Fast Targeted Insert
+      if (type === "guests") {
+        try {
+          const filePath = path.join(process.cwd(), "src/data/initialGuests.json");
+          fs.writeFileSync(filePath, JSON.stringify(updatedList, null, 2));
+        } catch {}
+
+        if (sql) {
+          try {
+            await initPostgresTables();
+            await sql`
+              INSERT INTO guests (id, code, name, phone, category, template, status, checked_in, check_in_time, pax)
+              VALUES (${item.id || Date.now().toString()}, ${item.code || item.name || item.id}, ${item.name}, ${item.phone || null}, ${item.category || "Tamu VIP"}, ${item.template || "Standar"}, ${item.status || "pending"}, ${!!item.checkedIn}, ${item.checkInTime || null}, ${item.pax || 1})
+              ON CONFLICT (id) DO UPDATE SET
+                code = EXCLUDED.code,
+                name = EXCLUDED.name,
+                phone = EXCLUDED.phone,
+                category = EXCLUDED.category,
+                template = EXCLUDED.template,
+                status = EXCLUDED.status,
+                checked_in = EXCLUDED.checked_in,
+                check_in_time = EXCLUDED.check_in_time,
+                pax = EXCLUDED.pax;
+            `;
+          } catch (err) {
+            console.error("Postgres add guest error:", err);
+          }
+        }
+
+        if (supabase) {
+          try {
+            await supabase.from("guests").upsert([{
+              id: String(item.id || Date.now()),
+              code: item.code || item.name || item.id,
+              name: item.name,
+              phone: item.phone || null,
+              category: item.category || "Tamu VIP",
+              template: item.template || "Standar",
+              status: item.status || "pending",
+              checked_in: !!item.checkedIn,
+              check_in_time: item.checkInTime || null,
+              pax: item.pax || 1,
+            }]);
+          } catch (err) {
+            console.error("Supabase add guest error:", err);
+          }
+        }
+      } else if (type === "rsvps") {
+        if (sql) {
+          try {
+            await initPostgresTables();
+            await sql`
+              INSERT INTO rsvps (id, name, status, pax, notes, checked_in, check_in_time)
+              VALUES (${item.id || Date.now().toString()}, ${item.name}, ${item.status || item.attendance || "Hadir"}, ${item.pax || item.guestCount || 1}, ${item.notes || item.session || ""}, ${!!item.checkedIn}, ${item.checkInTime || null})
+              ON CONFLICT (id) DO UPDATE SET
+                name = EXCLUDED.name,
+                status = EXCLUDED.status,
+                pax = EXCLUDED.pax,
+                notes = EXCLUDED.notes,
+                checked_in = EXCLUDED.checked_in,
+                check_in_time = EXCLUDED.check_in_time;
+            `;
+          } catch (err) {
+            console.error("Postgres add rsvp error:", err);
+          }
+        }
+        if (supabase) {
+          try {
+            await supabase.from("rsvps").upsert([{
+              id: item.id || Date.now().toString(),
+              name: item.name,
+              status: item.status || item.attendance || "Hadir",
+              pax: item.pax || item.guestCount || 1,
+              notes: item.notes || item.session || "",
+              checked_in: !!item.checkedIn,
+              check_in_time: item.checkInTime || null,
+            }]);
+          } catch (err) {
+            console.error("Supabase add rsvp error:", err);
+          }
+        }
+      } else if (type === "wishes") {
+        if (sql) {
+          try {
+            await initPostgresTables();
+            await sql`
+              INSERT INTO wishes (id, name, message, relationship, is_approved)
+              VALUES (${item.id || Date.now().toString()}, ${item.name}, ${item.message || ""}, ${item.relationship || "Kerabat"}, ${item.is_approved !== false})
+              ON CONFLICT (id) DO UPDATE SET
+                name = EXCLUDED.name,
+                message = EXCLUDED.message,
+                relationship = EXCLUDED.relationship,
+                is_approved = EXCLUDED.is_approved;
+            `;
+          } catch (err) {
+            console.error("Postgres add wish error:", err);
+          }
+        }
+        if (supabase) {
+          try {
+            await supabase.from("wishes").upsert([{
+              id: item.id || Date.now().toString(),
+              name: item.name,
+              message: item.message || "",
+              relationship: item.relationship || "Kerabat",
+              is_approved: item.is_approved !== false,
+            }]);
+          } catch (err) {
+            console.error("Supabase add wish error:", err);
+          }
+        }
+      }
+
+      if (GOOGLE_SCRIPT_URL) {
+        fetch(GOOGLE_SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "sync", data: newStore }),
+          redirect: "follow",
+        }).catch(() => {});
+      }
+
+      return NextResponse.json({ success: true, data: updatedList, item });
+    }
+
+    if ((action === "update" || action === "edit") && type && item) {
+      const targetId = String(item.id || "").trim();
+      const targetName = String(item.name || "").trim();
+
+      const list = currentStore[type as "guests" | "rsvps" | "wishes"] || [];
+      const updatedList = list.map((i: any) => {
+        const rowId = String(i.id || "").trim();
+        const rowName = String(i.name || "").trim();
+        if ((targetId && rowId === targetId) || (targetName && rowName === targetName)) {
+          return { ...i, ...item };
+        }
+        return i;
+      });
+
+      const newStore = { ...currentStore, [type]: updatedList };
+      cloudStore = newStore;
+      (globalThis as any).__weddingStore = newStore;
+
+      if (type === "guests") {
+        try {
+          const filePath = path.join(process.cwd(), "src/data/initialGuests.json");
+          fs.writeFileSync(filePath, JSON.stringify(updatedList, null, 2));
+        } catch {}
+
+        if (sql) {
+          try {
+            await initPostgresTables();
+            await sql`
+              UPDATE guests SET
+                name = ${item.name},
+                code = ${item.code || item.name},
+                phone = ${item.phone || null},
+                category = ${item.category || "Tamu VIP"},
+                template = ${item.template || "Standar"},
+                status = ${item.status || "pending"},
+                checked_in = ${!!item.checkedIn},
+                check_in_time = ${item.checkInTime || null},
+                pax = ${item.pax || 1}
+              WHERE id = ${targetId} OR name = ${targetName}
+            `;
+          } catch (err) {
+            console.error("Postgres update guest error:", err);
+          }
+        }
+
+        if (supabase) {
+          try {
+            await supabase.from("guests").update({
+              name: item.name,
+              code: item.code || item.name,
+              phone: item.phone || null,
+              category: item.category || "Tamu VIP",
+              template: item.template || "Standar",
+              status: item.status || "pending",
+              checked_in: !!item.checkedIn,
+              check_in_time: item.checkInTime || null,
+              pax: item.pax || 1,
+            }).match(targetId ? { id: targetId } : { name: targetName });
+          } catch (err) {
+            console.error("Supabase update guest error:", err);
+          }
+        }
+      } else if (type === "rsvps") {
+        if (sql) {
+          try {
+            await initPostgresTables();
+            await sql`
+              UPDATE rsvps SET
+                name = ${item.name},
+                status = ${item.status || item.attendance || "Hadir"},
+                pax = ${item.pax || item.guestCount || 1},
+                notes = ${item.notes || item.session || ""}
+              WHERE id = ${targetId} OR name = ${targetName}
+            `;
+          } catch (err) {
+            console.error("Postgres update rsvp error:", err);
+          }
+        }
+
+        if (supabase) {
+          try {
+            await supabase.from("rsvps").update({
+              name: item.name,
+              status: item.status || item.attendance || "Hadir",
+              pax: item.pax || item.guestCount || 1,
+              notes: item.notes || item.session || "",
+            }).match(targetId ? { id: targetId } : { name: targetName });
+          } catch (err) {
+            console.error("Supabase update rsvp error:", err);
+          }
+        }
+      } else if (type === "wishes") {
+        if (sql) {
+          try {
+            await initPostgresTables();
+            await sql`
+              UPDATE wishes SET
+                name = ${item.name},
+                message = ${item.message || ""},
+                relationship = ${item.relationship || "Kerabat"}
+              WHERE id = ${targetId}
+            `;
+          } catch (err) {
+            console.error("Postgres update wish error:", err);
+          }
+        }
+
+        if (supabase) {
+          try {
+            await supabase.from("wishes").update({
+              name: item.name,
+              message: item.message || "",
+              relationship: item.relationship || "Kerabat",
+            }).match({ id: targetId });
+          } catch (err) {
+            console.error("Supabase update wish error:", err);
+          }
+        }
+      }
+
+      if (GOOGLE_SCRIPT_URL) {
+        fetch(GOOGLE_SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "sync", data: newStore }),
+          redirect: "follow",
+        }).catch(() => {});
+      }
+
+      return NextResponse.json({ success: true, data: updatedList, item });
     }
 
     if (action === "set" && type) {
@@ -747,6 +1001,13 @@ export async function POST(req: Request) {
       cloudStore = newStore;
       (globalThis as any).__weddingStore = newStore;
 
+      if (type === "guests") {
+        try {
+          const filePath = path.join(process.cwd(), "src/data/initialGuests.json");
+          fs.writeFileSync(filePath, JSON.stringify(updatedList, null, 2));
+        } catch {}
+      }
+
       if (sql) {
         try {
           if (type === "wishes") {
@@ -787,7 +1048,15 @@ export async function POST(req: Request) {
         }
       }
 
-      await saveToExternalCloud(newStore);
+      if (GOOGLE_SCRIPT_URL) {
+        fetch(GOOGLE_SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "sync", data: newStore }),
+          redirect: "follow",
+        }).catch(() => {});
+      }
+
       return NextResponse.json({ success: true, data: updatedList });
     }
 

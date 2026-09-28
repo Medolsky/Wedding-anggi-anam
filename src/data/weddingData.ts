@@ -107,7 +107,7 @@ export const weddingData = {
     },
   ],
 
-  // Gallery — Prewedding Series (42 Foto: a 1-13, 16-17, b 1-27)
+  // Gallery — Prewedding Series (51 Foto: a 1-13, 16-17, b 1-27, c 1-9)
   gallery: [
     { id: 1, src: "/image/a (1).jpeg", fullSrc: "/image/a (1).jpeg", alt: "Angi & Anam 1", orientation: "portrait" },
     { id: 2, src: "/image/a (2).jpeg", fullSrc: "/image/a (2).jpeg", alt: "Angi & Anam 2", orientation: "portrait" },
@@ -151,6 +151,15 @@ export const weddingData = {
     { id: 40, src: "/image/b (25).jpeg", fullSrc: "/image/b (25).jpeg", alt: "Angi & Anam 40", orientation: "portrait" },
     { id: 41, src: "/image/b (26).jpeg", fullSrc: "/image/b (26).jpeg", alt: "Angi & Anam 41", orientation: "portrait" },
     { id: 42, src: "/image/b (27).jpeg", fullSrc: "/image/b (27).jpeg", alt: "Angi & Anam 42", orientation: "portrait" },
+    { id: 43, src: "/image/c (1).jpeg", fullSrc: "/image/c (1).jpeg", alt: "Angi & Anam 43", orientation: "portrait" },
+    { id: 44, src: "/image/c (2).jpeg", fullSrc: "/image/c (2).jpeg", alt: "Angi & Anam 44", orientation: "portrait" },
+    { id: 45, src: "/image/c (3).jpeg", fullSrc: "/image/c (3).jpeg", alt: "Angi & Anam 45", orientation: "portrait" },
+    { id: 46, src: "/image/c (4).jpeg", fullSrc: "/image/c (4).jpeg", alt: "Angi & Anam 46", orientation: "portrait" },
+    { id: 47, src: "/image/c (5).jpeg", fullSrc: "/image/c (5).jpeg", alt: "Angi & Anam 47", orientation: "portrait" },
+    { id: 48, src: "/image/c (6).jpeg", fullSrc: "/image/c (6).jpeg", alt: "Angi & Anam 48", orientation: "portrait" },
+    { id: 49, src: "/image/c (7).jpeg", fullSrc: "/image/c (7).jpeg", alt: "Angi & Anam 49", orientation: "portrait" },
+    { id: 50, src: "/image/c (8).jpeg", fullSrc: "/image/c (8).jpeg", alt: "Angi & Anam 50", orientation: "portrait" },
+    { id: 51, src: "/image/c (9).jpeg", fullSrc: "/image/c (9).jpeg", alt: "Angi & Anam 51", orientation: "portrait" },
   ],
 
   // Bank Accounts — Misbakhul Anam Roziqin & Angi Sulistia
@@ -192,10 +201,10 @@ export const weddingData = {
     phone: "0812-3456-7890",
   },
 
-  // Music — The Catalyst
+  // Music
   music: {
-    src: "/music/catal.mp3",
-    title: "The Catalyst",
+    src: "/music/parkir.mp3",
+    title: "Wedding Song",
     autoplay: false,
     defaultVolume: 0.45,
   },

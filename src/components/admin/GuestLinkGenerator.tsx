@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { weddingData } from "@/data/weddingData";
 import { QRCodeCanvas } from "@/components/ui/QRCodeCanvas";
+import { useAdminStore } from "@/stores/adminStore";
 
 export interface GeneratedGuest {
   id: string;
@@ -26,9 +27,29 @@ export function GuestLinkGenerator() {
   const [guestName, setGuestName] = useState("");
   const [phone, setPhone] = useState("");
   const [category, setCategory] = useState("Tamu VIP");
-  const [guests, setGuests] = useState<GeneratedGuest[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [origin, setOrigin] = useState("");
+
+  // Global Admin Store for instant reactive updates & notifications
+  const guests = useAdminStore((s) => s.guests);
+  const addGuest = useAdminStore((s) => s.addGuest);
+  const updateGuest = useAdminStore((s) => s.updateGuest);
+  const deleteGuest = useAdminStore((s) => s.deleteGuest);
+  const bulkAddGuests = useAdminStore((s) => s.bulkAddGuests);
+  const clearAllGuests = useAdminStore((s) => s.clearAllGuests);
+  const toggleGuestStatus = useAdminStore((s) => s.toggleGuestStatus);
+  const markGuestSent = useAdminStore((s) => s.markGuestSent);
+  const markGuestCopied = useAdminStore((s) => s.markGuestCopied);
+  const fetchData = useAdminStore((s) => s.fetchData);
+
+  // Edit Guest Modal States
+  const [editingGuest, setEditingGuest] = useState<GeneratedGuest | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [editCategory, setEditCategory] = useState("Tamu VIP");
+  const [editPax, setEditPax] = useState<number>(1);
+  const [editStatus, setEditStatus] = useState<GeneratedGuest["status"]>("pending");
+  const [editCheckedIn, setEditCheckedIn] = useState<boolean>(false);
 
   // Bulk Import States
   const [showBulkInput, setShowBulkInput] = useState(false);
@@ -48,43 +69,7 @@ export function GuestLinkGenerator() {
     if (typeof window !== "undefined") {
       setOrigin(window.location.origin);
     }
-    loadCloudGuests();
   }, []);
-
-  async function loadCloudGuests() {
-    try {
-      const res = await fetch(`/api/db?type=guests&t=${Date.now()}`, { cache: "no-store" });
-      const json = await res.json();
-      if (json.success && Array.isArray(json.data)) {
-        const mapped = json.data.map((g: any) => ({
-          ...g,
-          isSentWa: g.isSentWa || g.status === "sent" || g.status === "sent_and_copied",
-          isCopied: g.isCopied || g.status === "copied" || g.status === "sent_and_copied",
-        }));
-        setGuests(mapped);
-      }
-    } catch {
-      // API failed
-    }
-  }
-
-  async function saveGuests(updated: GeneratedGuest[]) {
-    setGuests(updated);
-
-    try {
-      await fetch("/api/db", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "set",
-          type: "guests",
-          item: updated,
-        }),
-      });
-    } catch {
-      // Fallback
-    }
-  }
 
   function formatPhoneNumber(num: string): string {
     let cleaned = num.replace(/\D/g, "");
@@ -96,6 +81,42 @@ export function GuestLinkGenerator() {
 
   function generateUniqueCode(name: string): string {
     return name.trim();
+  }
+
+  function openEditModal(guest: GeneratedGuest) {
+    setEditingGuest(guest);
+    setEditName(guest.name);
+    setEditPhone(guest.phone ? formatPhoneNumber(guest.phone) : "");
+    setEditCategory(guest.category || "Tamu VIP");
+    setEditPax(guest.pax || 1);
+    setEditStatus(guest.status || "pending");
+    setEditCheckedIn(!!guest.checkedIn);
+  }
+
+  function handleSaveEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingGuest || !editName.trim()) return;
+
+    const trimmedName = editName.trim();
+    const updated: GeneratedGuest = {
+      ...editingGuest,
+      name: trimmedName,
+      code: editingGuest.code || trimmedName,
+      phone: editPhone.trim() ? formatPhoneNumber(editPhone.trim()) : undefined,
+      category: editCategory,
+      pax: Number(editPax) || 1,
+      status: editStatus,
+      isSentWa: editStatus === "sent" || editStatus === "sent_and_copied",
+      isCopied: editStatus === "copied" || editStatus === "sent_and_copied",
+      checkedIn: editCheckedIn,
+      checkInTime: editCheckedIn
+        ? editingGuest.checkInTime ||
+          new Date().toLocaleTimeString("id-ID", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit" }) + " WIB"
+        : undefined,
+    };
+
+    updateGuest(updated);
+    setEditingGuest(null);
   }
 
   function handleGenerate(e: React.FormEvent) {
@@ -113,15 +134,15 @@ export function GuestLinkGenerator() {
       status: "pending",
       checkedIn: false,
       pax: 1,
-      createdAt: new Date().toLocaleTimeString("id-ID", {
-        timeZone: "Asia/Jakarta",
-        hour: "2-digit",
-        minute: "2-digit",
-      }) + " WIB",
+      createdAt:
+        new Date().toLocaleTimeString("id-ID", {
+          timeZone: "Asia/Jakarta",
+          hour: "2-digit",
+          minute: "2-digit",
+        }) + " WIB",
     };
 
-    const updated = [newGuest, ...guests];
-    saveGuests(updated);
+    addGuest(newGuest);
     setGuestName("");
     setPhone("");
   }
@@ -177,35 +198,17 @@ export function GuestLinkGenerator() {
     });
 
     if (newGuests.length > 0) {
-      const updated = [...newGuests, ...guests];
-      saveGuests(updated);
+      bulkAddGuests(newGuests);
       setBulkText("");
       setShowBulkInput(false);
-      alert(`✓ Berhasil mengimpor ${newGuests.length} nama & nomor tamu ke Cloud DB!`);
     }
   }
 
-  async function handleDelete(id: string) {
+  function handleDelete(id: string) {
     const targetGuest = guests.find((g) => g.id === id);
-    const updated = guests.filter((g) => g.id !== id);
-    setGuests(updated);
-
-    try {
-      await fetch("/api/db", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "delete",
-          type: "guests",
-          item: {
-            id,
-            name: targetGuest?.name,
-            code: targetGuest?.code,
-          },
-        }),
-      });
-    } catch (err) {
-      console.error("Failed to delete guest from cloud DB:", err);
+    const targetName = targetGuest?.name || "Tamu";
+    if (confirm(`Apakah Anda yakin ingin menghapus "${targetName}" dari daftar undangan?`)) {
+      deleteGuest(id);
     }
   }
 
@@ -262,34 +265,11 @@ Wassalamu’alaikum Wr. Wb.
       await navigator.clipboard.writeText(url);
       setCopiedId(id);
       setTimeout(() => setCopiedId(null), 2000);
-
-      const timeStr =
-        new Date().toLocaleTimeString("id-ID", {
-          timeZone: "Asia/Jakarta",
-          hour: "2-digit",
-          minute: "2-digit",
-        }) + " WIB";
-
-      const updated = guests.map((g) => {
-        if (g.id === id) {
-          const isAlreadySent = g.isSentWa || g.status === "sent" || g.status === "sent_and_copied";
-          const nextStatus = isAlreadySent ? ("sent_and_copied" as const) : ("copied" as const);
-          return {
-            ...g,
-            status: nextStatus,
-            isCopied: true,
-            copiedAt: timeStr,
-          };
-        }
-        return g;
-      });
-      saveGuests(updated);
+      markGuestCopied(id, name);
     } catch {
       alert("Gagal menyalin link");
     }
   }
-
-
 
   function handleDirectWaWeb(guest: GeneratedGuest) {
     const text = getWaMessage(guest.name, guest.code);
@@ -300,29 +280,7 @@ Wassalamu’alaikum Wr. Wb.
       : `https://api.whatsapp.com/send?text=${encodedText}`;
     
     window.open(waUrl, "_blank");
-
-    const timeStr =
-      new Date().toLocaleTimeString("id-ID", {
-        timeZone: "Asia/Jakarta",
-        hour: "2-digit",
-        minute: "2-digit",
-      }) + " WIB";
-
-    const isAlreadyCopied = guest.isCopied || guest.status === "copied" || guest.status === "sent_and_copied";
-    const nextStatus = isAlreadyCopied ? ("sent_and_copied" as const) : ("sent" as const);
-
-    // Automatically mark status as sent to WA
-    const updated = guests.map((g) =>
-      g.id === guest.id
-        ? {
-            ...g,
-            status: nextStatus,
-            isSentWa: true,
-            sentWaAt: timeStr,
-          }
-        : g
-    );
-    saveGuests(updated);
+    markGuestSent(guest);
   }
 
   async function handleCopyFullMessage(guest: GeneratedGuest) {
@@ -331,59 +289,10 @@ Wassalamu’alaikum Wr. Wb.
       await navigator.clipboard.writeText(text);
       setCopiedId(`msg-${guest.id}`);
       setTimeout(() => setCopiedId(null), 2000);
-
-      const timeStr =
-        new Date().toLocaleTimeString("id-ID", {
-          timeZone: "Asia/Jakarta",
-          hour: "2-digit",
-          minute: "2-digit",
-        }) + " WIB";
-
-      const isAlreadySent = guest.isSentWa || guest.status === "sent" || guest.status === "sent_and_copied";
-      const nextStatus = isAlreadySent ? ("sent_and_copied" as const) : ("copied" as const);
-
-      const updated = guests.map((g) =>
-        g.id === guest.id
-          ? {
-              ...g,
-              status: nextStatus,
-              isCopied: true,
-              copiedAt: timeStr,
-            }
-          : g
-      );
-      saveGuests(updated);
+      markGuestCopied(guest.id, guest.name);
     } catch {
       alert("Gagal menyalin pesan");
     }
-  }
-
-  function toggleGuestStatus(id: string) {
-    const updated = guests.map((g) => {
-      if (g.id === id) {
-        let nextStatus: GeneratedGuest["status"] = "sent";
-        let isSentWa = true;
-        let isCopied = false;
-
-        if (g.status === "sent") {
-          nextStatus = "copied";
-          isSentWa = false;
-          isCopied = true;
-        } else if (g.status === "copied") {
-          nextStatus = "sent_and_copied";
-          isSentWa = true;
-          isCopied = true;
-        } else if (g.status === "sent_and_copied") {
-          nextStatus = "pending";
-          isSentWa = false;
-          isCopied = false;
-        }
-
-        return { ...g, status: nextStatus, isSentWa, isCopied };
-      }
-      return g;
-    });
-    saveGuests(updated);
   }
 
   return (
@@ -698,7 +607,7 @@ Budi Santoso, 081987654321`}
 
                 <button
                   onClick={async () => {
-                    await loadCloudGuests();
+                    await fetchData();
                   }}
                   className="text-[11px] text-[#E0C98F] bg-[#28292F] hover:bg-[#32343B] px-3 py-1 rounded-xl border border-[#35373E] cursor-pointer font-bold transition-all flex items-center gap-1"
                 >
@@ -712,20 +621,7 @@ Budi Santoso, 081987654321`}
                   <button
                     onClick={async () => {
                       if (confirm("Apakah Anda yakin ingin menghapus SEMUA daftar tamu dari database?")) {
-                        setGuests([]);
-                        try {
-                          await fetch("/api/db", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({
-                              action: "set",
-                              type: "guests",
-                              item: [],
-                            }),
-                          });
-                        } catch (err) {
-                          console.error("Failed to clear guests from cloud:", err);
-                        }
+                        await clearAllGuests();
                       }
                     }}
                     className="text-[11px] text-rose-400 hover:underline cursor-pointer font-bold px-2 py-1"
@@ -942,17 +838,31 @@ Budi Santoso, 081987654321`}
                           </button>
                         </div>
 
-                        {/* Delete button */}
-                        <button
-                          onClick={() => handleDelete(g.id)}
-                          className="text-[#8A8C94] hover:text-rose-400 p-1.5 hover:bg-rose-950/40 rounded-lg cursor-pointer transition-colors shrink-0"
-                          title="Hapus Tamu"
-                        >
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <polyline points="3 6 5 6 21 6" />
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                          </svg>
-                        </button>
+                        {/* Edit & Delete buttons */}
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => openEditModal(g)}
+                            className="text-[#8A8C94] hover:text-[#E0C98F] hover:bg-[#C8A96B]/15 p-1.5 rounded-lg cursor-pointer transition-colors"
+                            title="Edit Data Tamu"
+                          >
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                            </svg>
+                          </button>
+
+                          <button
+                            onClick={() => handleDelete(g.id)}
+                            className="text-[#8A8C94] hover:text-rose-400 p-1.5 hover:bg-rose-950/40 rounded-lg cursor-pointer transition-colors shrink-0"
+                            title="Hapus Tamu"
+                          >
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <polyline points="3 6 5 6 21 6" />
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
@@ -962,6 +872,148 @@ Budi Santoso, 081987654321`}
       </div>
     );
   })()}
+
+      {/* Edit Guest Modal */}
+      {editingGuest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in">
+          <div className="max-w-md w-full bg-[#181920] border border-[#35373E] rounded-3xl p-6 shadow-2xl text-[#F1F0EC] space-y-4">
+            <div className="flex items-center justify-between border-b border-[#2C2E38] pb-3.5">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-[#C8A96B]/20 border border-[#806A42] flex items-center justify-center text-[#E0C98F]">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold font-serif text-white">Edit Data Tamu</h3>
+                  <p className="text-[11px] text-[#8A8C94]">Perbarui rincian undangan secara instan</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingGuest(null)}
+                className="text-[#8A8C94] hover:text-white p-1 rounded-lg hover:bg-[#252833] transition-colors cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="space-y-3.5">
+              <div>
+                <label className="block text-[10.5px] uppercase tracking-wider text-[#E0C98F] font-bold mb-1">
+                  Nama Tamu Undangan *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full text-xs py-2.5 px-3.5 rounded-xl border border-[#35373E] bg-[#22242B] text-white focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10.5px] uppercase tracking-wider text-[#E0C98F] font-bold mb-1">
+                  Nomor WhatsApp
+                </label>
+                <input
+                  type="tel"
+                  placeholder="Contoh: 08123456789 atau 628123456789"
+                  value={editPhone}
+                  onChange={(e) => setEditPhone(e.target.value)}
+                  className="w-full text-xs py-2.5 px-3.5 rounded-xl border border-[#35373E] bg-[#22242B] text-white focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10.5px] uppercase tracking-wider text-[#E0C98F] font-bold mb-1">
+                    Kategori
+                  </label>
+                  <select
+                    value={editCategory}
+                    onChange={(e) => setEditCategory(e.target.value)}
+                    className="w-full text-xs py-2.5 px-3 rounded-xl border border-[#35373E] bg-[#22242B] text-white focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
+                  >
+                    <option value="Keluarga Anam">Keluarga Anam</option>
+                    <option value="Kel. Alm Mama">Kel. Alm Mama</option>
+                    <option value="Kel. Mba Ayu">Kel. Mba Ayu</option>
+                    <option value="Kel. Mba Diah">Kel. Mba Diah</option>
+                    <option value="Teman Anam">Teman Anam</option>
+                    <option value="Teman Ilham">Teman Ilham</option>
+                    <option value="Teman Angi">Teman Angi</option>
+                    <option value="Tamu VIP">Tamu VIP</option>
+                    <option value="Rekan Kerja">Rekan Kerja</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10.5px] uppercase tracking-wider text-[#E0C98F] font-bold mb-1">
+                    Jumlah PAX (Orang)
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={10}
+                    value={editPax}
+                    onChange={(e) => setEditPax(Number(e.target.value))}
+                    className="w-full text-xs py-2.5 px-3 rounded-xl border border-[#35373E] bg-[#22242B] text-white focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10.5px] uppercase tracking-wider text-[#E0C98F] font-bold mb-1">
+                    Status Pengiriman WA
+                  </label>
+                  <select
+                    value={editStatus}
+                    onChange={(e) => setEditStatus(e.target.value as any)}
+                    className="w-full text-xs py-2.5 px-3 rounded-xl border border-[#35373E] bg-[#22242B] text-white focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
+                  >
+                    <option value="pending">⏳ Belum Kirim</option>
+                    <option value="sent">✓ Sudah Kirim WA</option>
+                    <option value="copied">📋 Sudah Salin Link</option>
+                    <option value="sent_and_copied">✓ Kirim &amp; Salin</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10.5px] uppercase tracking-wider text-[#E0C98F] font-bold mb-1">
+                    Status Check-In
+                  </label>
+                  <select
+                    value={editCheckedIn ? "true" : "false"}
+                    onChange={(e) => setEditCheckedIn(e.target.value === "true")}
+                    className="w-full text-xs py-2.5 px-3 rounded-xl border border-[#35373E] bg-[#22242B] text-white focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
+                  >
+                    <option value="false">Belum Hadir</option>
+                    <option value="true">✓ Hadir di Lokasi</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-[#2C2E38] flex items-center justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setEditingGuest(null)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-[#8A8C94] hover:text-white bg-[#22242B] hover:bg-[#2C2E38] transition-all cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[#C8A96B] to-[#A38240] text-black hover:brightness-110 transition-all shadow-md cursor-pointer"
+                >
+                  Simpan Perubahan
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 </div>
 );
 }

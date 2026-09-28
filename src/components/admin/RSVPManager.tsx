@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useAdminStore } from "@/stores/adminStore";
 
 export interface RSVPItem {
   id: string;
@@ -13,7 +14,12 @@ export interface RSVPItem {
 }
 
 export function RSVPManager() {
-  const [rsvps, setRsvps] = useState<RSVPItem[]>([]);
+  const rsvps = useAdminStore((s) => s.rsvps);
+  const addRsvp = useAdminStore((s) => s.addRsvp);
+  const updateRsvp = useAdminStore((s) => s.updateRsvp);
+  const deleteRsvp = useAdminStore((s) => s.deleteRsvp);
+  const fetchData = useAdminStore((s) => s.fetchData);
+
   const [filter, setFilter] = useState<string>("all");
   const [search, setSearch] = useState<string>("");
   const [showAddModal, setShowAddModal] = useState(false);
@@ -24,35 +30,38 @@ export function RSVPManager() {
   const [manualPax, setManualPax] = useState(2);
   const [manualSession, setManualSession] = useState("Akad & Resepsi");
 
-  useEffect(() => {
-    loadRSVPs();
-  }, []);
+  // Form states for Edit RSVP modal
+  const [editingRsvp, setEditingRsvp] = useState<RSVPItem | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editAttendance, setEditAttendance] = useState<"Hadir" | "Ragu-ragu" | "Tidak Hadir">("Hadir");
+  const [editPax, setEditPax] = useState<number>(2);
+  const [editSession, setEditSession] = useState("Akad & Resepsi");
 
-  async function loadRSVPs() {
-    try {
-      const res = await fetch("/api/db?type=rsvps");
-      const json = await res.json();
-      if (json.success && Array.isArray(json.data)) {
-        const formatted = json.data.map((item: any) => ({
-          id: item.id || Date.now().toString(),
-          name: item.name,
-          attendance: item.status === "Hadir" ? "Hadir" : "Tidak Hadir",
-          guestCount: item.pax || 1,
-          session: item.notes || "Akad & Resepsi",
-          createdAt: item.createdAt || "Baru saja",
-        }));
-        setRsvps(formatted);
-      }
-    } catch {
-      // API failed
-    }
+  function openEditModal(rsvp: RSVPItem) {
+    setEditingRsvp(rsvp);
+    setEditName(rsvp.name);
+    setEditAttendance(rsvp.attendance);
+    setEditPax(rsvp.guestCount || 1);
+    setEditSession(rsvp.session || "Akad & Resepsi");
   }
 
-  async function saveRSVPs(updated: RSVPItem[]) {
-    setRsvps(updated);
+  function handleSaveEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingRsvp || !editName.trim()) return;
+
+    const updated: RSVPItem = {
+      ...editingRsvp,
+      name: editName.trim(),
+      attendance: editAttendance,
+      guestCount: editAttendance === "Hadir" ? Number(editPax) : 0,
+      session: editSession,
+    };
+
+    updateRsvp(updated);
+    setEditingRsvp(null);
   }
 
-  async function handleAddManual(e: React.FormEvent) {
+  function handleAddManual(e: React.FormEvent) {
     e.preventDefault();
     if (!manualName.trim()) return;
 
@@ -71,53 +80,14 @@ export function RSVPManager() {
       }) + " WIB",
     };
 
-    try {
-      await fetch("/api/db", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "add",
-          type: "rsvps",
-          item: {
-            id: newItem.id,
-            name: newItem.name,
-            pax: newItem.guestCount,
-            status: newItem.attendance,
-            notes: newItem.session,
-            createdAt: newItem.createdAt,
-          },
-        }),
-      });
-    } catch {
-      // Fallback
-    }
-
-    const updated = [newItem, ...rsvps];
-    saveRSVPs(updated);
+    addRsvp(newItem);
     setShowAddModal(false);
     setManualName("");
   }
 
-  async function handleDelete(rsvp: RSVPItem) {
-    const updated = rsvps.filter((r) => r.id !== rsvp.id);
-    setRsvps(updated);
-
-    try {
-      await fetch("/api/db", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "delete",
-          type: "rsvps",
-          item: {
-            id: rsvp.id,
-            name: rsvp.name,
-            message: rsvp.session,
-          },
-        }),
-      });
-    } catch {
-      // Fallback
+  function handleDelete(rsvp: RSVPItem) {
+    if (confirm(`Apakah Anda yakin ingin menghapus data RSVP dari "${rsvp.name}"?`)) {
+      deleteRsvp(rsvp);
     }
   }
 
@@ -257,7 +227,7 @@ export function RSVPManager() {
             <span>Daftar Konfirmasi Kehadiran ({filteredRSVPs.length})</span>
           </h4>
           <button
-            onClick={loadRSVPs}
+            onClick={() => fetchData()}
             className="text-[11px] text-[#E0C98F] hover:underline cursor-pointer font-bold flex items-center gap-1"
           >
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -318,7 +288,18 @@ export function RSVPManager() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 self-end sm:self-center">
+                <div className="flex items-center gap-1.5 self-end sm:self-center">
+                  <button
+                    onClick={() => openEditModal(r)}
+                    className="text-[#8A8C94] hover:text-[#E0C98F] hover:bg-[#C8A96B]/15 p-2 rounded-lg cursor-pointer transition-colors"
+                    title="Edit Data RSVP"
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                  </button>
+
                   <button
                     onClick={() => handleDelete(r)}
                     className="text-[#8A8C94] hover:text-rose-400 hover:bg-rose-950/30 p-2 rounded-lg cursor-pointer transition-colors"
@@ -395,6 +376,83 @@ export function RSVPManager() {
                 </button>
                 <button type="submit" className="text-xs flex-1 py-2.5 font-bold bg-gradient-to-r from-[#C8A96B] to-[#B8860B] text-white hover:opacity-95 rounded-xl cursor-pointer transition-all">
                   Simpan RSVP
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit RSVP Modal */}
+      {editingRsvp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in">
+          <div className="max-w-sm w-full p-6 border border-[#35373E] rounded-2xl space-y-4 bg-[#181920] text-[#F1F0EC] shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#2C2E38] pb-3">
+              <h3 className="text-base font-bold font-serif text-[#F1F0EC]">Edit Data RSVP</h3>
+              <button onClick={() => setEditingRsvp(null)} className="text-[#9E9D98] hover:text-white cursor-pointer">✕</button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="space-y-3">
+              <div>
+                <label className="block text-[10px] uppercase text-[#E0C98F] font-bold mb-1">Nama Tamu *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Nama Lengkap"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full text-xs py-2.5 px-3 border border-[#35373E] rounded-xl bg-[#22242B] text-[#F1F0EC] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase text-[#E0C98F] font-bold mb-1">Status Kehadiran</label>
+                <select
+                  value={editAttendance}
+                  onChange={(e) => setEditAttendance(e.target.value as any)}
+                  className="w-full text-xs py-2.5 px-3 border border-[#35373E] rounded-xl bg-[#22242B] text-[#F1F0EC] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
+                >
+                  <option value="Hadir">Hadir</option>
+                  <option value="Ragu-ragu">Ragu-ragu</option>
+                  <option value="Tidak Hadir">Tidak Hadir</option>
+                </select>
+              </div>
+
+              {editAttendance === "Hadir" && (
+                <div>
+                  <label className="block text-[10px] uppercase text-[#E0C98F] font-bold mb-1">Jumlah Tamu (PAX)</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={10}
+                    value={editPax}
+                    onChange={(e) => setEditPax(Number(e.target.value))}
+                    className="w-full text-xs py-2.5 px-3 border border-[#35373E] rounded-xl bg-[#22242B] text-[#F1F0EC] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="block text-[10px] uppercase text-[#E0C98F] font-bold mb-1">Sesi / Catatan</label>
+                <input
+                  type="text"
+                  placeholder="Contoh: Akad & Resepsi"
+                  value={editSession}
+                  onChange={(e) => setEditSession(e.target.value)}
+                  className="w-full text-xs py-2.5 px-3 border border-[#35373E] rounded-xl bg-[#22242B] text-[#F1F0EC] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
+                />
+              </div>
+
+              <div className="pt-3 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingRsvp(null)}
+                  className="text-xs flex-1 py-2.5 bg-[#22242B] border border-[#35373E] text-[#9E9D98] hover:bg-[#2C2E38] rounded-xl cursor-pointer transition-all"
+                >
+                  Batal
+                </button>
+                <button type="submit" className="text-xs flex-1 py-2.5 font-bold bg-gradient-to-r from-[#C8A96B] to-[#B8860B] text-white hover:opacity-95 rounded-xl cursor-pointer transition-all">
+                  Simpan Perubahan
                 </button>
               </div>
             </form>

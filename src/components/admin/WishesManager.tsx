@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useAdminStore } from "@/stores/adminStore";
 
 export interface WishItem {
   id: string;
@@ -12,94 +13,52 @@ export interface WishItem {
 }
 
 export function WishesManager() {
-  const [wishes, setWishes] = useState<WishItem[]>([]);
+  const wishes = useAdminStore((s) => s.wishes);
+  const isRefreshing = useAdminStore((s) => s.isRefreshing);
+  const updateWish = useAdminStore((s) => s.updateWish);
+  const deleteWish = useAdminStore((s) => s.deleteWish);
+  const clearAllWishes = useAdminStore((s) => s.clearAllWishes);
+  const fetchData = useAdminStore((s) => s.fetchData);
+
   const [searchQuery, setSearchQuery] = useState("");
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  useEffect(() => {
-    // 1. Initial Load from LocalStorage Cache
-    try {
-      const cached = localStorage.getItem("wedding_wishes_backup");
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setWishes(parsed);
-        }
-      }
-    } catch {}
+  // Edit Wish Modal States
+  const [editingWish, setEditingWish] = useState<WishItem | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editMessage, setEditMessage] = useState("");
+  const [editRelationship, setEditRelationship] = useState("Kerabat");
 
-    // 2. Fetch from Cloud DB
-    loadWishes();
-    const interval = setInterval(loadWishes, 8000);
-    return () => clearInterval(interval);
-  }, []);
-
-  async function loadWishes() {
-    try {
-      setIsRefreshing(true);
-      const res = await fetch("/api/db?type=wishes&t=" + Date.now(), { cache: "no-store" });
-      const json = await res.json();
-      if (json.success && Array.isArray(json.data)) {
-        setWishes(json.data);
-        try {
-          localStorage.setItem("wedding_wishes_backup", JSON.stringify(json.data));
-        } catch {}
-      }
-    } catch {
-      // API failed
-    } finally {
-      setIsRefreshing(false);
-    }
+  function openEditModal(wish: WishItem) {
+    setEditingWish(wish);
+    setEditName(wish.name);
+    setEditMessage(wish.message);
+    setEditRelationship(wish.relationship || "Kerabat");
   }
 
-  async function handleDelete(wish: WishItem) {
-    const updated = wishes.filter(
-      (item) => item.id !== wish.id && !(item.name === wish.name && item.message === wish.message)
-    );
-    setWishes(updated);
-    try {
-      localStorage.setItem("wedding_wishes_backup", JSON.stringify(updated));
-    } catch {}
+  function handleSaveEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingWish || !editName.trim() || !editMessage.trim()) return;
 
-    try {
-      await fetch("/api/db", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "delete",
-          type: "wishes",
-          item: {
-            id: wish.id,
-            name: wish.name,
-            message: wish.message,
-          },
-        }),
-      });
-    } catch {
-      // Fallback
+    const updated: WishItem = {
+      ...editingWish,
+      name: editName.trim(),
+      message: editMessage.trim(),
+      relationship: editRelationship,
+    };
+
+    updateWish(updated);
+    setEditingWish(null);
+  }
+
+  function handleDelete(wish: WishItem) {
+    if (confirm(`Apakah Anda yakin ingin menghapus ucapan dari "${wish.name}"?`)) {
+      deleteWish(wish);
     }
   }
 
   async function handleClearAll() {
     if (confirm("Apakah Anda yakin ingin menghapus semua ucapan tamu?")) {
-      setWishes([]);
-      try {
-        localStorage.removeItem("wedding_wishes_backup");
-      } catch {}
-
-      try {
-        await fetch("/api/db", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "set",
-            type: "wishes",
-            item: [],
-          }),
-        });
-      } catch {
-        // Fallback
-      }
+      await clearAllWishes();
     }
   }
 
@@ -130,7 +89,7 @@ export function WishesManager() {
 
         <div className="flex gap-2">
           <button
-            onClick={loadWishes}
+            onClick={() => fetchData()}
             disabled={isRefreshing}
             className="text-[11px] py-1.5 px-3 bg-[#28292F] border border-[#35373E] text-[#E0C98F] hover:bg-[#32343B] rounded-xl cursor-pointer transition-all flex items-center gap-1 font-bold disabled:opacity-50"
           >
@@ -208,8 +167,20 @@ export function WishesManager() {
                   )}
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <span className="text-[10px] text-[#9E9D98] font-mono">{w.createdAt}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-[#9E9D98] font-mono mr-1">{w.createdAt}</span>
+                  
+                  <button
+                    onClick={() => openEditModal(w)}
+                    className="text-[#8A8C94] hover:text-[#E0C98F] hover:bg-[#C8A96B]/15 p-1.5 rounded-lg cursor-pointer transition-colors"
+                    title="Edit Ucapan"
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                  </button>
+
                   <button
                     onClick={() => handleDelete(w)}
                     className="text-[#8A8C94] hover:text-rose-400 p-1.5 hover:bg-rose-950/30 rounded-lg cursor-pointer transition-colors"
@@ -228,6 +199,66 @@ export function WishesManager() {
               </p>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Edit Wish Modal */}
+      {editingWish && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in">
+          <div className="max-w-md w-full p-6 border border-[#35373E] rounded-2xl space-y-4 bg-[#181920] text-[#F1F0EC] shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#2C2E38] pb-3">
+              <h3 className="text-base font-bold font-serif text-[#F1F0EC]">Edit Ucapan Tamu</h3>
+              <button onClick={() => setEditingWish(null)} className="text-[#9E9D98] hover:text-white cursor-pointer">✕</button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="space-y-3.5">
+              <div>
+                <label className="block text-[10px] uppercase text-[#E0C98F] font-bold mb-1">Nama Pengirim *</label>
+                <input
+                  type="text"
+                  required
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full text-xs py-2.5 px-3 border border-[#35373E] rounded-xl bg-[#22242B] text-[#F1F0EC] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase text-[#E0C98F] font-bold mb-1">Hubungan</label>
+                <input
+                  type="text"
+                  placeholder="Contoh: Sahabat, Keluarga, Rekan Kerja"
+                  value={editRelationship}
+                  onChange={(e) => setEditRelationship(e.target.value)}
+                  className="w-full text-xs py-2.5 px-3 border border-[#35373E] rounded-xl bg-[#22242B] text-[#F1F0EC] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase text-[#E0C98F] font-bold mb-1">Pesan &amp; Doa *</label>
+                <textarea
+                  rows={4}
+                  required
+                  value={editMessage}
+                  onChange={(e) => setEditMessage(e.target.value)}
+                  className="w-full text-xs p-3 border border-[#35373E] rounded-xl bg-[#22242B] text-[#F1F0EC] focus:ring-2 focus:ring-[#C8A96B] focus:outline-none leading-relaxed"
+                />
+              </div>
+
+              <div className="pt-3 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingWish(null)}
+                  className="text-xs flex-1 py-2.5 bg-[#22242B] border border-[#35373E] text-[#9E9D98] hover:bg-[#2C2E38] rounded-xl cursor-pointer transition-all"
+                >
+                  Batal
+                </button>
+                <button type="submit" className="text-xs flex-1 py-2.5 font-bold bg-gradient-to-r from-[#C8A96B] to-[#B8860B] text-white hover:opacity-95 rounded-xl cursor-pointer transition-all">
+                  Simpan Perubahan
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

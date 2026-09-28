@@ -3,11 +3,13 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { weddingData } from "@/data/weddingData";
-import { GuestLinkGenerator, GeneratedGuest } from "@/components/admin/GuestLinkGenerator";
-import { RSVPManager, RSVPItem } from "@/components/admin/RSVPManager";
-import { WishesManager, WishItem } from "@/components/admin/WishesManager";
+import { GuestLinkGenerator } from "@/components/admin/GuestLinkGenerator";
+import { RSVPManager } from "@/components/admin/RSVPManager";
+import { WishesManager } from "@/components/admin/WishesManager";
 import { BarcodeScannerManager } from "@/components/admin/BarcodeScannerManager";
 import { AdminLogin, AdminUser } from "@/components/admin/AdminLogin";
+import { useAdminStore } from "@/stores/adminStore";
+import { AdminToastContainer } from "@/components/admin/AdminToastContainer";
 
 type AdminTab = "dashboard" | "scanner" | "links" | "rsvp" | "wishes" | "database" | "info";
 
@@ -18,17 +20,17 @@ export default function AdminPage() {
 
   const [activeTab, setActiveTab] = useState<AdminTab>("dashboard");
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-
-  // Summary Metrics State
-  const [guests, setGuests] = useState<GeneratedGuest[]>([]);
-  const [rsvps, setRsvps] = useState<RSVPItem[]>([]);
-  const [wishes, setWishes] = useState<WishItem[]>([]);
-  const [isCloudSynced, setIsCloudSynced] = useState<boolean | null>(null);
-  const [dbProvider, setDbProvider] = useState<string>("memory");
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [latencyMs, setLatencyMs] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState<string>("");
+
+  // Reactive state from global Zustand store
+  const guests = useAdminStore((s) => s.guests);
+  const rsvps = useAdminStore((s) => s.rsvps);
+  const wishes = useAdminStore((s) => s.wishes);
+  const isCloudSynced = useAdminStore((s) => s.isCloudSynced);
+  const dbProvider = useAdminStore((s) => s.dbProvider);
+  const isRefreshing = useAdminStore((s) => s.isRefreshing);
+  const latencyMs = useAdminStore((s) => s.latencyMs);
+  const fetchData = useAdminStore((s) => s.fetchData);
 
   // Check login session on mount
   useEffect(() => {
@@ -49,10 +51,12 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (!currentUser) return;
-    fetchDashboardMetrics();
-    const interval = setInterval(fetchDashboardMetrics, 12000);
+    fetchData();
+    const interval = setInterval(() => {
+      fetchData(true);
+    }, 15000);
     return () => clearInterval(interval);
-  }, [currentUser]);
+  }, [currentUser, fetchData]);
 
   const handleLogout = () => {
     localStorage.removeItem("wedding_admin_auth");
@@ -75,30 +79,6 @@ export default function AdminPage() {
     const clockInterval = setInterval(updateClock, 1000);
     return () => clearInterval(clockInterval);
   }, []);
-
-  async function fetchDashboardMetrics() {
-    const startTime = performance.now();
-    try {
-      setIsRefreshing(true);
-      const res = await fetch("/api/db?t=" + Date.now(), { cache: "no-store" });
-      const json = await res.json();
-      const endTime = performance.now();
-      setLatencyMs(Math.round(endTime - startTime));
-
-      if (json.success && json.data) {
-        if (Array.isArray(json.data.guests)) setGuests(json.data.guests);
-        if (Array.isArray(json.data.rsvps)) setRsvps(json.data.rsvps);
-        if (Array.isArray(json.data.wishes)) setWishes(json.data.wishes);
-        setIsCloudSynced(json.persistent !== false);
-        if (json.provider) setDbProvider(json.provider);
-      }
-    } catch {
-      setIsCloudSynced(false);
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
-  }
 
   // Calculated Metrics
   const totalGuests = guests.length;
@@ -535,7 +515,7 @@ export default function AdminPage() {
 
             {/* Manual Refresh Button */}
             <button
-              onClick={fetchDashboardMetrics}
+              onClick={() => fetchData()}
               disabled={isRefreshing}
               title="Refresh Data"
               className="p-2 sm:px-3 sm:py-1.5 bg-[#1C1E25] hover:bg-[#252833] text-[#A1A4B2] hover:text-white border border-[#2B2E38] rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-sm active:scale-95"
@@ -847,7 +827,7 @@ export default function AdminPage() {
 
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={fetchDashboardMetrics}
+                      onClick={() => fetchData()}
                       className="py-2 px-3 bg-[#1C1E25] hover:bg-[#252833] text-white border border-[#2E313D] rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
                     >
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -1012,6 +992,9 @@ export default function AdminPage() {
           )}
         </main>
       </div>
+
+      {/* Floating Real-time Admin Toasts */}
+      <AdminToastContainer />
     </div>
   );
 }

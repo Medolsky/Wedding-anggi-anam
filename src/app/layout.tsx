@@ -52,8 +52,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/image/link.jpeg",
-        width: 908,
-        height: 1280,
+        width: 769,
+        height: 1024,
         alt: "The Wedding of Anam & Angi",
         type: "image/jpeg",
       },
@@ -92,8 +92,8 @@ export default function RootLayout({
         <meta property="og:image" content={`${siteUrl}/image/link.jpeg`} />
         <meta property="og:image:secure_url" content={`${siteUrl}/image/link.jpeg`} />
         <meta property="og:image:type" content="image/jpeg" />
-        <meta property="og:image:width" content="908" />
-        <meta property="og:image:height" content="1280" />
+        <meta property="og:image:width" content="769" />
+        <meta property="og:image:height" content="1024" />
         <meta property="og:url" content={siteUrl} />
         <meta property="og:type" content="website" />
       </head>

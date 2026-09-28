@@ -10,7 +10,6 @@ import { copyToClipboard } from "@/lib/utils";
 export function GiftSection() {
   const { giftAccounts, giftAddress, sectionBgs } = weddingData;
   const [copiedField, setCopiedField] = useState<string | null>(null);
-  const [showQris, setShowQris] = useState(false);
   const [showAddress, setShowAddress] = useState(false);
 
   async function handleCopy(text: string, fieldId: string) {
@@ -130,40 +129,23 @@ export function GiftSection() {
           ))}
         </StaggerContainer>
 
-        {/* QRIS & Physical gift buttons — Compact & Sleek */}
+        {/* Physical gift button — Compact & Sleek */}
         <AnimatedText delay={0.5} variant="fadeUp" className="w-full max-w-xs flex justify-center">
-          <div className="flex gap-2 justify-center w-full">
-            <button
-              onClick={() => setShowQris(true)}
-              className="btn-modern-primary py-1.5 px-4 text-[9.5px] uppercase tracking-[1px] font-bold rounded-full shadow-sm flex items-center justify-center"
-            >
-              Lihat QRIS
-            </button>
-            <button
-              onClick={() => setShowAddress(true)}
-              className="btn-modern-secondary py-1.5 px-4 text-[9.5px] uppercase tracking-[1px] font-bold rounded-full shadow-sm flex items-center justify-center"
-            >
-              Kado Fisik
-            </button>
-          </div>
+          <button
+            onClick={() => setShowAddress(true)}
+            className="btn-modern-secondary py-1.5 px-5 text-[9.5px] uppercase tracking-[1px] font-bold rounded-full shadow-sm flex items-center justify-center gap-1.5"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 12 20 22 4 22 4 12" />
+              <rect x="2" y="7" width="20" height="5" />
+              <line x1="12" y1="22" x2="12" y2="7" />
+              <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
+              <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+            </svg>
+            Kirim Kado Fisik
+          </button>
         </AnimatedText>
       </div>
-
-      {/* QRIS Modal */}
-      <Modal isOpen={showQris} onClose={() => setShowQris(false)} title="QRIS Pembayaran">
-        <div className="flex flex-col items-center justify-center text-center py-2">
-          <div className="w-48 h-48 bg-[#171719] p-2 rounded-xl shadow-xl flex flex-col items-center justify-center mb-3 border border-[#806A42]">
-            <img
-              src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=Wedding-Raka-Alya-QRIS"
-              alt="QRIS Wedding"
-              className="w-full h-full object-contain bg-white rounded-lg p-1"
-            />
-          </div>
-          <p className="text-xs text-[#C8C5BE] text-center max-w-xs leading-relaxed">
-            Scan QR code di atas menggunakan GoPay, OVO, Dana, ShopeePay, LinkAja, atau Mobile Banking Anda.
-          </p>
-        </div>
-      </Modal>
 
       {/* Gift Address Modal */}
       <Modal

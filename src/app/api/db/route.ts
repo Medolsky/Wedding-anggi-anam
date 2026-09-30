@@ -475,6 +475,11 @@ async function saveSingleCheckInToCloud(matchedGuest: any, matchedRsvp: any, upd
   cloudStore = updatedStore;
   (globalThis as any).__weddingStore = updatedStore;
 
+  try {
+    const filePath = path.join(process.cwd(), "src/data/initialGuests.json");
+    fs.writeFileSync(filePath, JSON.stringify(updatedStore.guests, null, 2));
+  } catch {}
+
   // 1. Save targeted single guest & rsvp to Vercel Postgres / Neon
   if (sql) {
     try {
@@ -569,6 +574,104 @@ async function saveSingleCheckInToCloud(matchedGuest: any, matchedRsvp: any, upd
   }
 }
 
+function normalizeGuestString(str: string): string {
+  if (!str) return "";
+  return str
+    .toLowerCase()
+    .replace(/[+]/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/\bdan\b/gi, "&")
+    .replace(/[^a-z0-9]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function stripGuestDecorations(str: string): string {
+  let s = normalizeGuestString(str);
+  let prev = "";
+  // Strip leading Indonesian honorifics
+  while (prev !== s) {
+    prev = s;
+    s = s.replace(/^(yth|kepada yth|bapak ibu|bapak|ibu|bpk ibu|bpk|sdr|sdri|kak|om|tante)\s+/gi, "");
+  }
+  // Strip trailing partner & family
+  s = s.replace(/\s+(&)\s+(partner|pasangan|keluarga|istri|suami)$/gi, "");
+  s = s.replace(/\s+(partner|pasangan|keluarga|istri|suami)$/gi, "");
+  return s.trim();
+}
+
+function cleanRawGuestInput(raw: string): string {
+  let cleaned = (raw || "").trim();
+  if (cleaned.startsWith("http://") || cleaned.startsWith("https://") || cleaned.includes("?")) {
+    try {
+      const u = new URL(cleaned, "https://wedding.local");
+      const param =
+        u.searchParams.get("to") ||
+        u.searchParams.get("t") ||
+        u.searchParams.get("name") ||
+        u.searchParams.get("code") ||
+        u.searchParams.get("guest");
+      if (param) cleaned = param;
+    } catch {
+      const m = cleaned.match(/[?&](?:to|t|name|code|guest)=([^&]+)/i);
+      if (m && m[1]) cleaned = m[1];
+    }
+  }
+
+  try {
+    cleaned = decodeURIComponent(cleaned);
+  } catch {}
+  cleaned = cleaned.replace(/\+/g, " ").replace(/\s+/g, " ").trim();
+  if (/%[0-9a-fA-F]{2}/.test(cleaned)) {
+    try {
+      cleaned = decodeURIComponent(cleaned);
+    } catch {}
+    cleaned = cleaned.replace(/\+/g, " ").replace(/\s+/g, " ").trim();
+  }
+  return cleaned;
+}
+
+function findBestGuestMatch(guests: any[], searchStr: string): any | null {
+  if (!searchStr || !Array.isArray(guests) || guests.length === 0) return null;
+
+  const cleaned = cleanRawGuestInput(searchStr);
+  if (!cleaned) return null;
+
+  const rawSearch = cleaned.toLowerCase();
+  const normSearch = normalizeGuestString(cleaned);
+  const strippedSearch = stripGuestDecorations(cleaned);
+
+  // 1. Exact ID
+  const byId = guests.find((g) => String(g.id || "").trim().toLowerCase() === rawSearch);
+  if (byId) return byId;
+
+  // 2. Exact Code
+  const byCode = guests.find((g) => String(g.code || "").trim().toLowerCase() === rawSearch);
+  if (byCode) return byCode;
+
+  // 3. Exact Name
+  const byName = guests.find((g) => String(g.name || "").trim().toLowerCase() === rawSearch);
+  if (byName) return byName;
+
+  // 4. Normalized Name / Code (ignores & vs dan, extra spaces, casing)
+  if (normSearch) {
+    const byNorm = guests.find(
+      (g) =>
+        normalizeGuestString(g.name) === normSearch ||
+        normalizeGuestString(g.code) === normSearch
+    );
+    if (byNorm) return byNorm;
+  }
+
+  // 5. Stripped Salutation & Partner (only if meaningful length >= 3)
+  if (strippedSearch && strippedSearch.length >= 3) {
+    const byStripped = guests.find((g) => stripGuestDecorations(g.name) === strippedSearch);
+    if (byStripped) return byStripped;
+  }
+
+  return null;
+}
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const type = searchParams.get("type") || "all";
@@ -605,48 +708,13 @@ export async function GET(req: Request) {
       return NextResponse.json({
         success: true,
         valid: true,
-        guest: { name: toParam || "Tamu Undangan" },
+        guest: { name: cleanRawGuestInput(toParam) || "Tamu Undangan" },
       });
     }
 
-    const clean = (s: string) =>
-      s
-        .toLowerCase()
-        .replace(/^yth\.?\s*/i, "")
-        .replace(/^bapak\/ibu\s*/i, "")
-        .replace(/^bpk\.?\s*/i, "")
-        .replace(/^ibu\.?\s*/i, "")
-        .replace(/^sdr\.?\s*/i, "")
-        .replace(/\s*&\s*partner/i, "")
-        .replace(/\s*&\s*pasangan/i, "")
-        .replace(/\s*dan\s*keluarga/i, "")
-        .replace(/[^a-z0-9]/g, "");
-
-    const matched = guests.find((g: any) => {
-      const gCode = String(g.code || g.id || "").trim().toLowerCase();
-      const gName = String(g.name || "").trim().toLowerCase();
-      const searchCode = codeParam.toLowerCase();
-      const searchTo = toParam.toLowerCase();
-
-      if (searchCode && (gCode === searchCode || gCode.includes(searchCode) || searchCode.includes(gCode))) {
-        return true;
-      }
-
-      if (searchTo) {
-        if (gName === searchTo) return true;
-        if (
-          clean(gName) &&
-          clean(searchTo) &&
-          (clean(gName) === clean(searchTo) ||
-            clean(gName).includes(clean(searchTo)) ||
-            clean(searchTo).includes(clean(gName)))
-        ) {
-          return true;
-        }
-      }
-
-      return false;
-    });
+    const matched =
+      (codeParam && findBestGuestMatch(guests, codeParam)) ||
+      (toParam && findBestGuestMatch(guests, toParam));
 
     if (matched) {
       return NextResponse.json({
@@ -1062,134 +1130,117 @@ export async function POST(req: Request) {
 
     if (action === "checkin") {
       const rawCode = (item?.code || item?.id || item?.name || "").toString().trim();
-      const codeToMatch = rawCode.toLowerCase();
-      let wasAlreadyCheckedIn = false;
-      let matchedGuest: any = null;
-
       const guests = currentStore.guests || [];
-      const clean = (s: string) =>
-        s
-          .toLowerCase()
-          .replace(/^yth\.?\s*/i, "")
-          .replace(/^bapak\/ibu\s*/i, "")
-          .replace(/^bpk\.?\s*/i, "")
-          .replace(/^ibu\.?\s*/i, "")
-          .replace(/^sdr\.?\s*/i, "")
-          .replace(/\s*&\s*partner/i, "")
-          .replace(/\s*&\s*pasangan/i, "")
-          .replace(/\s*dan\s*keluarga/i, "")
-          .replace(/[^a-z0-9]/g, "");
 
-      const cleanSearch = clean(codeToMatch);
+      // Find the single best matching guest using robust tiered logic
+      let matchedGuest = findBestGuestMatch(guests, rawCode);
 
-      const updatedGuests = guests.map((g: any) => {
-        const guestCode = (g.code || g.id || "").toString().trim().toLowerCase();
-        const guestName = (g.name || "").toString().trim().toLowerCase();
-        const cleanGName = clean(guestName);
-        const cleanGCode = clean(guestCode);
-
-        const isMatch =
-          guestCode === codeToMatch ||
-          guestName === codeToMatch ||
-          (cleanSearch && cleanGName && (cleanGName === cleanSearch || cleanGName.includes(cleanSearch) || cleanSearch.includes(cleanGName))) ||
-          (cleanSearch && cleanGCode && (cleanGCode === cleanSearch || cleanGCode.includes(cleanSearch) || cleanSearch.includes(cleanGCode))) ||
-          (codeToMatch && (guestCode.includes(codeToMatch) || codeToMatch.includes(guestCode)));
-
-        if (isMatch) {
-          if (g.checkedIn) {
-            wasAlreadyCheckedIn = true;
-            matchedGuest = g;
-            return g;
-          }
-          matchedGuest = {
-            ...g,
-            checkedIn: true,
-            checkInTime: new Date().toLocaleTimeString("id-ID", {
-              timeZone: "Asia/Jakarta",
-              hour: "2-digit",
-              minute: "2-digit",
-              second: "2-digit",
-            }) + " WIB",
-            pax: item?.pax || g.pax || 1,
-          };
-          return matchedGuest;
-        }
-        return g;
-      });
-
-      // If guest is already checked in, return immediately without duplicate writes
-      if (wasAlreadyCheckedIn && matchedGuest) {
-        return NextResponse.json({
-          success: true,
-          alreadyCheckedIn: true,
-          message: `⚠️ Tamu "${matchedGuest.name}" sudah check-in sebelumnya pada ${matchedGuest.checkInTime || "jam yang tercatat"}.`,
-          guest: matchedGuest,
-          guests: currentStore.guests,
-          rsvps: currentStore.rsvps,
-        });
-      }
-
-      if (!matchedGuest) {
-        // Create new guest entry if scanned code wasn't pre-added
-        const newCheckInTime = new Date().toLocaleTimeString("id-ID", {
+      const checkInTime =
+        new Date().toLocaleTimeString("id-ID", {
           timeZone: "Asia/Jakarta",
           hour: "2-digit",
           minute: "2-digit",
           second: "2-digit",
         }) + " WIB";
 
-        const assignedName = item?.name || item?.code || "Tamu Undangan";
+      let updatedGuests: any[];
+
+      if (matchedGuest) {
+        if (matchedGuest.checkedIn) {
+          return NextResponse.json({
+            success: true,
+            alreadyCheckedIn: true,
+            message: `⚠️ Tamu "${matchedGuest.name}" sudah pernah check-in sebelumnya pada ${
+              matchedGuest.checkInTime || "jam yang tercatat"
+            }.`,
+            guest: matchedGuest,
+            guests: currentStore.guests,
+            rsvps: currentStore.rsvps,
+          });
+        }
+
         matchedGuest = {
-          id: Date.now().toString(),
+          ...matchedGuest,
+          checkedIn: true,
+          checkInTime,
+          pax: item?.pax || matchedGuest.pax || 1,
+        };
+
+        // ONLY update this single matched guest in the list
+        updatedGuests = guests.map((g: any) => (g.id === matchedGuest.id ? matchedGuest : g));
+      } else {
+        // Not in pre-registered list, create new guest entry with clean decoded name
+        const assignedName = cleanRawGuestInput(rawCode) || "Tamu Undangan";
+        matchedGuest = {
+          id: "guest-" + Date.now().toString(),
           code: assignedName,
           name: assignedName,
-          category: "Tamu General",
-          template: "Formal",
+          category: "Tamu Undangan",
+          template: "Standar",
           checkedIn: true,
-          checkInTime: newCheckInTime,
+          checkInTime,
           pax: item?.pax || 1,
-          createdAt: new Date().toLocaleString("id-ID", {
-            timeZone: "Asia/Jakarta",
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-          }) + " WIB",
+          createdAt:
+            new Date().toLocaleString("id-ID", {
+              timeZone: "Asia/Jakarta",
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            }) + " WIB",
         };
-        updatedGuests.unshift(matchedGuest);
+        updatedGuests = [matchedGuest, ...guests];
       }
 
-      // Sync and deduplicate RSVPs
+      // Sync and deduplicate RSVP for matchedGuest
       const rsvps = currentStore.rsvps || [];
-      const cleanRsvps = rsvps.filter((r: any) => r.name?.trim().toLowerCase() !== matchedGuest.name?.trim().toLowerCase());
-      const newRsvp = {
+      const existingRsvpIndex = rsvps.findIndex(
+        (r: any) =>
+          (r.id && r.id === matchedGuest.id) ||
+          (r.name && r.name.trim().toLowerCase() === matchedGuest.name.trim().toLowerCase())
+      );
+
+      const rsvpItem = {
         id: String(matchedGuest.id || Date.now()),
         name: matchedGuest.name,
         status: "Hadir",
+        attendance: "Hadir",
         checkedIn: true,
         checkInTime: matchedGuest.checkInTime,
         pax: matchedGuest.pax || 1,
+        guestCount: matchedGuest.pax || 1,
+        session: "Sesi 1 (Akad & Resepsi)",
         notes: "Checked-In via Scanner Barcode",
-        createdAt: new Date().toLocaleString("id-ID", {
-          timeZone: "Asia/Jakarta",
-          weekday: "long",
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        }) + " WIB",
+        createdAt:
+          existingRsvpIndex >= 0 && rsvps[existingRsvpIndex].createdAt
+            ? rsvps[existingRsvpIndex].createdAt
+            : new Date().toLocaleString("id-ID", {
+                timeZone: "Asia/Jakarta",
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+              }) + " WIB",
       };
-      const updatedRsvps = [newRsvp, ...cleanRsvps];
+
+      let updatedRsvps: any[];
+      if (existingRsvpIndex >= 0) {
+        updatedRsvps = [...rsvps];
+        updatedRsvps[existingRsvpIndex] = { ...updatedRsvps[existingRsvpIndex], ...rsvpItem };
+      } else {
+        updatedRsvps = [rsvpItem, ...rsvps];
+      }
 
       const newStore = { ...currentStore, guests: updatedGuests, rsvps: updatedRsvps };
-      
-      // Perform ultra-fast single-item DB update instead of full-store multi-query loop
-      await saveSingleCheckInToCloud(matchedGuest, newRsvp, newStore);
+
+      // Persist check-in
+      await saveSingleCheckInToCloud(matchedGuest, rsvpItem, newStore);
 
       return NextResponse.json({
         success: true,

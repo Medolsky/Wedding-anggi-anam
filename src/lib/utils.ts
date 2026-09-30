@@ -141,7 +141,22 @@ export function parseGuestParams(searchParams: URLSearchParams) {
   const rawTo = searchParams.get("to") || searchParams.get("u") || searchParams.get("n");
   let name = "Tamu Undangan";
   if (rawTo) {
-    name = rawTo.replace(/\+/g, " ").replace(/-/g, " ").trim();
+    let cleaned = rawTo;
+    try {
+      cleaned = decodeURIComponent(cleaned);
+    } catch {}
+    cleaned = cleaned.replace(/\+/g, " ").trim();
+    if (/%[0-9a-fA-F]{2}/.test(cleaned)) {
+      try {
+        cleaned = decodeURIComponent(cleaned);
+      } catch {}
+      cleaned = cleaned.replace(/\+/g, " ").trim();
+    }
+    // Only replace hyphens if no spaces exist (slug style 'nama-tamu') and not guest ID
+    if (cleaned.includes("-") && !cleaned.includes(" ") && !cleaned.startsWith("guest-")) {
+      cleaned = cleaned.replace(/-/g, " ");
+    }
+    name = cleaned.trim();
   }
 
   return {

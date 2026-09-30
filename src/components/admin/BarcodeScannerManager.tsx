@@ -24,7 +24,7 @@ interface ActivePopupState {
 
 // Extract clean guest name or code from raw scanned string or URL (e.g. https://domain.com/?to=Nama+Tamu)
 function extractGuestIdentifier(raw: string): string {
-  let cleaned = raw.trim();
+  let cleaned = (raw || "").trim();
   if (cleaned.startsWith("http://") || cleaned.startsWith("https://") || cleaned.includes("?")) {
     try {
       const url = new URL(cleaned, typeof window !== "undefined" ? window.location.origin : "https://wedding.local");
@@ -35,15 +35,27 @@ function extractGuestIdentifier(raw: string): string {
         url.searchParams.get("guest") ||
         url.searchParams.get("code");
       if (toParam) {
-        return decodeURIComponent(toParam).replace(/\+/g, " ").trim();
+        cleaned = toParam;
       }
     } catch {
       const match = cleaned.match(/[?&](?:to|t|name|guest|code)=([^&]+)/i);
       if (match && match[1]) {
-        return decodeURIComponent(match[1]).replace(/\+/g, " ").trim();
+        cleaned = match[1];
       }
     }
   }
+
+  try {
+    cleaned = decodeURIComponent(cleaned);
+  } catch {}
+  cleaned = cleaned.replace(/\+/g, " ").trim();
+  if (/%[0-9a-fA-F]{2}/.test(cleaned)) {
+    try {
+      cleaned = decodeURIComponent(cleaned);
+    } catch {}
+    cleaned = cleaned.replace(/\+/g, " ").trim();
+  }
+
   return cleaned;
 }
 

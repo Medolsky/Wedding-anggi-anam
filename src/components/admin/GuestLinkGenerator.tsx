@@ -213,9 +213,9 @@ export function GuestLinkGenerator() {
   }
 
   function getGuestUrl(name: string) {
-    // Clean & compact short link (readable, no %20 clutter, no long code params)
-    const safeName = (name || "Tamu Undangan").trim().replace(/&/g, "%26").replace(/\s+/g, "+");
-    return `${origin}/?to=${encodeURI(safeName)}`;
+    // Clean & standard URL encoding without double-encoding %2526
+    const safeName = (name || "Tamu Undangan").trim();
+    return `${origin}/?to=${encodeURIComponent(safeName).replace(/%20/g, "+")}`;
   }
 
   function getWaMessage(name: string, codeOrTmpl?: string, code?: string) {

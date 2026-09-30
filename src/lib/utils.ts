@@ -138,7 +138,14 @@ export function scrollToSection(sectionId: string) {
  * Parse guest parameters from URL search params
  */
 export function parseGuestParams(searchParams: URLSearchParams) {
-  const rawTo = searchParams.get("to") || searchParams.get("u") || searchParams.get("n");
+  const rawTo =
+    searchParams.get("to") ||
+    searchParams.get("name") ||
+    searchParams.get("tamu") ||
+    searchParams.get("guest") ||
+    searchParams.get("u") ||
+    searchParams.get("n") ||
+    searchParams.get("t");
   let name = "Tamu Undangan";
   if (rawTo) {
     let cleaned = rawTo;

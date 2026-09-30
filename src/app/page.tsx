@@ -61,7 +61,10 @@ function InvitationContent() {
           if (json.success && json.valid && json.guest) {
             setGuest({
               ...guestData,
-              name: json.guest.name || guestData.name,
+              name:
+                guestData.name && guestData.name !== "Tamu Undangan"
+                  ? guestData.name
+                  : (json.guest.name || guestData.name),
               code: json.guest.code || guestData.code,
               category: json.guest.category || guestData.category,
               maxGuest: json.guest.pax || guestData.maxGuest,

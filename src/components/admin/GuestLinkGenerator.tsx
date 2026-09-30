@@ -27,8 +27,15 @@ export function GuestLinkGenerator() {
   const [guestName, setGuestName] = useState("");
   const [phone, setPhone] = useState("");
   const [category, setCategory] = useState("Tamu VIP");
+  const DEFAULT_DOMAIN = "https://wedding-angi-anam.vercel.app";
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [origin, setOrigin] = useState("");
+  const [lastGeneratedGuest, setLastGeneratedGuest] = useState<GeneratedGuest | null>(null);
+  const [origin, setOrigin] = useState<string>(() => {
+    if (typeof window !== "undefined" && window.location?.origin) {
+      return window.location.origin;
+    }
+    return DEFAULT_DOMAIN;
+  });
 
   // Global Admin Store for instant reactive updates & notifications
   const guests = useAdminStore((s) => s.guests);
@@ -66,7 +73,7 @@ export function GuestLinkGenerator() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && window.location?.origin) {
       setOrigin(window.location.origin);
     }
   }, []);
@@ -98,10 +105,15 @@ export function GuestLinkGenerator() {
     if (!editingGuest || !editName.trim()) return;
 
     const trimmedName = editName.trim();
+    const shouldUpdateCode =
+      !editingGuest.code ||
+      editingGuest.code === editingGuest.name ||
+      editingGuest.code.startsWith("guest-");
+
     const updated: GeneratedGuest = {
       ...editingGuest,
       name: trimmedName,
-      code: editingGuest.code || trimmedName,
+      code: shouldUpdateCode ? trimmedName : editingGuest.code,
       phone: editPhone.trim() ? formatPhoneNumber(editPhone.trim()) : undefined,
       category: editCategory,
       pax: Number(editPax) || 1,
@@ -143,6 +155,7 @@ export function GuestLinkGenerator() {
     };
 
     addGuest(newGuest);
+    setLastGeneratedGuest(newGuest);
     setGuestName("");
     setPhone("");
   }
@@ -212,29 +225,42 @@ export function GuestLinkGenerator() {
     }
   }
 
+  function getBaseUrl(): string {
+    if (origin && origin.trim()) return origin.trim();
+    if (typeof window !== "undefined" && window.location?.origin) {
+      return window.location.origin;
+    }
+    return DEFAULT_DOMAIN;
+  }
+
   function getGuestUrl(name: string) {
-    // Clean & standard URL encoding without double-encoding %2526
+    const base = getBaseUrl();
     const safeName = (name || "Tamu Undangan").trim();
-    return `${origin}/?to=${encodeURIComponent(safeName).replace(/%20/g, "+")}`;
+    return `${base}/?to=${encodeURIComponent(safeName).replace(/%20/g, "+")}`;
+  }
+
+  function getSalutationTitle(name: string): string {
+    const trimmed = (name || "").trim();
+    const clean = trimmed.replace(/^(kepada\s+)?yth\.?\s*/i, "");
+
+    const hasHonorific = /^(bapak\/ibu\/saudara\/i|bapak\/ibu|bapak|ibu|bpk\/ibu|bpk|mas|mba|mbak|kak|kakak|bang|om|tante|ustadz|ustadzah|ust\.?|kyai|dr\.|prof\.|keluarga|kel\.)\b/i.test(clean);
+
+    if (hasHonorific) {
+      return `*Yth. ${clean}*`;
+    }
+    return `*Yth. Bapak/Ibu/Saudara/i ${clean}*`;
   }
 
   function getWaMessage(name: string, codeOrTmpl?: string, code?: string) {
-    const url = getGuestUrl(name);
-
-    const cleanName = name.trim();
-    let guestDisplayName = cleanName;
-    if (/^Bapak\/Ibu\s+/i.test(cleanName)) {
-      guestDisplayName = cleanName.replace(/^Bapak\/Ibu\s+/i, "");
-    }
-
-    const hasPartnerOrFamily = /(&|dan\s+|partner|keluarga|istri|suami|pasangan)/i.test(guestDisplayName);
-    const guestWithPartner = hasPartnerOrFamily ? guestDisplayName : `${guestDisplayName} & Partner`;
+    const safeName = (name || "Tamu Undangan").trim();
+    const url = getGuestUrl(safeName);
+    const title = getSalutationTitle(safeName);
 
     return `Assalamu’alaikum Wr. Wb.
 
-*Yth. Bapak/Ibu ${guestDisplayName}*
+${title}
 
-Tanpa mengurangi rasa hormat, perkenankan kami mengundang Bapak/Ibu/Saudara/i *${guestWithPartner}*, Untuk menghadiri acara pernikahan kami. 
+Tanpa mengurangi rasa hormat, perkenankan kami mengundang Bapak/Ibu/Saudara/i *${safeName}*, untuk menghadiri acara pernikahan kami.
 
 *Misbakhul Anam Roziqin & Angi Sulistia*
 
@@ -427,6 +453,87 @@ Budi Santoso, 081987654321`}
               + Tambah ke Daftar
             </button>
           </div>
+
+          {/* Instant Success Result Preview Card for Newly Generated Link */}
+          {lastGeneratedGuest && (
+            <div className="bg-[#14231A] border border-emerald-500/70 rounded-2xl p-4 shadow-lg animate-in fade-in space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <h4 className="text-xs font-bold text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <span>✓</span>
+                    <span>Tautan Tamu Baru Berhasil Dibuat</span>
+                  </h4>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setLastGeneratedGuest(null)}
+                  className="text-xs text-[#9E9D98] hover:text-white cursor-pointer px-2 py-0.5 rounded-lg hover:bg-[#28292F]"
+                >
+                  ✕ Tutup
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div>
+                  <p className="text-sm font-bold text-white font-serif">{lastGeneratedGuest.name}</p>
+                  <p className="text-[11px] text-[#A1A4B2]">
+                    {lastGeneratedGuest.category} • {lastGeneratedGuest.phone ? `+${formatPhoneNumber(lastGeneratedGuest.phone)}` : "Tanpa Nomor WA"}
+                  </p>
+                </div>
+                <a
+                  href={getGuestUrl(lastGeneratedGuest.name)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[11px] text-[#E0C98F] hover:text-[#F3E5AB] hover:underline flex items-center gap-1 font-bold"
+                >
+                  <span>Buka Undangan ↗</span>
+                </a>
+              </div>
+
+              {/* Exact Link Box */}
+              <div
+                onClick={() => handleCopy(lastGeneratedGuest.name, lastGeneratedGuest.id)}
+                className="p-2.5 rounded-xl bg-[#0D1711] border border-emerald-700/60 text-[11px] font-mono text-emerald-200 select-all cursor-pointer hover:border-emerald-400 flex items-center justify-between transition-colors"
+                title="Klik untuk menyalin tautan"
+              >
+                <span className="truncate mr-2">{getGuestUrl(lastGeneratedGuest.name)}</span>
+                <span className="text-[10.5px] text-[#C8A96B] font-sans font-bold shrink-0">
+                  {copiedId === lastGeneratedGuest.id ? "✓ Tersalin!" : "Salin Link"}
+                </span>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 flex-wrap pt-0.5">
+                <button
+                  type="button"
+                  onClick={() => handleDirectWaWeb(lastGeneratedGuest)}
+                  className="text-xs py-2 px-3.5 font-bold bg-[#25D366] hover:bg-[#20ba59] text-[#0A0B0D] rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs transition-all active:scale-95"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.969.587 1.771.889 2.796.889 3.183 0 5.77-2.587 5.77-5.766.001-3.18-2.585-5.776-5.77-5.776zm0 10.455c-.93 0-1.745-.278-2.493-.728l-.178-.107-1.574.413.42-1.534-.117-.186c-.496-.789-.758-1.564-.757-2.547.001-2.584 2.102-4.686 4.689-4.686 2.586 0 4.688 2.102 4.688 4.687 0 2.585-2.102 4.688-4.689 4.688z" />
+                  </svg>
+                  <span>Kirim WhatsApp</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleCopyFullMessage(lastGeneratedGuest)}
+                  className="text-xs py-2 px-3 bg-[#202125] hover:bg-[#28292F] border border-[#35373E] text-white rounded-xl cursor-pointer transition-all"
+                >
+                  {copiedId === `msg-${lastGeneratedGuest.id}` ? "✓ Pesan Tersalin!" : "Salin Pesan WA"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleCopy(lastGeneratedGuest.name, lastGeneratedGuest.id)}
+                  className="text-xs py-2 px-3 bg-[#202125] hover:bg-[#28292F] border border-[#35373E] text-[#E0C98F] rounded-xl cursor-pointer transition-all"
+                >
+                  {copiedId === lastGeneratedGuest.id ? "✓ Link Tersalin!" : "Salin Link"}
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Single Unified Template Info Badge with Interactive Preview */}
           <div className="bg-[#1C1D21] border border-[#2D2E34] rounded-xl overflow-hidden transition-all">

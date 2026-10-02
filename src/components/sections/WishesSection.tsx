@@ -11,7 +11,8 @@ interface WishItem {
   id: string;
   name: string;
   message: string;
-  createdAt: string;
+  createdAt?: string;
+  created_at?: string;
 }
 
 export function WishesSection() {
@@ -52,9 +53,13 @@ export function WishesSection() {
         const res = await fetch("/api/db?type=wishes&t=" + Date.now(), { cache: "no-store" });
         const json = await res.json();
         if (json.success && Array.isArray(json.data)) {
-          setWishes(json.data);
+          const normalized = json.data.map((w: any) => ({
+            ...w,
+            createdAt: w.createdAt || w.created_at || new Date().toISOString(),
+          }));
+          setWishes(normalized);
           try {
-            localStorage.setItem("wedding_wishes_backup", JSON.stringify(json.data));
+            localStorage.setItem("wedding_wishes_backup", JSON.stringify(normalized));
           } catch {}
         }
       } catch {
@@ -73,17 +78,13 @@ export function WishesSection() {
 
     setIsSubmitting(true);
 
+    const nowIso = new Date().toISOString();
     const newWish: WishItem = {
       id: Date.now().toString(),
       name: name.trim(),
       message: message.trim(),
-      createdAt: new Date().toLocaleString("id-ID", {
-        timeZone: "Asia/Jakarta",
-        day: "numeric",
-        month: "short",
-        hour: "2-digit",
-        minute: "2-digit",
-      }) + " WIB",
+      createdAt: nowIso,
+      created_at: nowIso,
     };
 
     // 1. Instantly update local state and localStorage
@@ -234,7 +235,7 @@ export function WishesSection() {
                     </div>
                   </div>
                   <span className="text-[9px] text-[#D2B573] font-mono">
-                    {formatRelativeTime(wish.createdAt)}
+                    {formatRelativeTime(wish.createdAt || wish.created_at)}
                   </span>
                 </div>
                 <p className="text-xs text-[#C8C5BE] leading-relaxed pl-8">

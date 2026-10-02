@@ -159,14 +159,9 @@ async function fetchFromExternalCloud() {
           relationship: w.relationship || "Kerabat",
           is_approved: w.is_approved !== false,
           createdAt: w.created_at
-            ? new Date(w.created_at).toLocaleString("id-ID", {
-                timeZone: "Asia/Jakarta",
-                day: "numeric",
-                month: "short",
-                hour: "2-digit",
-                minute: "2-digit",
-              }) + " WIB"
-            : w.createdAt || new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta" }) + " WIB",
+            ? new Date(w.created_at).toISOString()
+            : w.createdAt || new Date().toISOString(),
+          created_at: w.created_at || w.createdAt || new Date().toISOString(),
         }));
       }
       if (Array.isArray(configRows) && configRows.length > 0 && configRows[0].value) {
@@ -191,7 +186,13 @@ async function fetchFromExternalCloud() {
         if (json.success && json.data) {
           if (Array.isArray(json.data.guests)) cloudStore.guests = json.data.guests;
           if (Array.isArray(json.data.rsvps)) cloudStore.rsvps = json.data.rsvps;
-          if (Array.isArray(json.data.wishes)) cloudStore.wishes = json.data.wishes;
+          if (Array.isArray(json.data.wishes)) {
+            cloudStore.wishes = json.data.wishes.map((w: any) => ({
+              ...w,
+              createdAt: w.createdAt || w.created_at || new Date().toISOString(),
+              created_at: w.created_at || w.createdAt || new Date().toISOString(),
+            }));
+          }
           if (json.data.config) cloudStore.config = json.data.config;
           return cloudStore;
         }
@@ -232,7 +233,11 @@ async function fetchFromExternalCloud() {
         }));
       }
       if (!wishesRes.error && Array.isArray(wishesRes.data)) {
-        cloudStore.wishes = wishesRes.data;
+        cloudStore.wishes = wishesRes.data.map((w: any) => ({
+          ...w,
+          createdAt: w.created_at || w.createdAt || new Date().toISOString(),
+          created_at: w.created_at || w.createdAt || new Date().toISOString(),
+        }));
       }
       if (!configRes.error && configRes.data?.value) {
         cloudStore.config = configRes.data.value;
@@ -755,6 +760,10 @@ export async function POST(req: Request) {
     const currentStore = await fetchFromExternalCloud();
 
     if (action === "add" && type && item) {
+      if (type === "wishes") {
+        item.createdAt = item.createdAt || item.created_at || new Date().toISOString();
+        item.created_at = item.created_at || item.createdAt;
+      }
       const list = currentStore[type as "guests" | "rsvps" | "wishes"] || [];
       const updatedList = [item, ...list];
       const newStore = { ...currentStore, [type]: updatedList };

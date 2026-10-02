@@ -128,7 +128,12 @@ export const useAdminStore = create<AdminStore>((set, get) => ({
           createdAt: item.createdAt || "Baru saja",
         }));
 
-        const formattedWishes = Array.isArray(json.data.wishes) ? json.data.wishes : [];
+        const formattedWishes = Array.isArray(json.data.wishes)
+          ? json.data.wishes.map((w: any) => ({
+              ...w,
+              createdAt: w.createdAt || w.created_at || "Baru saja",
+            }))
+          : [];
 
         set({
           guests: mappedGuests,

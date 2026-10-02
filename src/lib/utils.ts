@@ -102,13 +102,152 @@ export function downloadICS(event: {
 }
 
 /**
- * Format relative time in Indonesian
+ * Safely parse any date representation (ISO, timestamp, Indonesian format, etc.)
  */
-export function formatRelativeTime(dateStr: string): string {
+export function parseDateSafely(input: unknown): Date | null {
+  if (!input) return null;
+  if (input instanceof Date) {
+    return isNaN(input.getTime()) ? null : input;
+  }
+
+  if (typeof input === "number") {
+    const d = new Date(input > 1e11 ? input : input * 1000);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  const str = String(input).trim();
+  if (
+    !str ||
+    str.toLowerCase() === "invalid date" ||
+    str.toLowerCase() === "undefined" ||
+    str.toLowerCase() === "null"
+  ) {
+    return null;
+  }
+
+  // 1. Numeric timestamp in string
+  if (/^\d{10,13}$/.test(str)) {
+    const num = Number(str);
+    const d = new Date(num > 1e11 ? num : num * 1000);
+    if (!isNaN(d.getTime())) return d;
+  }
+
+  // 2. Explicit Indonesian DD/MM/YYYY or DD-MM-YYYY format
+  const dmyMatch = str.match(
+    /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:\s*[, ]\s*(\d{1,2})[:.](\d{2})(?:[:.](\d{2}))?)?/
+  );
+  if (dmyMatch) {
+    const [, day, month, year, h = "00", min = "00", sec = "00"] = dmyMatch;
+    const d = new Date(
+      Number(year),
+      Number(month) - 1,
+      Number(day),
+      Number(h),
+      Number(min),
+      Number(sec)
+    );
+    if (!isNaN(d.getTime())) return d;
+  }
+
+  // 3. Standard ISO / RFC parse
+  let d = new Date(str);
+  if (!isNaN(d.getTime())) return d;
+
+  // 4. Remove Indonesian timezone suffixes (WIB, WITA, WIT)
+  const cleanStr = str.replace(/\s*(WIB|WITA|WIT)/gi, "").trim();
+  d = new Date(cleanStr);
+  if (!isNaN(d.getTime())) return d;
+
+  // 5. Convert time with dots instead of colons: e.g. "13.11" or "13.11.45"
+  const timeFixed = cleanStr.replace(
+    /(\d{1,2})\.(\d{2})(?:\.(\d{2}))?/g,
+    (_, h, min, s) => (s ? `${h}:${min}:${s}` : `${h}:${min}`)
+  );
+  d = new Date(timeFixed);
+  if (!isNaN(d.getTime())) return d;
+
+  // 6. Indonesian month dictionary
+  const monthMap: Record<string, string> = {
+    jan: "Jan",
+    januari: "Jan",
+    feb: "Feb",
+    februari: "Feb",
+    mar: "Mar",
+    maret: "Mar",
+    apr: "Apr",
+    april: "Apr",
+    mei: "May",
+    jun: "Jun",
+    juni: "Jun",
+    jul: "Jul",
+    juli: "Jul",
+    agu: "Aug",
+    ags: "Aug",
+    agustus: "Aug",
+    sep: "Sep",
+    september: "Sep",
+    okt: "Oct",
+    oktober: "Oct",
+    nov: "Nov",
+    november: "Nov",
+    des: "Dec",
+    desember: "Dec",
+  };
+
+  let enStr = timeFixed;
+  for (const [idm, enm] of Object.entries(monthMap)) {
+    const reg = new RegExp(`\\b${idm}\\b`, "gi");
+    if (reg.test(enStr)) {
+      enStr = enStr.replace(reg, enm);
+      break;
+    }
+  }
+
+  // If missing year (e.g. "2 Oct, 13:11"), append current year
+  if (!/\b(20\d\d)\b/.test(enStr)) {
+    enStr = `${enStr} ${new Date().getFullYear()}`;
+  }
+
+  d = new Date(enStr);
+  if (!isNaN(d.getTime())) return d;
+
+  return null;
+}
+
+/**
+ * Format relative time in Indonesian with robust fallback against Invalid Date
+ */
+export function formatRelativeTime(dateInput?: unknown): string {
+  if (!dateInput) return "Baru saja";
+
+  const rawStr = String(dateInput).trim();
+  if (
+    rawStr.includes("lalu") ||
+    rawStr.toLowerCase() === "baru saja" ||
+    rawStr.toLowerCase() === "kemarin"
+  ) {
+    return rawStr;
+  }
+
+  const parsedDate = parseDateSafely(dateInput);
+
+  if (!parsedDate || isNaN(parsedDate.getTime())) {
+    // If input already looks like a valid human date string and not 'Invalid Date'
+    if (rawStr && !rawStr.toLowerCase().includes("invalid") && rawStr.length >= 3) {
+      return rawStr;
+    }
+    return "Baru saja";
+  }
+
   const now = new Date();
-  const date = new Date(dateStr);
-  const diffMs = now.getTime() - date.getTime();
-  const diffSeconds = Math.floor(diffMs / 1000);
+  const diffMs = now.getTime() - parsedDate.getTime();
+
+  // Handle tiny future clock drift across devices
+  if (diffMs < 0 && diffMs > -60000) {
+    return "Baru saja";
+  }
+
+  const diffSeconds = Math.max(0, Math.floor(diffMs / 1000));
   const diffMinutes = Math.floor(diffSeconds / 60);
   const diffHours = Math.floor(diffMinutes / 60);
   const diffDays = Math.floor(diffHours / 24);
@@ -116,12 +255,19 @@ export function formatRelativeTime(dateStr: string): string {
   if (diffSeconds < 60) return "Baru saja";
   if (diffMinutes < 60) return `${diffMinutes} menit lalu`;
   if (diffHours < 24) return `${diffHours} jam lalu`;
+  if (diffDays === 1) return "Kemarin";
   if (diffDays < 7) return `${diffDays} hari lalu`;
-  return date.toLocaleDateString("id-ID", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+
+  try {
+    const formatted = parsedDate.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+    return formatted !== "Invalid Date" ? formatted : "Baru saja";
+  } catch {
+    return "Baru saja";
+  }
 }
 
 /**

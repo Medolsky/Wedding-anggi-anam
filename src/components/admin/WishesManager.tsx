@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAdminStore } from "@/stores/adminStore";
+import { formatRelativeTime } from "@/lib/utils";
 
 export interface WishItem {
   id: string;
@@ -9,7 +10,8 @@ export interface WishItem {
   message: string;
   relationship?: string;
   attendance?: "Hadir" | "Ragu-ragu" | "Tidak Hadir";
-  createdAt: string;
+  createdAt?: string;
+  created_at?: string;
 }
 
 export function WishesManager() {
@@ -168,7 +170,9 @@ export function WishesManager() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-[#9E9D98] font-mono mr-1">{w.createdAt}</span>
+                  <span className="text-[10px] text-[#9E9D98] font-mono mr-1">
+                    {formatRelativeTime(w.createdAt || (w as any).created_at)}
+                  </span>
                   
                   <button
                     onClick={() => openEditModal(w)}

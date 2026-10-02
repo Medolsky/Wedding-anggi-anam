@@ -304,6 +304,7 @@ function getWishes(ss) {
       relationship: String(r[3] || "Kerabat"),
       is_approved: r[4] !== false && r[4] !== "false",
       createdAt: String(r[5] || ""),
+      created_at: String(r[5] || ""),
     });
   }
   return wishes;
@@ -325,7 +326,7 @@ function saveWishes(ss, wishes) {
         String(w.message || ""),
         String(w.relationship || "Kerabat"),
         w.is_approved !== false ? "Ya" : "Tidak",
-        String(w.createdAt || new Date().toLocaleString("id-ID")),
+        String(w.createdAt || w.created_at || new Date().toISOString()),
       ];
     });
     sheet.getRange(2, 1, rows.length, headers.length).setValues(rows);
@@ -340,7 +341,7 @@ function appendWish(ss, w) {
     String(w.message || ""),
     String(w.relationship || "Kerabat"),
     w.is_approved !== false ? "Ya" : "Tidak",
-    String(w.createdAt || new Date().toLocaleString("id-ID")),
+    String(w.createdAt || w.created_at || new Date().toISOString()),
   ]);
 }
 

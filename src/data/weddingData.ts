@@ -203,8 +203,8 @@ export const weddingData = {
 
   // Music
   music: {
-    src: "/music/parkir.mp3",
-    title: "Wedding Song",
+    src: "/music/Song of Sabdatama.mp3",
+    title: "Song of Sabdatama",
     autoplay: false,
     defaultVolume: 0.45,
   },
